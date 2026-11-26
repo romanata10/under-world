@@ -1,0 +1,101 @@
+name: Build & Release Under World
+
+on:
+  push:
+    branches:
+      - main
+      - "arena/**"
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Build mod JAR
+        run: |
+          set -o pipefail
+          ./gradlew build --no-daemon --console=plain 2>&1 | tee build.log
+
+      - name: Report build failure log
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os, subprocess, json
+          lines = open('build.log', 'r', encoding='utf-8', errors='replace').read().splitlines()
+          filtered = [l for l in lines if not l.lstrip().startswith('at ')]
+          tail = '\n'.join(filtered[-200:])
+          if len(tail) > 55000:
+              tail = tail[-55000:]
+          body = f"Build failed on `{os.environ['GITHUB_SHA']}`:\n\n```text\n{tail}\n```"
+          with open('err.json', 'w') as f:
+              json.dump({'body': body}, f)
+          subprocess.run([
+              'gh', 'api',
+              f"repos/{os.environ['GITHUB_REPOSITORY']}/commits/{os.environ['GITHUB_SHA']}/comments",
+              '--input', 'err.json'
+          ], check=True)
+          PY
+
+      - name: Verify built JAR
+        run: |
+          ls -lh build/libs/
+          JAR_FILE=$(find build/libs -maxdepth 1 -name "under_world-*.jar" ! -name "*-sources.jar" ! -name "*-dev.jar" | head -n 1)
+          if [ -z "$JAR_FILE" ] || [ ! -s "$JAR_FILE" ]; then
+            echo "Error: Built mod JAR not found or empty!"
+            exit 1
+          fi
+          echo "Built JAR: $JAR_FILE"
+          jar tf "$JAR_FILE" | grep -E 'META-INF/mods.toml|under_world\.refmap\.json|under_world\.mixins\.json|UnderWorldMod\.class'
+
+      - name: Upload mod JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: under-world-mod-jar
+          path: build/libs/under_world-*.jar
+
+      - name: Publish GitHub Release
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          MOD_VER=$(grep '^mod_version=' gradle.properties | cut -d= -f2 | tr -d '[:space:]')
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            TAG="${GITHUB_REF_NAME}"
+          else
+            TAG="v${MOD_VER}"
+          fi
+          JAR_FILE=$(find build/libs -maxdepth 1 -name "under_world-*.jar" ! -name "*-sources.jar" ! -name "*-dev.jar" | head -n 1)
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$JAR_FILE" --clobber
+          else
+            gh release create "$TAG" "$JAR_FILE" \
+              --target "${GITHUB_SHA}" \
+              --title "Under World $TAG (Forge 1.20.1)" \
+              --notes "Minecraft 1.20.1 Forge mod build ($TAG). Requires Forge 47.1.47+, GeckoLib 4.8.4+, Fzzy Config 0.7.5+, and Kotlin for Forge 4.11.0+."
+          fi

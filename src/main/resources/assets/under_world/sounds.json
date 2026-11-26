@@ -1,0 +1,65 @@
+{
+  "hands_scream": {
+    "subtitle": "subtitles.under_world.hands_scream",
+    "sounds": [
+      {
+        "name": "under_world:hands_scream",
+        "stream": false
+      }
+    ]
+  },
+  "hands_glitch": {
+    "subtitle": "subtitles.under_world.hands_glitch",
+    "sounds": [
+      {
+        "name": "under_world:hands_glitch",
+        "stream": false
+      }
+    ]
+  },
+  "hands_burrow": {
+    "subtitle": "subtitles.under_world.hands_burrow",
+    "sounds": [
+      {
+        "name": "under_world:hands_burrow",
+        "stream": false
+      }
+    ]
+  },
+  "tree_awaken": {
+    "subtitle": "subtitles.under_world.tree_awaken",
+    "sounds": [
+      {
+        "name": "under_world:tree_awaken",
+        "stream": false
+      }
+    ]
+  },
+  "tree_step": {
+    "subtitle": "subtitles.under_world.tree_step",
+    "sounds": [
+      {
+        "name": "under_world:tree_step",
+        "stream": false
+      }
+    ]
+  },
+  "the_sky_roar": {
+    "subtitle": "subtitles.under_world.the_sky_roar",
+    "sounds": [
+      {
+        "name": "under_world:the_sky_roar",
+        "stream": false
+      }
+    ]
+  },
+  "the_sky_stomp": {
+    "subtitle": "subtitles.under_world.the_sky_stomp",
+    "sounds": [
+      {
+        "name": "under_world:the_sky_stomp",
+        "stream": false
+      }
+    ]
+  }
+}

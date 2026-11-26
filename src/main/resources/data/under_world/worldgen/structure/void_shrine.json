@@ -1,0 +1,7 @@
+{
+  "type": "under_world:void_shrine",
+  "biomes": "#under_world:has_structure/void_shrine",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

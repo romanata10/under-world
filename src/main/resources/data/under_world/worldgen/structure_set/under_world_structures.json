@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "under_world:void_shrine",
+      "weight": 1
+    },
+    {
+      "structure": "under_world:broken_shaft",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 19482731,
+    "spacing": 42,
+    "separation": 18
+  }
+}

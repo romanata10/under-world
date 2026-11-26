@@ -1,0 +1,248 @@
+package com.underworld.mod.command;
+
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.underworld.mod.config.UnderWorldConfigHolder;
+import com.underworld.mod.entity.FriendEntity;
+import com.underworld.mod.entity.HandsEntity;
+import com.underworld.mod.entity.TheSkyEntity;
+import com.underworld.mod.entity.TreeMimicEntity;
+import com.underworld.mod.event.UnderWorldEventDirector;
+import com.underworld.mod.network.NetworkHandler;
+import com.underworld.mod.registry.ModEntities;
+import com.underworld.mod.world.UnderWorldSavedData;
+import com.underworld.mod.world.structure.BrokenShaftPiece;
+import com.underworld.mod.world.structure.VoidShrinePiece;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+
+import java.util.function.Supplier;
+
+public final class UnderWorldCommands {
+    private UnderWorldCommands() {}
+
+    @SubscribeEvent
+    public static void onRegisterCommands(final RegisterCommandsEvent event) {
+        register(event.getDispatcher());
+    }
+
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("underworld")
+                .requires(src -> src.hasPermission(2));
+
+        // /underworld spawn <entity> [<player>]
+        LiteralArgumentBuilder<CommandSourceStack> spawnCmd = Commands.literal("spawn")
+                .then(buildSpawnNode("friend", ModEntities.FRIEND, true))
+                .then(buildSpawnNode("hands", ModEntities.HANDS, true))
+                .then(buildSpawnNode("tree", ModEntities.TREE_MIMIC, false))
+                .then(buildSpawnNode("tree_mimic", ModEntities.TREE_MIMIC, false))
+                .then(buildSpawnNode("the_sky", ModEntities.THE_SKY, false));
+
+        // /underworld trigger <event> [<player>]
+        LiteralArgumentBuilder<CommandSourceStack> triggerCmd = Commands.literal("trigger")
+                .then(Commands.literal("friend_join")
+                        .executes(ctx -> executeTriggerFriendJoin(ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeTriggerFriendJoin(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+                .then(Commands.literal("friend_chat")
+                        .executes(ctx -> executeTriggerFriendChat(ctx.getSource())))
+                .then(Commands.literal("hands_encounter")
+                        .executes(ctx -> executeTriggerHands(ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeTriggerHands(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+                .then(Commands.literal("tree_encounter")
+                        .executes(ctx -> executeTriggerTree(ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeTriggerTree(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+                .then(Commands.literal("the_sky_event")
+                        .executes(ctx -> executeTriggerTheSky(ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeTriggerTheSky(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))));
+
+        // /underworld structure <name> [<player>]
+        LiteralArgumentBuilder<CommandSourceStack> structureCmd = Commands.literal("structure")
+                .then(Commands.literal("void_shrine")
+                        .executes(ctx -> executeStructure(ctx.getSource(), ctx.getSource().getPlayerOrException(), true))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeStructure(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"), true))))
+                .then(Commands.literal("broken_shaft")
+                        .executes(ctx -> executeStructure(ctx.getSource(), ctx.getSource().getPlayerOrException(), false))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeStructure(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"), false))));
+
+        // /underworld events <enable|disable|status>
+        LiteralArgumentBuilder<CommandSourceStack> eventsCmd = Commands.literal("events")
+                .then(Commands.literal("enable")
+                        .executes(ctx -> executeSetEvents(ctx.getSource(), true)))
+                .then(Commands.literal("disable")
+                        .executes(ctx -> executeSetEvents(ctx.getSource(), false)))
+                .then(Commands.literal("status")
+                        .executes(ctx -> executeEventsStatus(ctx.getSource())));
+
+        // /underworld reset friend
+        LiteralArgumentBuilder<CommandSourceStack> resetCmd = Commands.literal("reset")
+                .then(Commands.literal("friend")
+                        .executes(ctx -> executeResetFriend(ctx.getSource())));
+
+        root.then(spawnCmd)
+                .then(triggerCmd)
+                .then(structureCmd)
+                .then(eventsCmd)
+                .then(resetCmd);
+
+        dispatcher.register(root);
+    }
+
+    private static <T extends Mob> LiteralArgumentBuilder<CommandSourceStack> buildSpawnNode(
+            String literal, Supplier<EntityType<T>> typeSupplier, boolean allowCave) {
+        return Commands.literal(literal)
+                .executes(ctx -> executeSpawn(ctx.getSource(), ctx.getSource().getPlayerOrException(), typeSupplier.get(), allowCave))
+                .then(Commands.argument("player", EntityArgument.player())
+                        .executes(ctx -> executeSpawn(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"), typeSupplier.get(), allowCave)));
+    }
+
+    private static <T extends Mob> int executeSpawn(CommandSourceStack source, ServerPlayer target,
+                                                    EntityType<T> type, boolean allowCave) {
+        ServerLevel level = target.serverLevel();
+        int minDist = UnderWorldConfigHolder.getSpawnMinDistance();
+        int maxDist = UnderWorldConfigHolder.getSpawnMaxDistance();
+        BlockPos pos = UnderWorldEventDirector.findSpawnPosAroundPlayer(level, target, minDist, maxDist, allowCave);
+        if (pos == null) {
+            source.sendFailure(Component.translatable("command.under_world.spawn.failed", target.getName()));
+            return 0;
+        }
+
+        T entity = type.create(level);
+        if (entity == null) {
+            source.sendFailure(Component.translatable("command.under_world.spawn.failed", target.getName()));
+            return 0;
+        }
+
+        entity.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, level.getRandom().nextFloat() * 360.0F, 0.0F);
+        entity.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.COMMAND, null, null);
+        level.addFreshEntity(entity);
+
+        if (entity instanceof FriendEntity) {
+            UnderWorldSavedData data = UnderWorldSavedData.get(source.getServer());
+            data.setFriendEntityUuid(entity.getUUID());
+            if (!data.isFriendInTabList()) {
+                data.setFriendInTabList(true);
+                NetworkHandler.syncFriendTabToAll(true, UnderWorldConfigHolder.getFriendDisplayName());
+            }
+        }
+
+        double actualDist = Math.sqrt(target.blockPosition().distSqr(pos));
+        source.sendSuccess(() -> Component.translatable(
+                "command.under_world.spawn.success",
+                entity.getDisplayName(), pos.getX(), pos.getY(), pos.getZ(), actualDist, target.getName()
+        ), true);
+        return 1;
+    }
+
+    private static int executeTriggerFriendJoin(CommandSourceStack source, ServerPlayer target) {
+        UnderWorldEventDirector.triggerFriendJoinEvent(source.getServer(), target.serverLevel(), target);
+        source.sendSuccess(() -> Component.translatable("command.under_world.trigger.friend_join"), true);
+        return 1;
+    }
+
+    private static int executeTriggerFriendChat(CommandSourceStack source) {
+        String sent = UnderWorldEventDirector.triggerFriendAmbientChat(source.getServer());
+        source.sendSuccess(() -> Component.translatable("command.under_world.trigger.friend_chat", sent), true);
+        return 1;
+    }
+
+    private static int executeTriggerHands(CommandSourceStack source, ServerPlayer target) {
+        HandsEntity entity = UnderWorldEventDirector.triggerHandsEncounter(target.serverLevel(), target);
+        if (entity == null) {
+            source.sendFailure(Component.translatable("command.under_world.spawn.failed", target.getName()));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable("command.under_world.trigger.hands", target.getName()), true);
+        return 1;
+    }
+
+    private static int executeTriggerTree(CommandSourceStack source, ServerPlayer target) {
+        TreeMimicEntity entity = UnderWorldEventDirector.triggerTreeEncounter(target.serverLevel(), target);
+        if (entity == null) {
+            source.sendFailure(Component.translatable("command.under_world.spawn.failed", target.getName()));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable("command.under_world.trigger.tree", target.getName()), true);
+        return 1;
+    }
+
+    private static int executeTriggerTheSky(CommandSourceStack source, ServerPlayer target) {
+        TheSkyEntity entity = UnderWorldEventDirector.triggerTheSkyEncounter(target.serverLevel(), target, 48, 72);
+        if (entity == null) {
+            source.sendFailure(Component.translatable("command.under_world.spawn.failed", target.getName()));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable("command.under_world.trigger.the_sky", target.getName()), true);
+        return 1;
+    }
+
+    private static int executeStructure(CommandSourceStack source, ServerPlayer target, boolean voidShrine) throws CommandSyntaxException {
+        ServerLevel level = target.serverLevel();
+        int minDist = UnderWorldConfigHolder.getSpawnMinDistance();
+        int maxDist = UnderWorldConfigHolder.getSpawnMaxDistance();
+        BlockPos pos = UnderWorldEventDirector.findSpawnPosAroundPlayer(level, target, minDist, maxDist, !voidShrine);
+        if (pos == null) {
+            pos = target.blockPosition().offset(16, voidShrine ? 0 : -12, 0);
+        }
+        if (voidShrine) {
+            VoidShrinePiece.placeAt(level, pos);
+        } else {
+            BlockPos underground = pos.getY() > 24 ? new BlockPos(pos.getX(), Math.max(level.getMinBuildHeight() + 8, pos.getY() - 18), pos.getZ()) : pos;
+            BrokenShaftPiece.placeAt(level, underground);
+            pos = underground;
+        }
+        BlockPos finalPos = pos;
+        String name = voidShrine ? "under_world:void_shrine" : "under_world:broken_shaft";
+        source.sendSuccess(() -> Component.translatable(
+                "command.under_world.structure.success", name, finalPos.getX(), finalPos.getY(), finalPos.getZ()
+        ), true);
+        return 1;
+    }
+
+    private static int executeSetEvents(CommandSourceStack source, boolean enable) {
+        UnderWorldSavedData data = UnderWorldSavedData.get(source.getServer());
+        data.setEventsPaused(!enable);
+        source.sendSuccess(() -> Component.translatable(
+                enable ? "command.under_world.events.enabled" : "command.under_world.events.disabled"
+        ), true);
+        return 1;
+    }
+
+    private static int executeEventsStatus(CommandSourceStack source) {
+        UnderWorldSavedData data = UnderWorldSavedData.get(source.getServer());
+        boolean enabled = UnderWorldConfigHolder.isModEnabled() && !data.areEventsPaused();
+        source.sendSuccess(() -> Component.translatable(
+                "command.under_world.events.status",
+                enabled,
+                data.hasFriendJoined(),
+                data.isFriendInTabList()
+        ), false);
+        return 1;
+    }
+
+    private static int executeResetFriend(CommandSourceStack source) {
+        UnderWorldSavedData data = UnderWorldSavedData.get(source.getServer());
+        data.setFriendHasJoined(false);
+        data.setFriendInTabList(false);
+        data.setFriendEntityUuid(null);
+        NetworkHandler.syncFriendTabToAll(false, UnderWorldConfigHolder.getFriendDisplayName());
+        source.sendSuccess(() -> Component.translatable("command.under_world.reset.friend"), true);
+        return 1;
+    }
+}
