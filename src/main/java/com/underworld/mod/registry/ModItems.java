@@ -41,6 +41,9 @@ public final class ModItems {
     public static final RegistryObject<Item> SMILE_SPAWN_EGG = ITEMS.register("smile_spawn_egg",
             () -> new ForgeSpawnEggItem(ModEntities.SMILE, 0x07070A, 0xFFF058, new Item.Properties()));
 
+    public static final RegistryObject<Item> THE_TRUTH_SPAWN_EGG = ITEMS.register("the_truth_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.THE_TRUTH, 0x050507, 0xE6E6EE, new Item.Properties()));
+
     // Fun World & Maze block items
     public static final RegistryObject<Item> FUN_GRASS_BLOCK = blockItem("fun_grass_block", ModBlocks.FUN_GRASS_BLOCK);
     public static final RegistryObject<Item> FUN_DIRT = blockItem("fun_dirt", ModBlocks.FUN_DIRT);
@@ -69,6 +72,7 @@ public final class ModItems {
                         output.accept(THE_SKY_SPAWN_EGG.get());
                         output.accept(EYES_OF_FUN_SPAWN_EGG.get());
                         output.accept(SMILE_SPAWN_EGG.get());
+                        output.accept(THE_TRUTH_SPAWN_EGG.get());
 
                         output.accept(FUN_GRASS_BLOCK.get());
                         output.accept(FUN_DIRT.get());
@@ -103,6 +107,7 @@ public final class ModItems {
             event.accept(THE_SKY_SPAWN_EGG.get());
             event.accept(EYES_OF_FUN_SPAWN_EGG.get());
             event.accept(SMILE_SPAWN_EGG.get());
+            event.accept(THE_TRUTH_SPAWN_EGG.get());
         }
     }
 }

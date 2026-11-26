@@ -54,6 +54,7 @@ public final class UnderWorldConfigHolder {
             c.spawnMinDistance.set(fzzyConfig.general.spawnMinDistance.get());
             c.spawnMaxDistance.set(fzzyConfig.general.spawnMaxDistance.get());
             c.debugLogging.set(fzzyConfig.general.debugLogging.get());
+            c.antiSpawnKillEnabled.set(fzzyConfig.general.antiSpawnKillEnabled.get());
 
             c.friendEnabled.set(fzzyConfig.friend.friendEnabled.get());
             c.friendEveningTime.set(fzzyConfig.friend.friendEveningTime.get());
@@ -83,7 +84,16 @@ public final class UnderWorldConfigHolder {
             c.theSkyVanishRange.set(fzzyConfig.theSky.theSkyVanishRange.get());
             c.theSkyStompChance.set(fzzyConfig.theSky.theSkyStompChance.get());
 
+            c.theTruthEnabled.set(fzzyConfig.theTruth.theTruthEnabled.get());
+            c.theTruthSpawnChance.set(fzzyConfig.theTruth.theTruthSpawnChance.get());
+            c.theTruthChaseDurationTicks.set(fzzyConfig.theTruth.theTruthChaseDurationTicks.get());
+            c.theTruthChaseSpeed.set(fzzyConfig.theTruth.theTruthChaseSpeed.get());
+            c.theTruthBreakBlocks.set(fzzyConfig.theTruth.theTruthBreakBlocks.get());
+            c.theTruthKickOnKill.set(fzzyConfig.theTruth.theTruthKickOnKill.get());
+            c.theTruthSpawnPillarOnRejoin.set(fzzyConfig.theTruth.theTruthSpawnPillarOnRejoin.get());
+
             c.funWorldEnabled.set(fzzyConfig.dimensions.funWorldEnabled.get());
+            c.funWorldTimeSpeedMultiplier.set(fzzyConfig.dimensions.funWorldTimeSpeedMultiplier.get());
             c.eyesOfFunEnabled.set(fzzyConfig.dimensions.eyesOfFunEnabled.get());
             c.eyesOfFunInstantKill.set(fzzyConfig.dimensions.eyesOfFunInstantKill.get());
             c.mazeEnabled.set(fzzyConfig.dimensions.mazeEnabled.get());
@@ -108,6 +118,7 @@ public final class UnderWorldConfigHolder {
             fzzyConfig.general.spawnMinDistance.trySet(c.spawnMinDistance.get());
             fzzyConfig.general.spawnMaxDistance.trySet(c.spawnMaxDistance.get());
             fzzyConfig.general.debugLogging.trySet(c.debugLogging.get());
+            fzzyConfig.general.antiSpawnKillEnabled.trySet(c.antiSpawnKillEnabled.get());
 
             fzzyConfig.friend.friendEnabled.trySet(c.friendEnabled.get());
             fzzyConfig.friend.friendEveningTime.trySet(c.friendEveningTime.get());
@@ -137,7 +148,16 @@ public final class UnderWorldConfigHolder {
             fzzyConfig.theSky.theSkyVanishRange.trySet(c.theSkyVanishRange.get());
             fzzyConfig.theSky.theSkyStompChance.trySet(c.theSkyStompChance.get());
 
+            fzzyConfig.theTruth.theTruthEnabled.trySet(c.theTruthEnabled.get());
+            fzzyConfig.theTruth.theTruthSpawnChance.trySet(c.theTruthSpawnChance.get());
+            fzzyConfig.theTruth.theTruthChaseDurationTicks.trySet(c.theTruthChaseDurationTicks.get());
+            fzzyConfig.theTruth.theTruthChaseSpeed.trySet(c.theTruthChaseSpeed.get());
+            fzzyConfig.theTruth.theTruthBreakBlocks.trySet(c.theTruthBreakBlocks.get());
+            fzzyConfig.theTruth.theTruthKickOnKill.trySet(c.theTruthKickOnKill.get());
+            fzzyConfig.theTruth.theTruthSpawnPillarOnRejoin.trySet(c.theTruthSpawnPillarOnRejoin.get());
+
             fzzyConfig.dimensions.funWorldEnabled.trySet(c.funWorldEnabled.get());
+            fzzyConfig.dimensions.funWorldTimeSpeedMultiplier.trySet(c.funWorldTimeSpeedMultiplier.get());
             fzzyConfig.dimensions.eyesOfFunEnabled.trySet(c.eyesOfFunEnabled.get());
             fzzyConfig.dimensions.eyesOfFunInstantKill.trySet(c.eyesOfFunInstantKill.get());
             fzzyConfig.dimensions.mazeEnabled.trySet(c.mazeEnabled.get());
