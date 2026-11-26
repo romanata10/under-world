@@ -1,0 +1,6 @@
+{
+  "type": "under_world:broken_shaft",
+  "biomes": "#under_world:has_structure/broken_shaft",
+  "step": "underground_structures",
+  "spawn_overrides": {}
+}

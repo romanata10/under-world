@@ -1,0 +1,49 @@
+{
+  "itemGroup.under_world": "Under World",
+
+  "entity.under_world.friend": "friend",
+  "entity.under_world.hands": "Руки (Hands)",
+  "entity.under_world.tree_mimic": "Дерево? (Tree?)",
+  "entity.under_world.the_sky": "Небо (The Sky)",
+
+  "item.under_world.friend_spawn_egg": "Яйцо призыва friend",
+  "item.under_world.hands_spawn_egg": "Яйцо призыва Hands",
+  "item.under_world.tree_mimic_spawn_egg": "Яйцо призыва Tree?",
+  "item.under_world.the_sky_spawn_egg": "Яйцо призыва The Sky",
+
+  "subtitles.under_world.hands_scream": "Далёкий искажённый крик",
+  "subtitles.under_world.hands_glitch": "Треск помех",
+  "subtitles.under_world.hands_burrow": "Кто-то закапывается под землю",
+  "subtitles.under_world.tree_awaken": "Треск и скрип древесины",
+  "subtitles.under_world.tree_step": "Тяжёлые деревянные шаги",
+  "subtitles.under_world.the_sky_roar": "Небо содрогается от далёкого рёва",
+  "subtitles.under_world.the_sky_stomp": "Эхо исполинского шага",
+
+  "disconnect.under_world.hands": "Соединение потеряно: нечто утащило вас в глубину.",
+  "message.under_world.tree_needs_axe": "Кора слишком толстая — нужен топор!",
+
+  "death.attack.under_world.hands": "%1$s был разорван существом Hands",
+  "death.attack.under_world.tree_mimic": "%1$s был поглощён живым деревом",
+  "death.attack.under_world.the_sky": "%1$s был раздавлен под Небом",
+
+  "command.under_world.spawn.success": "Призвано %1$s на (%2$d, %3$d, %4$d) [%5$.1f блоков от %6$s].",
+  "command.under_world.spawn.failed": "Не удалось найти точку спавна в 15-20 блоках от %1$s.",
+  "command.under_world.trigger.friend_join": "Запущено событие входа friend.",
+  "command.under_world.trigger.friend_chat": "Отправлено фоновое сообщение friend: \"%1$s\"",
+  "command.under_world.trigger.hands": "Запущено пещерное событие Hands рядом с %1$s.",
+  "command.under_world.trigger.tree": "Запущено событие Tree? рядом с %1$s.",
+  "command.under_world.trigger.the_sky": "Запущено событие The Sky вдалеке от %1$s.",
+  "command.under_world.structure.success": "Сгенерирована структура %1$s рядом с (%2$d, %3$d, %4$d).",
+  "command.under_world.events.enabled": "Автоматические хоррор-события Under World ВКЛЮЧЕНЫ в этом мире.",
+  "command.under_world.events.disabled": "Автоматические хоррор-события Under World ОТКЛЮЧЕНЫ в этом мире.",
+  "command.under_world.events.status": "События включены: %1$s | friend зашёл: %2$s | в табе: %3$s",
+  "command.under_world.reset.friend": "Сброшено одноразовое состояние входа friend для мира.",
+
+  "under_world.settings": "Настройки Under World",
+  "under_world.settings.general": "Общие",
+  "under_world.settings.general.desc": "Основные параметры событий и дистанции спавна",
+  "under_world.settings.friend": "friend",
+  "under_world.settings.hands": "Hands",
+  "under_world.settings.treeMimic": "Tree?",
+  "under_world.settings.theSky": "The Sky"
+}

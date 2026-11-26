@@ -1,0 +1,68 @@
+name: Build & Release Under World
+
+on:
+  push:
+    branches:
+      - main
+      - "arena/**"
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Build mod JAR
+        run: ./gradlew build --no-daemon --stacktrace
+
+      - name: Verify built JAR
+        run: |
+          ls -lh build/libs/
+          JAR_FILE=$(find build/libs -maxdepth 1 -name "under_world-*.jar" ! -name "*-sources.jar" ! -name "*-dev.jar" | head -n 1)
+          if [ -z "$JAR_FILE" ] || [ ! -s "$JAR_FILE" ]; then
+            echo "Error: Built mod JAR not found or empty!"
+            exit 1
+          fi
+          echo "Built JAR: $JAR_FILE"
+          jar tf "$JAR_FILE" | head -n 40
+
+      - name: Upload mod JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: under-world-mod-jar
+          path: build/libs/under_world-*.jar
+
+      - name: Create GitHub Release on version tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          JAR_FILE=$(find build/libs -maxdepth 1 -name "under_world-*.jar" ! -name "*-sources.jar" ! -name "*-dev.jar" | head -n 1)
+          gh release create "$TAG" "$JAR_FILE" \
+            --title "Under World $TAG (Forge 1.20.1)" \
+            --notes "Automated Forge 1.20.1 build of Under World ($TAG)." \
+            || gh release upload "$TAG" "$JAR_FILE" --clobber
