@@ -26,10 +26,10 @@ public class TheTruthRenderer extends GeoEntityRenderer<TheTruthEntity> {
 
     @Override
     public boolean shouldRender(TheTruthEntity entity, Frustum camera, double camX, double camY, double camZ) {
-        if (entity.shouldRenderAtSqrDistance(entity.distanceToSqr(camX, camY, camZ))) {
-            return true;
+        if (!entity.shouldRender(camX, camY, camZ)) {
+            return false;
         }
-        return super.shouldRender(entity, camera, camX, camY, camZ);
+        return camera.isVisible(entity.getBoundingBoxForCulling());
     }
 
     @Override
@@ -51,9 +51,9 @@ public class TheTruthRenderer extends GeoEntityRenderer<TheTruthEntity> {
                 packedLight, packedOverlay, red, green, blue, alpha);
         if (!isReRender && animatable.getTruthState() == TheTruthEntity.STATE_EMERGE) {
             float progress = animatable.getEmergeProgress();
-            // Ease-out rise from 50 blocks below ground
+            // Ease-out rise from 50 world blocks below ground (divided by 5.0F renderer scale)
             float eased = 1.0F - (1.0F - progress) * (1.0F - progress);
-            poseStack.translate(0.0D, -50.0D * (1.0D - eased), 0.0D);
+            poseStack.translate(0.0D, -10.0D * (1.0D - eased), 0.0D);
         }
     }
 
