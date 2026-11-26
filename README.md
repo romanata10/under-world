@@ -1,6 +1,6 @@
-# Under World (`under_world`)
+# Under World (`under_world`) — v2.0.0
 
-A Minecraft **1.20.1 Forge** horror mod inspired by *The Broken Script*, built with **GeckoLib 4**, **Fzzy Config**, **Configured**, and full multiplayer server/client synchronization.
+A Minecraft **1.20.1 Forge** psychological & Dreamcore horror mod inspired by *The Broken Script*, built with **GeckoLib 4**, **Fzzy Config**, **Configured**, and full multiplayer server/client synchronization.
 
 ## Requirements
 
@@ -10,29 +10,45 @@ A Minecraft **1.20.1 Forge** horror mod inspired by *The Broken Script*, built w
 - **Fzzy Config**: `0.7.5+1.20.1+forge` (plus **Kotlin for Forge** `4.11.0+`)
 - **Configured** *(optional client GUI integration)*: `2.2.3+`
 
-## Entities (v1)
+## Entities (v1 + v2)
 
 - **`friend`** (`under_world:friend`):
   - Appears once per world on Day 1 evening (`dayTime >= 12500`), broadcasts a yellow server join message with a vanilla cave sound, spawns in the world, and stays permanently listed in the multiplayer player tab list.
-  - Emits ambient chat messages (`"hello?"`, `"im your friend"`, `"the void"`) and responds to English/Russian chat triggers (`hello`/`hi`/`привет`, `who are you?`/`кто ты?`, `friend`/`друг`, `void`, `hands`, `tree`, `the sky`).
-  - Insulting or swearing at `friend` in English or Russian replies `"why.."` and triggers a punishment (lightning strike, explosion, or high-altitude falling anvil).
+  - **v2 Stalker AI**: physically stalks players from afar, cracks open nearby wooden doors, leaves cryptic signs (`"hello?"`, `"the flowers watch at night"`, `"red bricks"`), builds rare Void Shrines behind players, and when spotted up close either vanishes in dark smoke or pulls victims into **The Fun World**.
+  - Emits ambient chat messages and replies to English/Russian chat triggers (`hello`/`hi`/`привет`, `who are you?`/`кто ты?`, `friend`/`друг`, `void`, `hands`, `tree`, `the sky`, `fun world`, `maze`, `smile`).
+  - Insulting `friend` in English or Russian replies `"why.."` and triggers a punishment (lightning strike, explosion, or high-altitude falling anvil).
 - **`hands`** (`under_world:hands`):
-  - Wire/scribble multi-eyed humanoid inspired by *The Broken Script*.
-  - Rare deep-cave encounter: extends clawed arms, chases the target for 1 minute (`1200` ticks) while breaking blocks around/behind itself with loud glitch and scream sounds, either killing and disconnecting the player or burrowing underground and vanishing after 1 minute.
+  - Wire/scribble multi-eyed humanoid cave encounter: extends clawed arms, chases the target for 1 minute while breaking surrounding blocks, disconnects killed players (configurable), or burrows underground.
 - **`tree?`** (`under_world:tree_mimic`):
-  - Disguised as a normal oak tree. On approach (or attack), sprouts dark ground tentacles, opens glowing white eyes across its trunk and leaves, and chases the player with wooden footsteps and creaking awaken audio.
-  - Requires an axe to deal lethal blows; drops charcoal and oak logs.
+  - Disguised oak tree ambush entity: awakens glowing eyes and dark tentacles on approach, requires an axe to deal lethal blows.
 - **`the sky`** (`under_world:the_sky`):
-  - Colossal ~100-block-tall, ~50-block-wide black scribble silhouette.
-  - Super-rare distant apparition that roars on arrival, stands still watching, and vanishes with a vanilla cave sound when approached — with a configurable chance (`25%` default) to unleash a ground-shaking stomp attack first.
+  - Colossal ~100-block-tall distant silhouette apparition that roars, watches, and either stomps or vanishes when approached.
+- **`eyes of fun`** (`under_world:eyes_of_fun`) *(v2)*:
+  - Tall dual-blossomed flower-stalk horror haunting **The Fun World** at night (one staring red/orange eye blossom, one withered white/pink toothy blossom, and hanging dark tendrils).
+  - **Look-Rule**: freezes dead still whenever directly observed in unobstructed line of sight, and sprints lethally toward the player the moment they look away.
+- **`smile`** (`under_world:smile`) *(v2)*:
+  - Tall four-legged pitch-black arachnid stalker with a floating glowing pale-yellow smiling mask haunting **The Maze** corridors.
+  - Unleashes a distorted digital roar on sight and relentlessly sprints through brick hallways with rapid spindly footsteps.
+
+## Dimensions (v2)
+
+- **The Fun World** (`under_world:the_fun_world`):
+  - Accessible by stepping into a **Void Shrine** ritual core in the Overworld or being warped by `friend` at close range.
+  - Dreamcore Windows-98 plains of saturated lime grass, glossy daisies, flat blossoms, blue/red spotted mushrooms, and a cobalt-to-white sky under a **Giant Yellow Sun with One Big Eye**.
+  - When night falls, the sky turns pitch black, every flower opens a glowing watching eye that tracks the player, and **`Eyes of Fun`** begins hunting.
+  - Look for **Maze Red-Brick Ruins** on the plains containing a glowing **`Maze Rift Portal`** (`under_world:maze_portal`) to enter **The Maze**.
+- **The Maze** (`under_world:maze`):
+  - Classic Windows 95/98 3D Maze screensaver labyrinth of red clay bricks, warm tan parquet floors, speckled grey ceiling tiles, dense dark corridor fog, and **`Smile`** hunting inside.
+  - Navigate the connected brick corridors to locate a glowing **`Maze Escape Terminal`** (`under_world:maze_teleporter`) and return safely to the Overworld.
 
 ## Commands (`/underworld`, op level 2)
 
-- `/underworld spawn <friend|hands|tree|tree_mimic|the_sky> [<player>]` — Spawns the entity `15–20` blocks away from the player.
-- `/underworld trigger <friend_join|friend_chat|hands_encounter|tree_encounter|the_sky_event> [<player>]` — Manually triggers an event.
-- `/underworld structure <void_shrine|broken_shaft> [<player>]` — Places a mod structure near the player.
-- `/underworld events <enable|disable|status>` — Enables, disables, or inspects automatic world horror events.
-- `/underworld reset friend` — Resets the per-world one-time `friend` join flag and tab-list entry for testing.
+- `/underworld spawn <friend|hands|tree|tree_mimic|the_sky|eyes_of_fun|smile> [<player>]`
+- `/underworld trigger <friend_join|friend_chat|hands_encounter|tree_encounter|the_sky_event|eyes_of_fun|smile> [<player>]`
+- `/underworld tp <overworld|fun_world|maze> [<player>]`
+- `/underworld structure <void_shrine|broken_shaft> [<player>]`
+- `/underworld events <enable|disable|status>`
+- `/underworld reset friend`
 
 ## Configuration
 
@@ -43,5 +59,3 @@ Settings are exposed in both **Fzzy Config** (`config/under_world/settings.toml`
 ```bash
 ./gradlew build
 ```
-
-> Note: Building requires Java 17 and outbound access to Mojang, MinecraftForge, Cloudsmith (GeckoLib), FzzyMaven, KotlinForForge, SpongePowered, and CurseMaven repositories.

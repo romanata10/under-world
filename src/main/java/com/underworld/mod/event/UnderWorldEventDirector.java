@@ -2,13 +2,19 @@ package com.underworld.mod.event;
 
 import com.underworld.mod.UnderWorldMod;
 import com.underworld.mod.config.UnderWorldConfigHolder;
+import com.underworld.mod.entity.EyesOfFunEntity;
 import com.underworld.mod.entity.FriendEntity;
 import com.underworld.mod.entity.HandsEntity;
+import com.underworld.mod.entity.SmileEntity;
 import com.underworld.mod.entity.TheSkyEntity;
 import com.underworld.mod.entity.TreeMimicEntity;
 import com.underworld.mod.network.NetworkHandler;
+import com.underworld.mod.registry.ModDimensions;
 import com.underworld.mod.registry.ModEntities;
+import com.underworld.mod.registry.ModSounds;
 import com.underworld.mod.world.UnderWorldSavedData;
+import com.underworld.mod.world.dimension.MazeChunkGenerator;
+import com.underworld.mod.world.structure.VoidShrinePiece;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -41,7 +47,10 @@ public final class UnderWorldEventDirector {
     private static final String[] AMBIENT_FRIEND_MESSAGES = {
             "hello?",
             "im your friend",
-            "the void"
+            "the void",
+            "look behind you",
+            "come play in the flowers",
+            "red bricks.."
     };
 
     private static final List<ScheduledAction> SCHEDULED_ACTIONS = new ArrayList<>();
@@ -117,6 +126,19 @@ public final class UnderWorldEventDirector {
         }
 
         UnderWorldSavedData data = UnderWorldSavedData.get(server);
+
+        // Void Shrine -> The Fun World ritual trigger (always active when funWorldEnabled)
+        if (server.getTickCount() % 10 == 0
+                && (UnderWorldConfigHolder.get() == null || UnderWorldConfigHolder.get().dimensions.funWorldEnabled.get())) {
+            checkVoidShrineWarps(overworld);
+        }
+
+        // Dimension horror directors (Fun World night Eyes of Fun & Maze Smile)
+        if (server.getTickCount() % 80 == 0) {
+            tickFunWorld(server);
+            tickMaze(server);
+        }
+
         if (!UnderWorldConfigHolder.isModEnabled() || data.areEventsPaused()) {
             return;
         }
@@ -142,6 +164,22 @@ public final class UnderWorldEventDirector {
                 data.setAmbientChatTimerTicks(interval + overworld.getRandom().nextInt(Math.max(100, interval / 2)));
             } else {
                 data.setAmbientChatTimerTicks(timer);
+            }
+        }
+
+        // 2b. Physical Friend Stalker spawning when absent
+        if (data.hasFriendJoined() && UnderWorldConfigHolder.get().friend.friendStalkerEnabled.get()) {
+            int stalkCd = data.getFriendStalkCooldownTicks() - 1;
+            if (stalkCd <= 0) {
+                data.setFriendStalkCooldownTicks(1800 + overworld.getRandom().nextInt(1800));
+                if (!hasFriendInServer(server, data)) {
+                    ServerPlayer target = pickSurvivalPlayer(overworld);
+                    if (target != null) {
+                        spawnFriendNear(overworld, target, data);
+                    }
+                }
+            } else {
+                data.setFriendStalkCooldownTicks(stalkCd);
             }
         }
 
@@ -207,6 +245,64 @@ public final class UnderWorldEventDirector {
         }
     }
 
+    private static void checkVoidShrineWarps(ServerLevel overworld) {
+        for (ServerPlayer player : List.copyOf(overworld.players())) {
+            if (player.isSpectator() || player.isOnPortalCooldown()) {
+                continue;
+            }
+            if (VoidShrinePiece.isPlayerInsideVoidShrine(overworld, player.blockPosition())) {
+                player.setPortalCooldown(100);
+                ModDimensions.sendToFunWorld(player);
+            }
+        }
+    }
+
+    private static void tickFunWorld(MinecraftServer server) {
+        if (UnderWorldConfigHolder.get() != null && !UnderWorldConfigHolder.get().dimensions.eyesOfFunEnabled.get()) {
+            return;
+        }
+        ServerLevel funLevel = server.getLevel(ModDimensions.THE_FUN_WORLD);
+        if (funLevel == null || funLevel.players().isEmpty()) {
+            return;
+        }
+        long timeOfDay = funLevel.getDayTime() % 24000L;
+        if (timeOfDay < 12600L || timeOfDay > 23400L) {
+            return;
+        }
+
+        for (ServerPlayer player : funLevel.players()) {
+            if (player.isCreative() || player.isSpectator() || !player.isAlive()) {
+                continue;
+            }
+            AABB nearby = AABB.ofSize(player.position(), 72.0D, 48.0D, 72.0D);
+            int existing = funLevel.getEntitiesOfClass(EyesOfFunEntity.class, nearby).size();
+            if (existing < 2 && funLevel.getRandom().nextFloat() < 0.45F) {
+                triggerEyesOfFunEncounter(funLevel, player);
+            }
+        }
+    }
+
+    private static void tickMaze(MinecraftServer server) {
+        if (UnderWorldConfigHolder.get() != null && !UnderWorldConfigHolder.get().dimensions.mazeEnabled.get()) {
+            return;
+        }
+        ServerLevel mazeLevel = server.getLevel(ModDimensions.MAZE);
+        if (mazeLevel == null || mazeLevel.players().isEmpty()) {
+            return;
+        }
+
+        for (ServerPlayer player : mazeLevel.players()) {
+            if (player.isCreative() || player.isSpectator() || !player.isAlive()) {
+                continue;
+            }
+            AABB nearby = AABB.ofSize(player.position(), 96.0D, 32.0D, 96.0D);
+            int existing = mazeLevel.getEntitiesOfClass(SmileEntity.class, nearby).size();
+            if (existing == 0 && mazeLevel.getRandom().nextFloat() < 0.55F) {
+                triggerSmileEncounter(mazeLevel, player);
+            }
+        }
+    }
+
     private static void processScheduledActions() {
         List<Runnable> ready = new ArrayList<>();
         synchronized (SCHEDULED_ACTIONS) {
@@ -267,25 +363,29 @@ public final class UnderWorldEventDirector {
         if (!hasFriendInServer(server, data)) {
             ServerPlayer anchor = nearPlayer != null ? nearPlayer : pickAnyPlayer(level);
             if (anchor != null) {
-                BlockPos pos = findSpawnPosAroundPlayer(level, anchor,
-                        UnderWorldConfigHolder.getSpawnMinDistance(),
-                        UnderWorldConfigHolder.getSpawnMaxDistance(),
-                        true);
-                if (pos == null) {
-                    pos = anchor.blockPosition().offset(16, 0, 0);
-                }
-                FriendEntity friend = ModEntities.FRIEND.get().create(level);
-                if (friend != null) {
-                    friend.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D,
-                            level.getRandom().nextFloat() * 360.0F, 0.0F);
-                    friend.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
-                    level.addFreshEntity(friend);
-                    data.setFriendEntityUuid(friend.getUUID());
-                }
+                spawnFriendNear(level, anchor, data);
             }
         }
 
         return true;
+    }
+
+    private static void spawnFriendNear(ServerLevel level, ServerPlayer anchor, UnderWorldSavedData data) {
+        BlockPos pos = findSpawnPosAroundPlayer(level, anchor,
+                UnderWorldConfigHolder.getSpawnMinDistance(),
+                UnderWorldConfigHolder.getSpawnMaxDistance(),
+                true);
+        if (pos == null) {
+            pos = anchor.blockPosition().offset(18, 0, 0);
+        }
+        FriendEntity friend = ModEntities.FRIEND.get().create(level);
+        if (friend != null) {
+            friend.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D,
+                    level.getRandom().nextFloat() * 360.0F, 0.0F);
+            friend.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
+            level.addFreshEntity(friend);
+            data.setFriendEntityUuid(friend.getUUID());
+        }
     }
 
     public static String triggerFriendAmbientChat(MinecraftServer server) {
@@ -361,6 +461,66 @@ public final class UnderWorldEventDirector {
     }
 
     @Nullable
+    public static EyesOfFunEntity triggerEyesOfFunEncounter(ServerLevel level, ServerPlayer player) {
+        BlockPos pos = findSpawnPosAroundPlayer(level, player, 18, 30, false);
+        if (pos == null) {
+            return null;
+        }
+        EyesOfFunEntity eyes = ModEntities.EYES_OF_FUN.get().create(level);
+        if (eyes == null) {
+            return null;
+        }
+        eyes.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D,
+                level.getRandom().nextFloat() * 360.0F, 0.0F);
+        eyes.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
+        eyes.setTarget(player);
+        level.addFreshEntity(eyes);
+        level.playSound(null, pos, ModSounds.EYES_OF_FUN_SPOT.get(), SoundSource.HOSTILE, 0.9F, 0.95F);
+        return eyes;
+    }
+
+    @Nullable
+    public static SmileEntity triggerSmileEncounter(ServerLevel level, ServerPlayer player) {
+        BlockPos pos = findMazeCorridorSpotAround(level, player, 20, 34);
+        if (pos == null) {
+            pos = findSpawnPosAroundPlayer(level, player, 16, 26, true);
+        }
+        if (pos == null) {
+            return null;
+        }
+        SmileEntity smile = ModEntities.SMILE.get().create(level);
+        if (smile == null) {
+            return null;
+        }
+        smile.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D,
+                level.getRandom().nextFloat() * 360.0F, 0.0F);
+        smile.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
+        smile.setTarget(player);
+        level.addFreshEntity(smile);
+        level.playSound(null, pos, ModSounds.SMILE_ROAR.get(), SoundSource.HOSTILE, 2.0F, 0.9F);
+        return smile;
+    }
+
+    @Nullable
+    private static BlockPos findMazeCorridorSpotAround(ServerLevel level, ServerPlayer player, int minDist, int maxDist) {
+        RandomSource random = level.getRandom();
+        for (int attempt = 0; attempt < 40; attempt++) {
+            double angle = random.nextDouble() * Math.PI * 2.0D;
+            double dist = minDist + random.nextDouble() * (maxDist - minDist);
+            int tx = (int) Math.floor(player.getX() + Math.cos(angle) * dist);
+            int tz = (int) Math.floor(player.getZ() + Math.sin(angle) * dist);
+            if (!MazeChunkGenerator.isCorridorAir(tx, tz)) {
+                continue;
+            }
+            BlockPos p = new BlockPos(tx, MazeChunkGenerator.FLOOR_Y + 1, tz);
+            if (level.getBlockState(p).isAir() && level.getBlockState(p.above()).isAir() && level.getBlockState(p.above(2)).isAir()) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
     public static BlockPos findSpawnPosAroundPlayer(ServerLevel level, ServerPlayer player, int minDist, int maxDist, boolean allowCave) {
         RandomSource random = level.getRandom();
         int effectiveMin = Math.max(4, Math.min(minDist, maxDist));
@@ -371,6 +531,16 @@ public final class UnderWorldEventDirector {
             double dist = effectiveMin + random.nextDouble() * (effectiveMax - effectiveMin);
             int tx = (int) Math.floor(player.getX() + Math.cos(angle) * dist);
             int tz = (int) Math.floor(player.getZ() + Math.sin(angle) * dist);
+
+            if (ModDimensions.isMaze(level)) {
+                if (MazeChunkGenerator.isCorridorAir(tx, tz)) {
+                    BlockPos p = new BlockPos(tx, MazeChunkGenerator.FLOOR_Y + 1, tz);
+                    if (level.getBlockState(p).isAir() && level.getBlockState(p.above()).isAir()) {
+                        return p;
+                    }
+                }
+                continue;
+            }
 
             if (allowCave && !level.canSeeSky(player.blockPosition())) {
                 int baseY = player.blockPosition().getY();

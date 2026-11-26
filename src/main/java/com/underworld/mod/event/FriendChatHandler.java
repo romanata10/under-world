@@ -58,6 +58,18 @@ public final class FriendChatHandler {
             "(?:^|[^\\p{L}])the\\s+sky(?:[^\\p{L}]|$)",
             Pattern.CASE_INSENSITIVE
     );
+    private static final Pattern FUN_WORLD_PHRASE = Pattern.compile(
+            "(?:^|[^\\p{L}])(fun\\s+world|eyes\\s+of\\s+fun|вес[ёе]л(?:ый|ого)\\s+мир|глаза)(?:[^\\p{L}]|$)",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS
+    );
+    private static final Pattern MAZE_PHRASE = Pattern.compile(
+            "(?:^|[^\\p{L}])(maze|лабиринт)(?:[^\\p{L}]|$)",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS
+    );
+    private static final Pattern SMILE_PHRASE = Pattern.compile(
+            "(?:^|[^\\p{L}])(smile|улыбк[аи])(?:[^\\p{L}]|$)",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS
+    );
 
     private FriendChatHandler() {}
 
@@ -116,6 +128,15 @@ public final class FriendChatHandler {
         if (WHO_ARE_YOU.matcher(lower).find()) {
             return "your REAL friend";
         }
+        if (FUN_WORLD_PHRASE.matcher(lower).find()) {
+            return "so bright. dont blink at night.";
+        }
+        if (MAZE_PHRASE.matcher(lower).find()) {
+            return "red bricks. keep running.";
+        }
+        if (SMILE_PHRASE.matcher(lower).find()) {
+            return "he is smiling behind you";
+        }
         if (FRIEND_WORD.matcher(lower).find()) {
             return "yes";
         }
@@ -143,7 +164,6 @@ public final class FriendChatHandler {
 
         switch (mode) {
             case 0 -> {
-                // Lightning kill
                 LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
                 if (bolt != null) {
                     bolt.moveTo(player.getX(), player.getY(), player.getZ());
@@ -153,14 +173,12 @@ public final class FriendChatHandler {
                 player.hurt(level.damageSources().lightningBolt(), 1000.0F);
             }
             case 1 -> {
-                // Explosion punishment
                 level.explode(null, player.getX(), player.getY(), player.getZ(), 4.2F, Level.ExplosionInteraction.TNT);
                 if (player.isAlive()) {
                     player.hurt(level.damageSources().explosion(null), 100.0F);
                 }
             }
             default -> {
-                // High-altitude falling anvil
                 BlockPos targetPos = player.blockPosition();
                 int dropOffset = Math.min(26, Math.max(8, level.getMaxBuildHeight() - targetPos.getY() - 2));
                 BlockPos anvilPos = targetPos.above(dropOffset);

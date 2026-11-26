@@ -1,8 +1,10 @@
 package com.underworld.mod.registry;
 
 import com.underworld.mod.UnderWorldMod;
+import com.underworld.mod.entity.EyesOfFunEntity;
 import com.underworld.mod.entity.FriendEntity;
 import com.underworld.mod.entity.HandsEntity;
+import com.underworld.mod.entity.SmileEntity;
 import com.underworld.mod.entity.TheSkyEntity;
 import com.underworld.mod.entity.TreeMimicEntity;
 import net.minecraft.world.entity.EntityType;
@@ -40,6 +42,18 @@ public final class ModEntities {
                     .clientTrackingRange(24)
                     .build(UnderWorldMod.id("the_sky").toString()));
 
+    public static final RegistryObject<EntityType<EyesOfFunEntity>> EYES_OF_FUN = ENTITIES.register("eyes_of_fun",
+            () -> EntityType.Builder.of(EyesOfFunEntity::new, MobCategory.MONSTER)
+                    .sized(0.95F, 2.85F)
+                    .clientTrackingRange(16)
+                    .build(UnderWorldMod.id("eyes_of_fun").toString()));
+
+    public static final RegistryObject<EntityType<SmileEntity>> SMILE = ENTITIES.register("smile",
+            () -> EntityType.Builder.of(SmileEntity::new, MobCategory.MONSTER)
+                    .sized(1.15F, 2.60F)
+                    .clientTrackingRange(18)
+                    .build(UnderWorldMod.id("smile").toString()));
+
     private ModEntities() {}
 
     public static void registerAttributes(final EntityAttributeCreationEvent event) {
@@ -47,5 +61,7 @@ public final class ModEntities {
         event.put(HANDS.get(), HandsEntity.createAttributes().build());
         event.put(TREE_MIMIC.get(), TreeMimicEntity.createAttributes().build());
         event.put(THE_SKY.get(), TheSkyEntity.createAttributes().build());
+        event.put(EYES_OF_FUN.get(), EyesOfFunEntity.createAttributes().build());
+        event.put(SMILE.get(), SmileEntity.createAttributes().build());
     }
 }

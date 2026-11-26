@@ -1,5 +1,6 @@
 package com.underworld.mod.world;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -7,6 +8,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class UnderWorldSavedData extends SavedData {
@@ -19,6 +22,8 @@ public class UnderWorldSavedData extends SavedData {
     private boolean eventsPaused = false;
     private int eventCooldownTicks = 600;
     private int ambientChatTimerTicks = 1200;
+    private int friendStalkCooldownTicks = 900;
+    private final Map<UUID, BlockPos> returnPositions = new HashMap<>();
 
     public UnderWorldSavedData() {}
 
@@ -48,6 +53,19 @@ public class UnderWorldSavedData extends SavedData {
         data.eventsPaused = tag.getBoolean("EventsPaused");
         data.eventCooldownTicks = tag.contains("EventCooldownTicks") ? tag.getInt("EventCooldownTicks") : 600;
         data.ambientChatTimerTicks = tag.contains("AmbientChatTimerTicks") ? tag.getInt("AmbientChatTimerTicks") : 1200;
+        data.friendStalkCooldownTicks = tag.contains("FriendStalkCooldownTicks") ? tag.getInt("FriendStalkCooldownTicks") : 900;
+
+        if (tag.contains("ReturnPositions", 10)) {
+            CompoundTag returns = tag.getCompound("ReturnPositions");
+            for (String key : returns.getAllKeys()) {
+                try {
+                    UUID uuid = UUID.fromString(key);
+                    CompoundTag posTag = returns.getCompound(key);
+                    data.returnPositions.put(uuid, new BlockPos(posTag.getInt("x"), posTag.getInt("y"), posTag.getInt("z")));
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+        }
         return data;
     }
 
@@ -61,6 +79,17 @@ public class UnderWorldSavedData extends SavedData {
         tag.putBoolean("EventsPaused", this.eventsPaused);
         tag.putInt("EventCooldownTicks", this.eventCooldownTicks);
         tag.putInt("AmbientChatTimerTicks", this.ambientChatTimerTicks);
+        tag.putInt("FriendStalkCooldownTicks", this.friendStalkCooldownTicks);
+
+        CompoundTag returns = new CompoundTag();
+        for (Map.Entry<UUID, BlockPos> entry : this.returnPositions.entrySet()) {
+            CompoundTag posTag = new CompoundTag();
+            posTag.putInt("x", entry.getValue().getX());
+            posTag.putInt("y", entry.getValue().getY());
+            posTag.putInt("z", entry.getValue().getZ());
+            returns.put(entry.getKey().toString(), posTag);
+        }
+        tag.put("ReturnPositions", returns);
         return tag;
     }
 
@@ -117,5 +146,24 @@ public class UnderWorldSavedData extends SavedData {
     public void setAmbientChatTimerTicks(int ambientChatTimerTicks) {
         this.ambientChatTimerTicks = Math.max(0, ambientChatTimerTicks);
         setDirty();
+    }
+
+    public int getFriendStalkCooldownTicks() {
+        return this.friendStalkCooldownTicks;
+    }
+
+    public void setFriendStalkCooldownTicks(int ticks) {
+        this.friendStalkCooldownTicks = Math.max(0, ticks);
+        setDirty();
+    }
+
+    public void saveReturnPos(UUID playerId, BlockPos pos) {
+        this.returnPositions.put(playerId, pos.immutable());
+        setDirty();
+    }
+
+    @Nullable
+    public BlockPos getReturnPos(UUID playerId) {
+        return this.returnPositions.get(playerId);
     }
 }

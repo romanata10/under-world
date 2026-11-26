@@ -36,6 +36,9 @@ public final class UnderWorldForgeConfig {
         public final ForgeConfigSpec.IntValue friendAmbientChatIntervalTicks;
         public final ForgeConfigSpec.BooleanValue friendChatResponsesEnabled;
         public final ForgeConfigSpec.BooleanValue friendProfanityPunishmentEnabled;
+        public final ForgeConfigSpec.BooleanValue friendStalkerEnabled;
+        public final ForgeConfigSpec.DoubleValue friendFunWorldWarpChance;
+        public final ForgeConfigSpec.BooleanValue friendDoorInteractionEnabled;
 
         public final ForgeConfigSpec.BooleanValue handsEnabled;
         public final ForgeConfigSpec.DoubleValue handsCaveSpawnChance;
@@ -52,6 +55,12 @@ public final class UnderWorldForgeConfig {
         public final ForgeConfigSpec.DoubleValue theSkySpawnChance;
         public final ForgeConfigSpec.DoubleValue theSkyVanishRange;
         public final ForgeConfigSpec.DoubleValue theSkyStompChance;
+
+        public final ForgeConfigSpec.BooleanValue funWorldEnabled;
+        public final ForgeConfigSpec.BooleanValue eyesOfFunEnabled;
+        public final ForgeConfigSpec.BooleanValue eyesOfFunInstantKill;
+        public final ForgeConfigSpec.BooleanValue mazeEnabled;
+        public final ForgeConfigSpec.DoubleValue smileSprintSpeed;
 
         public Common(ForgeConfigSpec.Builder builder) {
             builder.push("general");
@@ -99,13 +108,25 @@ public final class UnderWorldForgeConfig {
                     .translation("under_world.config.friendAmbientChatIntervalTicks")
                     .defineInRange("friendAmbientChatIntervalTicks", 6000, 600, 36000);
             this.friendChatResponsesEnabled = builder
-                    .comment("Lets friend reply to keywords like hello, who are you?, void, hands, tree, and the sky.")
+                    .comment("Lets friend reply to keywords.")
                     .translation("under_world.config.friendChatResponsesEnabled")
                     .define("friendChatResponsesEnabled", true);
             this.friendProfanityPunishmentEnabled = builder
                     .comment("Triggers lightning, explosion, or high-altitude falling anvil when players insult friend.")
                     .translation("under_world.config.friendProfanityPunishmentEnabled")
                     .define("friendProfanityPunishmentEnabled", true);
+            this.friendStalkerEnabled = builder
+                    .comment("Enables physical stalking AI for friend.")
+                    .translation("under_world.config.friendStalkerEnabled")
+                    .define("friendStalkerEnabled", true);
+            this.friendFunWorldWarpChance = builder
+                    .comment("Chance when spotted closely that friend pulls the player to The Fun World.")
+                    .translation("under_world.config.friendFunWorldWarpChance")
+                    .defineInRange("friendFunWorldWarpChance", 0.28D, 0.0D, 1.0D);
+            this.friendDoorInteractionEnabled = builder
+                    .comment("Allows friend to open nearby doors and leave cryptic signs.")
+                    .translation("under_world.config.friendDoorInteractionEnabled")
+                    .define("friendDoorInteractionEnabled", true);
             builder.pop();
 
             builder.push("hands");
@@ -167,6 +188,24 @@ public final class UnderWorldForgeConfig {
                     .comment("Probability that The Sky stomps the ground before vanishing when approached.")
                     .translation("under_world.config.theSkyStompChance")
                     .defineInRange("theSkyStompChance", 0.25D, 0.0D, 1.0D);
+            builder.pop();
+
+            builder.push("dimensions");
+            this.funWorldEnabled = builder
+                    .comment("Allows warping players into The Fun World.")
+                    .define("funWorldEnabled", true);
+            this.eyesOfFunEnabled = builder
+                    .comment("Spawns Eyes of Fun during nightfall in The Fun World.")
+                    .define("eyesOfFunEnabled", true);
+            this.eyesOfFunInstantKill = builder
+                    .comment("When true, Eyes of Fun kills caught players in one lethal strike.")
+                    .define("eyesOfFunInstantKill", true);
+            this.mazeEnabled = builder
+                    .comment("Enables Maze rift portals and Smile inside The Maze dimension.")
+                    .define("mazeEnabled", true);
+            this.smileSprintSpeed = builder
+                    .comment("Base sprint speed of Smile in The Maze.")
+                    .defineInRange("smileSprintSpeed", 0.43D, 0.25D, 0.70D);
             builder.pop();
         }
     }

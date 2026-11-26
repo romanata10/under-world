@@ -7,6 +7,9 @@ import com.underworld.mod.config.UnderWorldConfigHolder;
 import com.underworld.mod.event.FriendChatHandler;
 import com.underworld.mod.event.UnderWorldEventDirector;
 import com.underworld.mod.network.NetworkHandler;
+import com.underworld.mod.registry.ModBlockEntities;
+import com.underworld.mod.registry.ModBlocks;
+import com.underworld.mod.registry.ModChunkGenerators;
 import com.underworld.mod.registry.ModEntities;
 import com.underworld.mod.registry.ModItems;
 import com.underworld.mod.registry.ModSounds;
@@ -32,12 +35,15 @@ public final class UnderWorldMod {
 
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
+        ModBlocks.BLOCKS.register(modEventBus);
+        ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
         ModEntities.ENTITIES.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
         ModItems.CREATIVE_TABS.register(modEventBus);
         ModSounds.SOUND_EVENTS.register(modEventBus);
         ModStructures.STRUCTURE_TYPES.register(modEventBus);
         ModStructures.STRUCTURE_PIECES.register(modEventBus);
+        ModChunkGenerators.CHUNK_GENERATORS.register(modEventBus);
 
         UnderWorldConfigHolder.init(modEventBus);
 
