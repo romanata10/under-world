@@ -1,0 +1,55 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "misc.idle": {
+      "loop": true,
+      "animation_length": 3.0,
+      "bones": {
+        "stem": {
+          "rotation": {
+            "0.0": [
+              0,
+              0,
+              -2
+            ],
+            "1.5": [
+              2,
+              0,
+              2
+            ],
+            "3.0": [
+              0,
+              0,
+              -2
+            ]
+          }
+        }
+      }
+    },
+    "misc.watch": {
+      "loop": true,
+      "animation_length": 1.6,
+      "bones": {
+        "stem": {
+          "rotation": {
+            "0.0": [
+              0,
+              0,
+              0
+            ],
+            "0.8": [
+              1,
+              0,
+              -1
+            ],
+            "1.6": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    }
+  }
+}

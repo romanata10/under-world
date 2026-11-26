@@ -18,6 +18,14 @@ public final class ModSounds {
     public static final RegistryObject<SoundEvent> THE_SKY_ROAR = register("the_sky_roar");
     public static final RegistryObject<SoundEvent> THE_SKY_STOMP = register("the_sky_stomp");
 
+    public static final RegistryObject<SoundEvent> FRIEND_VANISH = register("friend_vanish");
+    public static final RegistryObject<SoundEvent> FUN_WORLD_WARP = register("fun_world_warp");
+    public static final RegistryObject<SoundEvent> EYES_OF_FUN_SPOT = register("eyes_of_fun_spot");
+    public static final RegistryObject<SoundEvent> EYES_OF_FUN_KILL = register("eyes_of_fun_kill");
+    public static final RegistryObject<SoundEvent> SMILE_ROAR = register("smile_roar");
+    public static final RegistryObject<SoundEvent> SMILE_STEP = register("smile_step");
+    public static final RegistryObject<SoundEvent> MAZE_PORTAL = register("maze_portal");
+
     private ModSounds() {}
 
     private static RegistryObject<SoundEvent> register(String name) {

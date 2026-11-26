@@ -1,0 +1,10 @@
+{
+  "type": "under_world:maze",
+  "generator": {
+    "type": "under_world:maze",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "under_world:maze_corridors"
+    }
+  }
+}

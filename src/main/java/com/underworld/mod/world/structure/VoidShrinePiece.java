@@ -53,15 +53,34 @@ public class VoidShrinePiece extends StructurePiece {
         build(level, level.getRandom(), fullBox, origin);
     }
 
+    public static boolean isPlayerInsideVoidShrine(ServerLevel level, BlockPos playerPos) {
+        // Detect standing directly next to / upon the central crying obsidian + redstone torch ritual altar
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -2; dy <= 1; dy++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    BlockPos p = playerPos.offset(dx, dy, dz);
+                    if (level.getBlockState(p).is(Blocks.BLACK_CONCRETE)
+                            && level.getBlockState(p.above()).is(Blocks.REDSTONE_TORCH)
+                            && level.getBlockState(p.below()).is(Blocks.CRYING_OBSIDIAN)
+                            && level.getBlockState(p.below(2)).is(Blocks.POLISHED_BLACKSTONE_BRICKS)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private static void build(ServerLevelAccessor level, RandomSource random, BoundingBox clipBox, BlockPos origin) {
-        // Foundation and mossy/cracked blackstone ritual platform
         for (int dx = -3; dx <= 3; dx++) {
             for (int dz = -3; dz <= 3; dz++) {
                 if (Math.abs(dx) == 3 && Math.abs(dz) == 3) continue;
                 BlockPos floorPos = origin.offset(dx, 0, dz);
-                BlockState floorState = random.nextFloat() < 0.25F
+                BlockState floorState = (dx == 0 && dz == 0)
+                        ? Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState()
+                        : (random.nextFloat() < 0.25F
                         ? Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS.defaultBlockState()
-                        : Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState();
+                        : Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState());
                 setIfInside(level, clipBox, floorPos, floorState);
                 setIfInside(level, clipBox, floorPos.below(), Blocks.DEEPSLATE_TILES.defaultBlockState());
 
@@ -71,7 +90,6 @@ public class VoidShrinePiece extends StructurePiece {
             }
         }
 
-        // Four jagged obsidian/crying obsidian corner pillars
         int[][] corners = {{-2, -2}, {2, -2}, {-2, 2}, {2, 2}};
         for (int[] c : corners) {
             int height = 3 + random.nextInt(3);
@@ -84,7 +102,7 @@ public class VoidShrinePiece extends StructurePiece {
             setIfInside(level, clipBox, origin.offset(c[0], height + 1, c[1]), Blocks.SOUL_LANTERN.defaultBlockState());
         }
 
-        // Central void altar + chest
+        // Central void altar + ritual core (matches isPlayerInsideVoidShrine!)
         setIfInside(level, clipBox, origin.offset(0, 1, 0), Blocks.CRYING_OBSIDIAN.defaultBlockState());
         setIfInside(level, clipBox, origin.offset(0, 2, 0), Blocks.BLACK_CONCRETE.defaultBlockState());
         setIfInside(level, clipBox, origin.offset(0, 3, 0), Blocks.REDSTONE_TORCH.defaultBlockState());

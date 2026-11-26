@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "under_world:item/fun_flat_blue_flower"
+  }
+}

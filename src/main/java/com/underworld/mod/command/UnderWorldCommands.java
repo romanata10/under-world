@@ -4,12 +4,15 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.underworld.mod.config.UnderWorldConfigHolder;
+import com.underworld.mod.entity.EyesOfFunEntity;
 import com.underworld.mod.entity.FriendEntity;
 import com.underworld.mod.entity.HandsEntity;
+import com.underworld.mod.entity.SmileEntity;
 import com.underworld.mod.entity.TheSkyEntity;
 import com.underworld.mod.entity.TreeMimicEntity;
 import com.underworld.mod.event.UnderWorldEventDirector;
 import com.underworld.mod.network.NetworkHandler;
+import com.underworld.mod.registry.ModDimensions;
 import com.underworld.mod.registry.ModEntities;
 import com.underworld.mod.world.UnderWorldSavedData;
 import com.underworld.mod.world.structure.BrokenShaftPiece;
@@ -47,7 +50,9 @@ public final class UnderWorldCommands {
                 .then(buildSpawnNode("hands", ModEntities.HANDS, true))
                 .then(buildSpawnNode("tree", ModEntities.TREE_MIMIC, false))
                 .then(buildSpawnNode("tree_mimic", ModEntities.TREE_MIMIC, false))
-                .then(buildSpawnNode("the_sky", ModEntities.THE_SKY, false));
+                .then(buildSpawnNode("the_sky", ModEntities.THE_SKY, false))
+                .then(buildSpawnNode("eyes_of_fun", ModEntities.EYES_OF_FUN, false))
+                .then(buildSpawnNode("smile", ModEntities.SMILE, true));
 
         // /underworld trigger <event> [<player>]
         LiteralArgumentBuilder<CommandSourceStack> triggerCmd = Commands.literal("trigger")
@@ -68,7 +73,30 @@ public final class UnderWorldCommands {
                 .then(Commands.literal("the_sky_event")
                         .executes(ctx -> executeTriggerTheSky(ctx.getSource(), ctx.getSource().getPlayerOrException()))
                         .then(Commands.argument("player", EntityArgument.player())
-                                .executes(ctx -> executeTriggerTheSky(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))));
+                                .executes(ctx -> executeTriggerTheSky(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+                .then(Commands.literal("eyes_of_fun")
+                        .executes(ctx -> executeTriggerEyesOfFun(ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeTriggerEyesOfFun(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+                .then(Commands.literal("smile")
+                        .executes(ctx -> executeTriggerSmile(ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeTriggerSmile(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))));
+
+        // /underworld tp <overworld|fun_world|maze> [<player>]
+        LiteralArgumentBuilder<CommandSourceStack> tpCmd = Commands.literal("tp")
+                .then(Commands.literal("overworld")
+                        .executes(ctx -> executeDimensionTp(ctx.getSource(), ctx.getSource().getPlayerOrException(), "overworld"))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeDimensionTp(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"), "overworld"))))
+                .then(Commands.literal("fun_world")
+                        .executes(ctx -> executeDimensionTp(ctx.getSource(), ctx.getSource().getPlayerOrException(), "fun_world"))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeDimensionTp(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"), "fun_world"))))
+                .then(Commands.literal("maze")
+                        .executes(ctx -> executeDimensionTp(ctx.getSource(), ctx.getSource().getPlayerOrException(), "maze"))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeDimensionTp(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"), "maze"))));
 
         // /underworld structure <name> [<player>]
         LiteralArgumentBuilder<CommandSourceStack> structureCmd = Commands.literal("structure")
@@ -97,6 +125,7 @@ public final class UnderWorldCommands {
 
         root.then(spawnCmd)
                 .then(triggerCmd)
+                .then(tpCmd)
                 .then(structureCmd)
                 .then(eventsCmd)
                 .then(resetCmd);
@@ -192,6 +221,40 @@ public final class UnderWorldCommands {
         return 1;
     }
 
+    private static int executeTriggerEyesOfFun(CommandSourceStack source, ServerPlayer target) {
+        EyesOfFunEntity entity = UnderWorldEventDirector.triggerEyesOfFunEncounter(target.serverLevel(), target);
+        if (entity == null) {
+            source.sendFailure(Component.translatable("command.under_world.spawn.failed", target.getName()));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable("command.under_world.trigger.eyes_of_fun", target.getName()), true);
+        return 1;
+    }
+
+    private static int executeTriggerSmile(CommandSourceStack source, ServerPlayer target) {
+        SmileEntity entity = UnderWorldEventDirector.triggerSmileEncounter(target.serverLevel(), target);
+        if (entity == null) {
+            source.sendFailure(Component.translatable("command.under_world.spawn.failed", target.getName()));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable("command.under_world.trigger.smile", target.getName()), true);
+        return 1;
+    }
+
+    private static int executeDimensionTp(CommandSourceStack source, ServerPlayer target, String dim) {
+        boolean ok = switch (dim) {
+            case "fun_world" -> ModDimensions.sendToFunWorld(target);
+            case "maze" -> ModDimensions.sendToMaze(target);
+            default -> ModDimensions.returnToOverworld(target);
+        };
+        if (!ok) {
+            source.sendFailure(Component.translatable("command.under_world.spawn.failed", target.getName()));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable("command.under_world.dimension.sent", target.getName(), dim), true);
+        return 1;
+    }
+
     private static int executeStructure(CommandSourceStack source, ServerPlayer target, boolean voidShrine) throws CommandSyntaxException {
         ServerLevel level = target.serverLevel();
         int minDist = UnderWorldConfigHolder.getSpawnMinDistance();
@@ -227,11 +290,14 @@ public final class UnderWorldCommands {
     private static int executeEventsStatus(CommandSourceStack source) {
         UnderWorldSavedData data = UnderWorldSavedData.get(source.getServer());
         boolean enabled = UnderWorldConfigHolder.isModEnabled() && !data.areEventsPaused();
+        ServerLevel funWorld = source.getServer().getLevel(ModDimensions.THE_FUN_WORLD);
+        int funCount = funWorld != null ? funWorld.players().size() : 0;
         source.sendSuccess(() -> Component.translatable(
                 "command.under_world.events.status",
                 enabled,
                 data.hasFriendJoined(),
-                data.isFriendInTabList()
+                data.isFriendInTabList(),
+                funCount
         ), false);
         return 1;
     }

@@ -63,6 +63,9 @@ public final class UnderWorldConfigHolder {
             c.friendAmbientChatIntervalTicks.set(fzzyConfig.friend.friendAmbientChatIntervalTicks.get());
             c.friendChatResponsesEnabled.set(fzzyConfig.friend.friendChatResponsesEnabled.get());
             c.friendProfanityPunishmentEnabled.set(fzzyConfig.friend.friendProfanityPunishmentEnabled.get());
+            c.friendStalkerEnabled.set(fzzyConfig.friend.friendStalkerEnabled.get());
+            c.friendFunWorldWarpChance.set(fzzyConfig.friend.friendFunWorldWarpChance.get());
+            c.friendDoorInteractionEnabled.set(fzzyConfig.friend.friendDoorInteractionEnabled.get());
 
             c.handsEnabled.set(fzzyConfig.hands.handsEnabled.get());
             c.handsCaveSpawnChance.set(fzzyConfig.hands.handsCaveSpawnChance.get());
@@ -79,6 +82,12 @@ public final class UnderWorldConfigHolder {
             c.theSkySpawnChance.set(fzzyConfig.theSky.theSkySpawnChance.get());
             c.theSkyVanishRange.set(fzzyConfig.theSky.theSkyVanishRange.get());
             c.theSkyStompChance.set(fzzyConfig.theSky.theSkyStompChance.get());
+
+            c.funWorldEnabled.set(fzzyConfig.dimensions.funWorldEnabled.get());
+            c.eyesOfFunEnabled.set(fzzyConfig.dimensions.eyesOfFunEnabled.get());
+            c.eyesOfFunInstantKill.set(fzzyConfig.dimensions.eyesOfFunInstantKill.get());
+            c.mazeEnabled.set(fzzyConfig.dimensions.mazeEnabled.get());
+            c.smileSprintSpeed.set(fzzyConfig.dimensions.smileSprintSpeed.get());
 
             UnderWorldForgeConfig.COMMON_SPEC.save();
         } finally {
@@ -108,6 +117,9 @@ public final class UnderWorldConfigHolder {
             fzzyConfig.friend.friendAmbientChatIntervalTicks.trySet(c.friendAmbientChatIntervalTicks.get());
             fzzyConfig.friend.friendChatResponsesEnabled.trySet(c.friendChatResponsesEnabled.get());
             fzzyConfig.friend.friendProfanityPunishmentEnabled.trySet(c.friendProfanityPunishmentEnabled.get());
+            fzzyConfig.friend.friendStalkerEnabled.trySet(c.friendStalkerEnabled.get());
+            fzzyConfig.friend.friendFunWorldWarpChance.trySet(c.friendFunWorldWarpChance.get());
+            fzzyConfig.friend.friendDoorInteractionEnabled.trySet(c.friendDoorInteractionEnabled.get());
 
             fzzyConfig.hands.handsEnabled.trySet(c.handsEnabled.get());
             fzzyConfig.hands.handsCaveSpawnChance.trySet(c.handsCaveSpawnChance.get());
@@ -124,6 +136,12 @@ public final class UnderWorldConfigHolder {
             fzzyConfig.theSky.theSkySpawnChance.trySet(c.theSkySpawnChance.get());
             fzzyConfig.theSky.theSkyVanishRange.trySet(c.theSkyVanishRange.get());
             fzzyConfig.theSky.theSkyStompChance.trySet(c.theSkyStompChance.get());
+
+            fzzyConfig.dimensions.funWorldEnabled.trySet(c.funWorldEnabled.get());
+            fzzyConfig.dimensions.eyesOfFunEnabled.trySet(c.eyesOfFunEnabled.get());
+            fzzyConfig.dimensions.eyesOfFunInstantKill.trySet(c.eyesOfFunInstantKill.get());
+            fzzyConfig.dimensions.mazeEnabled.trySet(c.mazeEnabled.get());
+            fzzyConfig.dimensions.smileSprintSpeed.trySet(c.smileSprintSpeed.get());
 
             fzzyConfig.save();
         } finally {
