@@ -5,7 +5,6 @@ import com.underworld.mod.registry.ModDimensions;
 import com.underworld.mod.registry.ModSounds;
 import com.underworld.mod.world.structure.VoidShrinePiece;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -13,6 +12,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -227,8 +227,9 @@ public class FriendEntity extends PathfinderMob implements GeoEntity {
         if (!level.getBlockState(pos).isAir() || !level.getBlockState(below).isSolidRender(level, below)) {
             return;
         }
-        Direction dir = Direction.nearest(player.getX() - pos.getX(), 0.0D, player.getZ() - pos.getZ());
-        int rot = ((dir.get2DDataValue() & 3) * 4) % 16;
+        double dx = player.getX() - (pos.getX() + 0.5D);
+        double dz = player.getZ() - (pos.getZ() + 0.5D);
+        int rot = Mth.floor((Math.atan2(-dx, dz) * 180.0D / Math.PI) * 16.0D / 360.0D + 0.5D) & 15;
         BlockState signState = Blocks.OAK_SIGN.defaultBlockState().setValue(StandingSignBlock.ROTATION, rot);
         level.setBlock(pos, signState, 3);
         if (level.getBlockEntity(pos) instanceof SignBlockEntity sign) {
