@@ -25,6 +25,10 @@ public final class ModSounds {
     public static final RegistryObject<SoundEvent> SMILE_ROAR = register("smile_roar");
     public static final RegistryObject<SoundEvent> SMILE_STEP = register("smile_step");
     public static final RegistryObject<SoundEvent> MAZE_PORTAL = register("maze_portal");
+    public static final RegistryObject<SoundEvent> THE_TRUTH_ROAR = register("the_truth_roar");
+    public static final RegistryObject<SoundEvent> THE_TRUTH_EMERGE = register("the_truth_emerge");
+    public static final RegistryObject<SoundEvent> THE_TRUTH_KILL = register("the_truth_kill");
+    public static final RegistryObject<SoundEvent> THE_TRUTH_AMBIENT = register("the_truth_ambient");
 
     private ModSounds() {}
 

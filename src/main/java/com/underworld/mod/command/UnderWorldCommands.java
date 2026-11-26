@@ -9,6 +9,7 @@ import com.underworld.mod.entity.FriendEntity;
 import com.underworld.mod.entity.HandsEntity;
 import com.underworld.mod.entity.SmileEntity;
 import com.underworld.mod.entity.TheSkyEntity;
+import com.underworld.mod.entity.TheTruthEntity;
 import com.underworld.mod.entity.TreeMimicEntity;
 import com.underworld.mod.event.UnderWorldEventDirector;
 import com.underworld.mod.network.NetworkHandler;
@@ -52,7 +53,8 @@ public final class UnderWorldCommands {
                 .then(buildSpawnNode("tree_mimic", ModEntities.TREE_MIMIC, false))
                 .then(buildSpawnNode("the_sky", ModEntities.THE_SKY, false))
                 .then(buildSpawnNode("eyes_of_fun", ModEntities.EYES_OF_FUN, false))
-                .then(buildSpawnNode("smile", ModEntities.SMILE, true));
+                .then(buildSpawnNode("smile", ModEntities.SMILE, true))
+                .then(buildSpawnNode("the_truth", ModEntities.THE_TRUTH, true));
 
         // /underworld trigger <event> [<player>]
         LiteralArgumentBuilder<CommandSourceStack> triggerCmd = Commands.literal("trigger")
@@ -81,7 +83,11 @@ public final class UnderWorldCommands {
                 .then(Commands.literal("smile")
                         .executes(ctx -> executeTriggerSmile(ctx.getSource(), ctx.getSource().getPlayerOrException()))
                         .then(Commands.argument("player", EntityArgument.player())
-                                .executes(ctx -> executeTriggerSmile(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))));
+                                .executes(ctx -> executeTriggerSmile(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+                .then(Commands.literal("the_truth")
+                        .executes(ctx -> executeTriggerTheTruth(ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeTriggerTheTruth(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))));
 
         // /underworld tp <overworld|fun_world|maze> [<player>]
         LiteralArgumentBuilder<CommandSourceStack> tpCmd = Commands.literal("tp")
@@ -160,6 +166,9 @@ public final class UnderWorldCommands {
 
         entity.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, level.getRandom().nextFloat() * 360.0F, 0.0F);
         entity.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.COMMAND, null, null);
+        if (entity instanceof TheTruthEntity truth) {
+            truth.setChasedPlayer(target);
+        }
         level.addFreshEntity(entity);
 
         if (entity instanceof FriendEntity) {
@@ -238,6 +247,16 @@ public final class UnderWorldCommands {
             return 0;
         }
         source.sendSuccess(() -> Component.translatable("command.under_world.trigger.smile", target.getName()), true);
+        return 1;
+    }
+
+    private static int executeTriggerTheTruth(CommandSourceStack source, ServerPlayer target) {
+        TheTruthEntity entity = UnderWorldEventDirector.triggerTheTruthEncounter(target.serverLevel(), target);
+        if (entity == null) {
+            source.sendFailure(Component.translatable("command.under_world.spawn.failed", target.getName()));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable("command.under_world.trigger.the_truth", target.getName()), true);
         return 1;
     }
 

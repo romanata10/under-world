@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
 import com.underworld.mod.UnderWorldMod;
+import com.underworld.mod.client.ClientFunWorldTimeHandler;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.DimensionSpecialEffects;
@@ -32,7 +33,8 @@ public class FunWorldDimensionEffects extends DimensionSpecialEffects {
 
     public static float getNightFactor(ClientLevel level, float partialTick) {
         long time = level.getDayTime() % 24000L;
-        float t = (float) time + partialTick;
+        float speed = (float) ClientFunWorldTimeHandler.getSpeedMultiplier();
+        float t = (float) time + partialTick * speed;
         if (t >= 12000.0F && t < 13500.0F) {
             return (t - 12000.0F) / 1500.0F;
         }
@@ -148,7 +150,8 @@ public class FunWorldDimensionEffects extends DimensionSpecialEffects {
 
         // Giant yellow Sun with one big staring eye watching over The Fun World!
         poseStack.pushPose();
-        float timeOfDay = level.getTimeOfDay(partialTick);
+        float speed = (float) ClientFunWorldTimeHandler.getSpeedMultiplier();
+        float timeOfDay = level.dimensionType().timeOfDay(level.getDayTime()) + (partialTick * speed) / 24000.0F;
         float sunElevation = 36.0F + 14.0F * Mth.sin(timeOfDay * Mth.TWO_PI);
         poseStack.mulPose(Axis.YP.rotationDegrees(-35.0F));
         poseStack.mulPose(Axis.XP.rotationDegrees(-sunElevation));

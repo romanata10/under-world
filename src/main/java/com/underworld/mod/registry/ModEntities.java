@@ -6,6 +6,7 @@ import com.underworld.mod.entity.FriendEntity;
 import com.underworld.mod.entity.HandsEntity;
 import com.underworld.mod.entity.SmileEntity;
 import com.underworld.mod.entity.TheSkyEntity;
+import com.underworld.mod.entity.TheTruthEntity;
 import com.underworld.mod.entity.TreeMimicEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -54,6 +55,13 @@ public final class ModEntities {
                     .clientTrackingRange(18)
                     .build(UnderWorldMod.id("smile").toString()));
 
+    public static final RegistryObject<EntityType<TheTruthEntity>> THE_TRUTH = ENTITIES.register("the_truth",
+            () -> EntityType.Builder.of(TheTruthEntity::new, MobCategory.MONSTER)
+                    .sized(10.0F, 48.0F)
+                    .clientTrackingRange(24)
+                    .updateInterval(1)
+                    .build(UnderWorldMod.id("the_truth").toString()));
+
     private ModEntities() {}
 
     public static void registerAttributes(final EntityAttributeCreationEvent event) {
@@ -63,5 +71,6 @@ public final class ModEntities {
         event.put(THE_SKY.get(), TheSkyEntity.createAttributes().build());
         event.put(EYES_OF_FUN.get(), EyesOfFunEntity.createAttributes().build());
         event.put(SMILE.get(), SmileEntity.createAttributes().build());
+        event.put(THE_TRUTH.get(), TheTruthEntity.createAttributes().build());
     }
 }

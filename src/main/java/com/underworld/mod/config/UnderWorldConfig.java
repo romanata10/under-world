@@ -20,6 +20,7 @@ public class UnderWorldConfig extends Config {
     public HandsSection hands = new HandsSection();
     public TreeMimicSection treeMimic = new TreeMimicSection();
     public TheSkySection theSky = new TheSkySection();
+    public TheTruthSection theTruth = new TheTruthSection();
     public DimensionsSection dimensions = new DimensionsSection();
 
     public UnderWorldConfig() {
@@ -44,6 +45,9 @@ public class UnderWorldConfig extends Config {
 
         @Comment("Enable verbose diagnostic logging for event scheduling.")
         public ValidatedBoolean debugLogging = new ValidatedBoolean(false);
+
+        @Comment("Removes any Under World entity that kills a player (and nearby aggro entities) so it cannot spawn-kill on respawn.")
+        public ValidatedBoolean antiSpawnKillEnabled = new ValidatedBoolean(true);
     }
 
     public static class FriendSection extends ConfigSection {
@@ -126,9 +130,35 @@ public class UnderWorldConfig extends Config {
         public ValidatedDouble theSkyStompChance = new ValidatedDouble(0.25D, 1.0D, 0.0D);
     }
 
+    public static class TheTruthSection extends ConfigSection {
+        @Comment("Enables the super-mega-rare emergence event of The Truth.")
+        public ValidatedBoolean theTruthEnabled = new ValidatedBoolean(true);
+
+        @Comment("Super-mega-rare chance per surface/overworld check for The Truth to emerge ahead of a player.")
+        public ValidatedDouble theTruthSpawnChance = new ValidatedDouble(0.0025D, 1.0D, 0.0D);
+
+        @Comment("Duration of The Truth pursuit in ticks before the event safely clears (600 = 30 seconds).")
+        public ValidatedInt theTruthChaseDurationTicks = new ValidatedInt(600, 2400, 100);
+
+        @Comment("Relentless chase movement speed of The Truth.")
+        public ValidatedDouble theTruthChaseSpeed = new ValidatedDouble(0.255D, 0.55D, 0.10D);
+
+        @Comment("Allows The Truth to break any destructible blocks in its 30x50 path while chasing.")
+        public ValidatedBoolean theTruthBreakBlocks = new ValidatedBoolean(true);
+
+        @Comment("Kicks the victim from the world/server if The Truth catches them before the timer ends.")
+        public ValidatedBoolean theTruthKickOnKill = new ValidatedBoolean(true);
+
+        @Comment("Spawns a 100-block tall cobblestone pillar beneath the victim when they rejoin after being caught.")
+        public ValidatedBoolean theTruthSpawnPillarOnRejoin = new ValidatedBoolean(true);
+    }
+
     public static class DimensionsSection extends ConfigSection {
         @Comment("Enables warping players to The Fun World via Void Shrines or friend encounters.")
         public ValidatedBoolean funWorldEnabled = new ValidatedBoolean(true);
+
+        @Comment("Day/night cycle speed multiplier inside The Fun World (4 = 4x faster than Overworld).")
+        public ValidatedInt funWorldTimeSpeedMultiplier = new ValidatedInt(4, 12, 1);
 
         @Comment("Allows Eyes of Fun to manifest during nightfall inside The Fun World.")
         public ValidatedBoolean eyesOfFunEnabled = new ValidatedBoolean(true);

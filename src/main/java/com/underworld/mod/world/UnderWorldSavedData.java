@@ -2,6 +2,9 @@ package com.underworld.mod.world;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -9,7 +12,9 @@ import net.minecraft.world.level.saveddata.SavedData;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class UnderWorldSavedData extends SavedData {
@@ -23,7 +28,10 @@ public class UnderWorldSavedData extends SavedData {
     private int eventCooldownTicks = 600;
     private int ambientChatTimerTicks = 1200;
     private int friendStalkCooldownTicks = 900;
+    private int truthCooldownTicks = 12000;
+    private long funWorldDayTime = 1000L;
     private final Map<UUID, BlockPos> returnPositions = new HashMap<>();
+    private final Set<UUID> pendingTruthPillars = new HashSet<>();
 
     public UnderWorldSavedData() {}
 
@@ -54,6 +62,8 @@ public class UnderWorldSavedData extends SavedData {
         data.eventCooldownTicks = tag.contains("EventCooldownTicks") ? tag.getInt("EventCooldownTicks") : 600;
         data.ambientChatTimerTicks = tag.contains("AmbientChatTimerTicks") ? tag.getInt("AmbientChatTimerTicks") : 1200;
         data.friendStalkCooldownTicks = tag.contains("FriendStalkCooldownTicks") ? tag.getInt("FriendStalkCooldownTicks") : 900;
+        data.truthCooldownTicks = tag.contains("TruthCooldownTicks") ? tag.getInt("TruthCooldownTicks") : 12000;
+        data.funWorldDayTime = tag.contains("FunWorldDayTime") ? tag.getLong("FunWorldDayTime") : 1000L;
 
         if (tag.contains("ReturnPositions", 10)) {
             CompoundTag returns = tag.getCompound("ReturnPositions");
@@ -62,6 +72,15 @@ public class UnderWorldSavedData extends SavedData {
                     UUID uuid = UUID.fromString(key);
                     CompoundTag posTag = returns.getCompound(key);
                     data.returnPositions.put(uuid, new BlockPos(posTag.getInt("x"), posTag.getInt("y"), posTag.getInt("z")));
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+        }
+        if (tag.contains("PendingTruthPillars", Tag.TAG_LIST)) {
+            ListTag list = tag.getList("PendingTruthPillars", Tag.TAG_STRING);
+            for (int i = 0; i < list.size(); i++) {
+                try {
+                    data.pendingTruthPillars.add(UUID.fromString(list.getString(i)));
                 } catch (IllegalArgumentException ignored) {
                 }
             }
@@ -80,6 +99,8 @@ public class UnderWorldSavedData extends SavedData {
         tag.putInt("EventCooldownTicks", this.eventCooldownTicks);
         tag.putInt("AmbientChatTimerTicks", this.ambientChatTimerTicks);
         tag.putInt("FriendStalkCooldownTicks", this.friendStalkCooldownTicks);
+        tag.putInt("TruthCooldownTicks", this.truthCooldownTicks);
+        tag.putLong("FunWorldDayTime", this.funWorldDayTime);
 
         CompoundTag returns = new CompoundTag();
         for (Map.Entry<UUID, BlockPos> entry : this.returnPositions.entrySet()) {
@@ -90,6 +111,12 @@ public class UnderWorldSavedData extends SavedData {
             returns.put(entry.getKey().toString(), posTag);
         }
         tag.put("ReturnPositions", returns);
+
+        ListTag pendingPillars = new ListTag();
+        for (UUID uuid : this.pendingTruthPillars) {
+            pendingPillars.add(StringTag.valueOf(uuid.toString()));
+        }
+        tag.put("PendingTruthPillars", pendingPillars);
         return tag;
     }
 
@@ -155,6 +182,41 @@ public class UnderWorldSavedData extends SavedData {
     public void setFriendStalkCooldownTicks(int ticks) {
         this.friendStalkCooldownTicks = Math.max(0, ticks);
         setDirty();
+    }
+
+    public int getTruthCooldownTicks() {
+        return this.truthCooldownTicks;
+    }
+
+    public void setTruthCooldownTicks(int ticks) {
+        this.truthCooldownTicks = Math.max(0, ticks);
+        setDirty();
+    }
+
+    public long getFunWorldDayTime() {
+        return this.funWorldDayTime;
+    }
+
+    public void setFunWorldDayTime(long funWorldDayTime) {
+        this.funWorldDayTime = Math.max(0L, funWorldDayTime);
+        setDirty();
+    }
+
+    public void markTruthPillarPending(UUID playerId) {
+        this.pendingTruthPillars.add(playerId);
+        setDirty();
+    }
+
+    public boolean hasPendingTruthPillar(UUID playerId) {
+        return this.pendingTruthPillars.contains(playerId);
+    }
+
+    public boolean consumePendingTruthPillar(UUID playerId) {
+        boolean removed = this.pendingTruthPillars.remove(playerId);
+        if (removed) {
+            setDirty();
+        }
+        return removed;
     }
 
     public void saveReturnPos(UUID playerId, BlockPos pos) {

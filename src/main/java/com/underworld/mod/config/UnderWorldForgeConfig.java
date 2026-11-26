@@ -27,6 +27,7 @@ public final class UnderWorldForgeConfig {
         public final ForgeConfigSpec.IntValue spawnMinDistance;
         public final ForgeConfigSpec.IntValue spawnMaxDistance;
         public final ForgeConfigSpec.BooleanValue debugLogging;
+        public final ForgeConfigSpec.BooleanValue antiSpawnKillEnabled;
 
         public final ForgeConfigSpec.BooleanValue friendEnabled;
         public final ForgeConfigSpec.IntValue friendEveningTime;
@@ -56,7 +57,16 @@ public final class UnderWorldForgeConfig {
         public final ForgeConfigSpec.DoubleValue theSkyVanishRange;
         public final ForgeConfigSpec.DoubleValue theSkyStompChance;
 
+        public final ForgeConfigSpec.BooleanValue theTruthEnabled;
+        public final ForgeConfigSpec.DoubleValue theTruthSpawnChance;
+        public final ForgeConfigSpec.IntValue theTruthChaseDurationTicks;
+        public final ForgeConfigSpec.DoubleValue theTruthChaseSpeed;
+        public final ForgeConfigSpec.BooleanValue theTruthBreakBlocks;
+        public final ForgeConfigSpec.BooleanValue theTruthKickOnKill;
+        public final ForgeConfigSpec.BooleanValue theTruthSpawnPillarOnRejoin;
+
         public final ForgeConfigSpec.BooleanValue funWorldEnabled;
+        public final ForgeConfigSpec.IntValue funWorldTimeSpeedMultiplier;
         public final ForgeConfigSpec.BooleanValue eyesOfFunEnabled;
         public final ForgeConfigSpec.BooleanValue eyesOfFunInstantKill;
         public final ForgeConfigSpec.BooleanValue mazeEnabled;
@@ -80,6 +90,10 @@ public final class UnderWorldForgeConfig {
                     .comment("Logs detailed event scheduling and entity state transitions.")
                     .translation("under_world.config.debugLogging")
                     .define("debugLogging", false);
+            this.antiSpawnKillEnabled = builder
+                    .comment("Removes Under World entities that kill a player so they cannot spawn-kill on respawn.")
+                    .translation("under_world.config.antiSpawnKillEnabled")
+                    .define("antiSpawnKillEnabled", true);
             builder.pop();
 
             builder.push("friend");
@@ -190,10 +204,44 @@ public final class UnderWorldForgeConfig {
                     .defineInRange("theSkyStompChance", 0.25D, 0.0D, 1.0D);
             builder.pop();
 
+            builder.push("the_truth");
+            this.theTruthEnabled = builder
+                    .comment("Enables the super-mega-rare emergence event of The Truth.")
+                    .translation("under_world.config.theTruthEnabled")
+                    .define("theTruthEnabled", true);
+            this.theTruthSpawnChance = builder
+                    .comment("Super-mega-rare chance per check for The Truth to emerge ahead of a player.")
+                    .translation("under_world.config.theTruthSpawnChance")
+                    .defineInRange("theTruthSpawnChance", 0.0025D, 0.0D, 1.0D);
+            this.theTruthChaseDurationTicks = builder
+                    .comment("Duration of The Truth pursuit in ticks before safely clearing (600 = 30 seconds).")
+                    .translation("under_world.config.theTruthChaseDurationTicks")
+                    .defineInRange("theTruthChaseDurationTicks", 600, 100, 2400);
+            this.theTruthChaseSpeed = builder
+                    .comment("Chase movement speed of The Truth.")
+                    .translation("under_world.config.theTruthChaseSpeed")
+                    .defineInRange("theTruthChaseSpeed", 0.255D, 0.10D, 0.55D);
+            this.theTruthBreakBlocks = builder
+                    .comment("Allows The Truth to break any destructible blocks in its 30x50 path.")
+                    .translation("under_world.config.theTruthBreakBlocks")
+                    .define("theTruthBreakBlocks", true);
+            this.theTruthKickOnKill = builder
+                    .comment("Kicks the victim from the world/server if The Truth catches them before the timer ends.")
+                    .translation("under_world.config.theTruthKickOnKill")
+                    .define("theTruthKickOnKill", true);
+            this.theTruthSpawnPillarOnRejoin = builder
+                    .comment("Spawns a 100-block tall cobblestone pillar at the victim's spot upon rejoin.")
+                    .translation("under_world.config.theTruthSpawnPillarOnRejoin")
+                    .define("theTruthSpawnPillarOnRejoin", true);
+            builder.pop();
+
             builder.push("dimensions");
             this.funWorldEnabled = builder
                     .comment("Allows warping players into The Fun World.")
                     .define("funWorldEnabled", true);
+            this.funWorldTimeSpeedMultiplier = builder
+                    .comment("Day/night speed multiplier in The Fun World (4 = 4x faster than Overworld).")
+                    .defineInRange("funWorldTimeSpeedMultiplier", 4, 1, 12);
             this.eyesOfFunEnabled = builder
                     .comment("Spawns Eyes of Fun during nightfall in The Fun World.")
                     .define("eyesOfFunEnabled", true);

@@ -7,41 +7,55 @@ import com.underworld.mod.entity.FriendEntity;
 import com.underworld.mod.entity.HandsEntity;
 import com.underworld.mod.entity.SmileEntity;
 import com.underworld.mod.entity.TheSkyEntity;
+import com.underworld.mod.entity.TheTruthEntity;
 import com.underworld.mod.entity.TreeMimicEntity;
 import com.underworld.mod.network.NetworkHandler;
 import com.underworld.mod.registry.ModDimensions;
 import com.underworld.mod.registry.ModEntities;
 import com.underworld.mod.registry.ModSounds;
+import com.underworld.mod.world.FunWorldTimeManager;
 import com.underworld.mod.world.UnderWorldSavedData;
 import com.underworld.mod.world.dimension.MazeChunkGenerator;
 import com.underworld.mod.world.structure.VoidShrinePiece;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BiomeTags;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class UnderWorldEventDirector {
     private static final String[] AMBIENT_FRIEND_MESSAGES = {
@@ -55,6 +69,7 @@ public final class UnderWorldEventDirector {
 
     private static final List<ScheduledAction> SCHEDULED_ACTIONS = new ArrayList<>();
     private static final List<PendingKick> PENDING_KICKS = new ArrayList<>();
+    private static final Map<UUID, Long> SPAWN_PROTECTION_UNTIL_TICK = new ConcurrentHashMap<>();
 
     private UnderWorldEventDirector() {}
 
@@ -93,6 +108,23 @@ public final class UnderWorldEventDirector {
     }
 
     @SubscribeEvent
+    public static void onServerStarting(final ServerStartingEvent event) {
+        FunWorldTimeManager.bindServer(event.getServer());
+    }
+
+    @SubscribeEvent
+    public static void onServerStopped(final ServerStoppedEvent event) {
+        FunWorldTimeManager.unbindServer();
+        synchronized (SCHEDULED_ACTIONS) {
+            SCHEDULED_ACTIONS.clear();
+        }
+        synchronized (PENDING_KICKS) {
+            PENDING_KICKS.clear();
+        }
+        SPAWN_PROTECTION_UNTIL_TICK.clear();
+    }
+
+    @SubscribeEvent
     public static void onPlayerLoggedIn(final PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
@@ -104,6 +136,105 @@ public final class UnderWorldEventDirector {
         UnderWorldSavedData data = UnderWorldSavedData.get(server);
         if (data.isFriendInTabList()) {
             NetworkHandler.syncFriendTabToPlayer(player, true, UnderWorldConfigHolder.getFriendDisplayName());
+        }
+        if (ModDimensions.isFunWorld(player.level())) {
+            FunWorldTimeManager.syncToPlayer(player);
+        }
+        syncTruthHudForPlayerDimension(player);
+
+        if (player.isAlive() && data.hasPendingTruthPillar(player.getUUID())) {
+            UUID id = player.getUUID();
+            schedule(2, () -> trySpawnTruthPillarForPlayer(server, id));
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerChangedDimension(final PlayerEvent.PlayerChangedDimensionEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
+            return;
+        }
+        if (event.getTo().equals(ModDimensions.THE_FUN_WORLD)) {
+            FunWorldTimeManager.syncToPlayer(player);
+        }
+        syncTruthHudForPlayerDimension(player);
+    }
+
+    @SubscribeEvent
+    public static void onPlayerRespawn(final PlayerEvent.PlayerRespawnEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
+            return;
+        }
+        grantSpawnProtection(player, 300);
+        if (UnderWorldConfigHolder.get() == null || UnderWorldConfigHolder.get().general.antiSpawnKillEnabled.get()) {
+            discardNearbyHostileUnderWorld(player.serverLevel(), player, 24.0D);
+        }
+        if (ModDimensions.isFunWorld(player.level())) {
+            FunWorldTimeManager.syncToPlayer(player);
+        }
+        syncTruthHudForPlayerDimension(player);
+
+        MinecraftServer server = player.getServer();
+        if (server != null && UnderWorldSavedData.get(server).hasPendingTruthPillar(player.getUUID())) {
+            UUID id = player.getUUID();
+            schedule(2, () -> trySpawnTruthPillarForPlayer(server, id));
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLivingDeath(final LivingDeathEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player) || event.isCanceled()) {
+            return;
+        }
+        if (UnderWorldConfigHolder.get() != null && !UnderWorldConfigHolder.get().general.antiSpawnKillEnabled.get()) {
+            return;
+        }
+
+        ServerLevel level = player.serverLevel();
+        Entity sourceEntity = event.getSource().getEntity();
+        Entity directEntity = event.getSource().getDirectEntity();
+        LivingEntity lastHurtMob = player.getLastHurtByMob();
+
+        boolean killedByUnderWorld = isUnderWorldEntity(sourceEntity)
+                || isUnderWorldEntity(directEntity)
+                || isUnderWorldEntity(lastHurtMob);
+
+        List<Entity> toRemove = new ArrayList<>();
+        if (isUnderWorldEntity(sourceEntity)) toRemove.add(sourceEntity);
+        if (isUnderWorldEntity(directEntity) && !toRemove.contains(directEntity)) toRemove.add(directEntity);
+        if (isUnderWorldEntity(lastHurtMob) && !toRemove.contains(lastHurtMob)) toRemove.add(lastHurtMob);
+
+        AABB radiusBox = AABB.ofSize(player.position(), 64.0D, 48.0D, 64.0D);
+        for (Entity nearby : level.getEntities(player, radiusBox, UnderWorldEventDirector::isUnderWorldEntity)) {
+            if (shouldVanishOnPlayerDeath(nearby, player, killedByUnderWorld) && !toRemove.contains(nearby)) {
+                toRemove.add(nearby);
+            }
+        }
+
+        if (toRemove.isEmpty() && !killedByUnderWorld) {
+            return;
+        }
+
+        for (Entity entity : toRemove) {
+            if (entity.isAlive()) {
+                level.sendParticles(
+                        ParticleTypes.LARGE_SMOKE,
+                        entity.getX(),
+                        entity.getY() + Math.min(2.0D, entity.getBbHeight() * 0.5D),
+                        entity.getZ(),
+                        14, 0.6D, 0.8D, 0.6D, 0.04D
+                );
+                if (entity instanceof TheTruthEntity) {
+                    NetworkHandler.syncTruthHudToDimension(level, false, 0, 600);
+                }
+                entity.discard();
+            }
+        }
+
+        grantSpawnProtection(player, 300);
+        MinecraftServer server = player.getServer();
+        if (server != null) {
+            UnderWorldSavedData data = UnderWorldSavedData.get(server);
+            data.setEventCooldownTicks(Math.max(data.getEventCooldownTicks(), 400));
         }
     }
 
@@ -119,6 +250,9 @@ public final class UnderWorldEventDirector {
         if (server.getPlayerList().getPlayerCount() == 0) {
             return;
         }
+
+        // Advance accelerated Fun World day/night clock independently of the Overworld
+        FunWorldTimeManager.tickServer(server);
 
         ServerLevel overworld = server.getLevel(Level.OVERWORLD);
         if (overworld == null) {
@@ -184,6 +318,10 @@ public final class UnderWorldEventDirector {
         }
 
         // 3. Rare automatic encounters checked every 5 seconds (100 ticks)
+        if (data.getTruthCooldownTicks() > 0) {
+            data.setTruthCooldownTicks(data.getTruthCooldownTicks() - 1);
+        }
+
         int cooldown = data.getEventCooldownTicks();
         if (cooldown > 0) {
             data.setEventCooldownTicks(cooldown - 1);
@@ -195,7 +333,7 @@ public final class UnderWorldEventDirector {
         }
 
         ServerPlayer target = pickSurvivalPlayer(overworld);
-        if (target == null) {
+        if (target == null || isSpawnProtected(target)) {
             return;
         }
 
@@ -206,6 +344,20 @@ public final class UnderWorldEventDirector {
         RandomSource random = overworld.getRandom();
         BlockPos playerPos = target.blockPosition();
         boolean seeSky = overworld.canSeeSky(playerPos);
+
+        // Super-mega-rare automatic event: The Truth
+        if (data.getTruthCooldownTicks() <= 0
+                && !hasActiveTruth(server)
+                && UnderWorldConfigHolder.get().theTruth.theTruthEnabled.get()) {
+            double truthChance = UnderWorldConfigHolder.get().theTruth.theTruthSpawnChance.get() * 0.12D;
+            if (random.nextDouble() < truthChance) {
+                if (triggerTheTruthEncounter(overworld, target) != null) {
+                    data.setTruthCooldownTicks(36000 + random.nextInt(36000));
+                    data.setEventCooldownTicks(6000 + random.nextInt(6000));
+                    return;
+                }
+            }
+        }
 
         // Cave encounter: Hands
         if (!seeSky && target.getY() < 48.0D
@@ -271,7 +423,7 @@ public final class UnderWorldEventDirector {
         }
 
         for (ServerPlayer player : funLevel.players()) {
-            if (player.isCreative() || player.isSpectator() || !player.isAlive()) {
+            if (player.isCreative() || player.isSpectator() || !player.isAlive() || isSpawnProtected(player)) {
                 continue;
             }
             AABB nearby = AABB.ofSize(player.position(), 72.0D, 48.0D, 72.0D);
@@ -292,7 +444,7 @@ public final class UnderWorldEventDirector {
         }
 
         for (ServerPlayer player : mazeLevel.players()) {
-            if (player.isCreative() || player.isSpectator() || !player.isAlive()) {
+            if (player.isCreative() || player.isSpectator() || !player.isAlive() || isSpawnProtected(player)) {
                 continue;
             }
             AABB nearby = AABB.ofSize(player.position(), 96.0D, 32.0D, 96.0D);
@@ -502,6 +654,158 @@ public final class UnderWorldEventDirector {
     }
 
     @Nullable
+    public static TheTruthEntity triggerTheTruthEncounter(ServerLevel level, ServerPlayer player) {
+        BlockPos spawnPos = findAheadSpawnPos(level, player);
+        if (spawnPos == null) {
+            return null;
+        }
+        TheTruthEntity truth = ModEntities.THE_TRUTH.get().create(level);
+        if (truth == null) {
+            return null;
+        }
+        double dx = player.getX() - (spawnPos.getX() + 0.5D);
+        double dz = player.getZ() - (spawnPos.getZ() + 0.5D);
+        float yaw = (float) (Mth.atan2(dz, dx) * (180.0D / Math.PI)) - 90.0F;
+        truth.moveTo(spawnPos.getX() + 0.5D, spawnPos.getY(), spawnPos.getZ() + 0.5D, yaw, 0.0F);
+        truth.finalizeSpawn(level, level.getCurrentDifficultyAt(spawnPos), MobSpawnType.EVENT, null, null);
+        truth.setChasedPlayer(player);
+        level.addFreshEntity(truth);
+        return truth;
+    }
+
+    @Nullable
+    private static BlockPos findAheadSpawnPos(ServerLevel level, ServerPlayer player) {
+        double baseYaw = Math.toRadians(player.getYRot());
+        double[] angleOffsets = {0.0D, 0.25D, -0.25D, 0.55D, -0.55D, Math.PI};
+        int[] distances = {30, 25, 36, 20};
+        boolean surfaceMode = level.canSeeSky(player.blockPosition());
+
+        for (int dist : distances) {
+            for (double offset : angleOffsets) {
+                double ang = baseYaw + offset;
+                double fwdX = -Math.sin(ang);
+                double fwdZ = Math.cos(ang);
+                int tx = Mth.floor(player.getX() + fwdX * dist);
+                int tz = Mth.floor(player.getZ() + fwdZ * dist);
+
+                int y;
+                if (surfaceMode) {
+                    y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, tx, tz);
+                    if (y <= level.getMinBuildHeight() + 2 || y >= level.getMaxBuildHeight() - 52) {
+                        y = Mth.clamp(player.blockPosition().getY(), level.getMinBuildHeight() + 2, level.getMaxBuildHeight() - 52);
+                    }
+                } else {
+                    y = Mth.clamp(player.blockPosition().getY(), level.getMinBuildHeight() + 2, level.getMaxBuildHeight() - 52);
+                }
+                return new BlockPos(tx, y, tz);
+            }
+        }
+        return null;
+    }
+
+    private static void syncTruthHudForPlayerDimension(ServerPlayer player) {
+        ServerLevel level = player.serverLevel();
+        List<? extends TheTruthEntity> active = level.getEntities(
+                ModEntities.THE_TRUTH.get(),
+                e -> e.isAlive() && e.getTruthState() != TheTruthEntity.STATE_VANISH
+        );
+        if (!active.isEmpty()) {
+            TheTruthEntity truth = active.get(0);
+            NetworkHandler.syncTruthHudToPlayer(player, true, truth.getRemainingTicks(), truth.getTotalTicks());
+        } else {
+            NetworkHandler.syncTruthHudToPlayer(player, false, 0, 600);
+        }
+    }
+
+    private static void trySpawnTruthPillarForPlayer(MinecraftServer server, UUID playerUuid) {
+        ServerPlayer player = server.getPlayerList().getPlayer(playerUuid);
+        if (player == null || !player.isAlive()) {
+            return;
+        }
+        UnderWorldSavedData data = UnderWorldSavedData.get(server);
+        if (!data.consumePendingTruthPillar(playerUuid)) {
+            return;
+        }
+        ServerLevel level = player.serverLevel();
+        BlockPos origin = player.blockPosition();
+        int minBase = level.getMinBuildHeight() + 2;
+        int maxBase = level.getMaxBuildHeight() - 103;
+        int baseY = Mth.clamp(origin.getY(), minBase, maxBase);
+
+        for (int dy = 0; dy < 100; dy++) {
+            BlockPos p = new BlockPos(origin.getX(), baseY + dy, origin.getZ());
+            level.setBlock(p, Blocks.COBBLESTONE.defaultBlockState(), 3);
+        }
+        BlockPos standPos = new BlockPos(origin.getX(), baseY + 100, origin.getZ());
+        level.setBlock(standPos, Blocks.AIR.defaultBlockState(), 3);
+        level.setBlock(standPos.above(), Blocks.AIR.defaultBlockState(), 3);
+
+        player.fallDistance = 0.0F;
+        player.teleportTo(level, standPos.getX() + 0.5D, standPos.getY(), standPos.getZ() + 0.5D,
+                player.getYRot(), player.getXRot());
+        level.playSound(null, standPos, SoundEvents.STONE_PLACE, SoundSource.BLOCKS, 2.0F, 0.7F);
+    }
+
+    private static void grantSpawnProtection(ServerPlayer player, int ticks) {
+        long until = player.serverLevel().getGameTime() + ticks;
+        SPAWN_PROTECTION_UNTIL_TICK.put(player.getUUID(), until);
+    }
+
+    private static boolean isSpawnProtected(ServerPlayer player) {
+        Long until = SPAWN_PROTECTION_UNTIL_TICK.get(player.getUUID());
+        return until != null && player.serverLevel().getGameTime() < until;
+    }
+
+    private static boolean isUnderWorldEntity(@Nullable Entity entity) {
+        if (entity == null) {
+            return false;
+        }
+        ResourceLocation key = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
+        return key != null && UnderWorldMod.MOD_ID.equals(key.getNamespace());
+    }
+
+    private static boolean shouldVanishOnPlayerDeath(Entity entity, ServerPlayer victim, boolean killedByUnderWorld) {
+        if (entity instanceof Mob mob && victim.equals(mob.getTarget())) {
+            return true;
+        }
+        if (entity instanceof FriendEntity) {
+            return false;
+        }
+        if (!killedByUnderWorld) {
+            return false;
+        }
+        if (entity instanceof TreeMimicEntity tree) {
+            return tree.isAwakened() && entity.distanceToSqr(victim) <= 32.0D * 32.0D;
+        }
+        return entity.distanceToSqr(victim) <= 32.0D * 32.0D;
+    }
+
+    private static void discardNearbyHostileUnderWorld(ServerLevel level, ServerPlayer player, double radius) {
+        AABB box = AABB.ofSize(player.position(), radius * 2.0D, 32.0D, radius * 2.0D);
+        for (Entity nearby : level.getEntities(player, box, UnderWorldEventDirector::isUnderWorldEntity)) {
+            if (nearby instanceof FriendEntity) {
+                continue;
+            }
+            if (nearby instanceof TreeMimicEntity tree && !tree.isAwakened()) {
+                continue;
+            }
+            if (nearby instanceof TheTruthEntity) {
+                NetworkHandler.syncTruthHudToDimension(level, false, 0, 600);
+            }
+            nearby.discard();
+        }
+    }
+
+    private static boolean hasActiveTruth(MinecraftServer server) {
+        for (ServerLevel lvl : server.getAllLevels()) {
+            if (!lvl.getEntities(ModEntities.THE_TRUTH.get(), Entity::isAlive).isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Nullable
     private static BlockPos findMazeCorridorSpotAround(ServerLevel level, ServerPlayer player, int minDist, int maxDist) {
         RandomSource random = level.getRandom();
         for (int attempt = 0; attempt < 40; attempt++) {
@@ -598,7 +902,8 @@ public final class UnderWorldEventDirector {
         AABB box = AABB.ofSize(center, radius * 2.0D, radius * 2.0D, radius * 2.0D);
         return !level.getEntitiesOfClass(HandsEntity.class, box).isEmpty()
                 || !level.getEntitiesOfClass(TreeMimicEntity.class, box).isEmpty()
-                || !level.getEntitiesOfClass(TheSkyEntity.class, box).isEmpty();
+                || !level.getEntitiesOfClass(TheSkyEntity.class, box).isEmpty()
+                || !level.getEntitiesOfClass(TheTruthEntity.class, box).isEmpty();
     }
 
     @Nullable
