@@ -36,7 +36,30 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build mod JAR
-        run: ./gradlew build --no-daemon --stacktrace
+        run: |
+          set -o pipefail
+          ./gradlew build --no-daemon --stacktrace --console=plain 2>&1 | tee build.log
+
+      - name: Report build failure log
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os, subprocess, json
+          log = open('build.log', 'r', encoding='utf-8', errors='replace').read()
+          tail = '\n'.join(log.splitlines()[-220:])
+          if len(tail) > 55000:
+              tail = tail[-55000:]
+          body = f"Build failed on `{os.environ['GITHUB_SHA']}`:\n\n```text\n{tail}\n```"
+          with open('err.json', 'w') as f:
+              json.dump({'body': body}, f)
+          subprocess.run([
+              'gh', 'api',
+              f"repos/{os.environ['GITHUB_REPOSITORY']}/commits/{os.environ['GITHUB_SHA']}/comments",
+              '--input', 'err.json'
+          ], check=True)
+          PY
 
       - name: Verify built JAR
         run: |
