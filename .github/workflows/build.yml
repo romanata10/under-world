@@ -38,7 +38,7 @@ jobs:
       - name: Build mod JAR
         run: |
           set -o pipefail
-          ./gradlew build --no-daemon --stacktrace --console=plain 2>&1 | tee build.log
+          ./gradlew build --no-daemon --console=plain 2>&1 | tee build.log
 
       - name: Report build failure log
         if: failure()
@@ -47,8 +47,9 @@ jobs:
         run: |
           python3 - <<'PY'
           import os, subprocess, json
-          log = open('build.log', 'r', encoding='utf-8', errors='replace').read()
-          tail = '\n'.join(log.splitlines()[-220:])
+          lines = open('build.log', 'r', encoding='utf-8', errors='replace').read().splitlines()
+          filtered = [l for l in lines if not l.lstrip().startswith('at ')]
+          tail = '\n'.join(filtered[-200:])
           if len(tail) > 55000:
               tail = tail[-55000:]
           body = f"Build failed on `{os.environ['GITHUB_SHA']}`:\n\n```text\n{tail}\n```"
