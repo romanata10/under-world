@@ -705,7 +705,7 @@ public final class UnderWorldEventDirector {
 
     private static void syncTruthHudForPlayerDimension(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
-        List<TheTruthEntity> active = level.getEntities(
+        List<? extends TheTruthEntity> active = level.getEntities(
                 ModEntities.THE_TRUTH.get(),
                 e -> e.isAlive() && e.getTruthState() != TheTruthEntity.STATE_VANISH
         );

@@ -229,7 +229,7 @@ public class TheTruthEntity extends Monster implements GeoEntity {
     @Override
     public void remove(RemovalReason reason) {
         if (!this.level().isClientSide && this.level() instanceof ServerLevel serverLevel) {
-            List<TheTruthEntity> others = serverLevel.getEntities(
+            List<? extends TheTruthEntity> others = serverLevel.getEntities(
                     com.underworld.mod.registry.ModEntities.THE_TRUTH.get(),
                     e -> e != this && e.isAlive() && e.getTruthState() != STATE_VANISH
             );
