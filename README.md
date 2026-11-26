@@ -1,4 +1,4 @@
-# Under World (`under_world`) — v2.1.0
+# Under World (`under_world`) — v2.1.1
 
 A Minecraft **1.20.1 Forge** psychological & Dreamcore horror mod inspired by *The Broken Script*, built with **GeckoLib 4**, **Fzzy Config**, **Configured**, and full multiplayer server/client synchronization.
 

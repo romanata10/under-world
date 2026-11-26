@@ -10,12 +10,48 @@ import net.minecraft.world.level.GameRules;
 
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public final class FunWorldTimeManager {
     private static volatile long serverFunWorldDayTime = 1000L;
     private static volatile WeakReference<MinecraftServer> activeServer = new WeakReference<>(null);
+    private static final List<WeakReference<Object>> FUN_WORLD_LEVEL_DATA = new ArrayList<>();
 
     private FunWorldTimeManager() {}
+
+    public static void registerFunWorldData(@Nullable Object levelData) {
+        if (levelData == null) {
+            return;
+        }
+        synchronized (FUN_WORLD_LEVEL_DATA) {
+            Iterator<WeakReference<Object>> it = FUN_WORLD_LEVEL_DATA.iterator();
+            while (it.hasNext()) {
+                Object existing = it.next().get();
+                if (existing == null) {
+                    it.remove();
+                } else if (existing == levelData) {
+                    return;
+                }
+            }
+            FUN_WORLD_LEVEL_DATA.add(new WeakReference<>(levelData));
+        }
+    }
+
+    public static boolean isFunWorldData(@Nullable Object levelData) {
+        if (levelData == null) {
+            return false;
+        }
+        synchronized (FUN_WORLD_LEVEL_DATA) {
+            for (int i = 0, n = FUN_WORLD_LEVEL_DATA.size(); i < n; i++) {
+                if (FUN_WORLD_LEVEL_DATA.get(i).get() == levelData) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     public static void bindServer(MinecraftServer server) {
         activeServer = new WeakReference<>(server);
@@ -26,6 +62,9 @@ public final class FunWorldTimeManager {
     public static void unbindServer() {
         activeServer = new WeakReference<>(null);
         serverFunWorldDayTime = 1000L;
+        synchronized (FUN_WORLD_LEVEL_DATA) {
+            FUN_WORLD_LEVEL_DATA.clear();
+        }
     }
 
     public static long getServerDayTime() {

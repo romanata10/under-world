@@ -6,6 +6,7 @@ import software.bernie.geckolib.model.DefaultedEntityGeoModel;
 
 public class TheTruthModel extends DefaultedEntityGeoModel<TheTruthEntity> {
     public TheTruthModel() {
-        super(UnderWorldMod.id("the_truth"));
+        super(UnderWorldMod.id("the_truth"), false);
+        this.withAltTexture(UnderWorldMod.id("the_truth/the_truth"));
     }
 }
