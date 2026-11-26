@@ -71,7 +71,7 @@ jobs:
             exit 1
           fi
           echo "Built JAR: $JAR_FILE"
-          jar tf "$JAR_FILE" | head -n 40
+          jar tf "$JAR_FILE" | grep -E 'META-INF/mods.toml|under_world\.refmap\.json|under_world\.mixins\.json|UnderWorldMod\.class'
 
       - name: Upload mod JAR artifact
         uses: actions/upload-artifact@v4
@@ -79,14 +79,23 @@ jobs:
           name: under-world-mod-jar
           path: build/libs/under_world-*.jar
 
-      - name: Create GitHub Release on version tag
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Publish GitHub Release
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${GITHUB_REF_NAME}"
+          MOD_VER=$(grep '^mod_version=' gradle.properties | cut -d= -f2 | tr -d '[:space:]')
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            TAG="${GITHUB_REF_NAME}"
+          else
+            TAG="v${MOD_VER}"
+          fi
           JAR_FILE=$(find build/libs -maxdepth 1 -name "under_world-*.jar" ! -name "*-sources.jar" ! -name "*-dev.jar" | head -n 1)
-          gh release create "$TAG" "$JAR_FILE" \
-            --title "Under World $TAG (Forge 1.20.1)" \
-            --notes "Automated Forge 1.20.1 build of Under World ($TAG)." \
-            || gh release upload "$TAG" "$JAR_FILE" --clobber
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$JAR_FILE" --clobber
+          else
+            gh release create "$TAG" "$JAR_FILE" \
+              --target "${GITHUB_SHA}" \
+              --title "Under World $TAG (Forge 1.20.1)" \
+              --notes "Minecraft 1.20.1 Forge mod build ($TAG). Requires Forge 47.1.47+, GeckoLib 4.8.4+, Fzzy Config 0.7.5+, and Kotlin for Forge 4.11.0+."
+          fi
