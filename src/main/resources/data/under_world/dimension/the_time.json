@@ -1,0 +1,10 @@
+{
+  "type": "under_world:the_time",
+  "generator": {
+    "type": "under_world:the_time",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "under_world:time_void"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "structures": [
+    {
+      "structure": "under_world:wheat_farm",
+      "weight": 4
+    },
+    {
+      "structure": "under_world:old_village_house",
+      "weight": 4
+    },
+    {
+      "structure": "under_world:leaf_maze",
+      "weight": 3
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 28,
+    "separation": 12,
+    "salt": 99124851
+  }
+}

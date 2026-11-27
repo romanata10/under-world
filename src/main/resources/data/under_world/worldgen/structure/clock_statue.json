@@ -1,0 +1,7 @@
+{
+  "type": "under_world:clock_statue",
+  "biomes": "#under_world:has_structure/clock_statue",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

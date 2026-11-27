@@ -1,6 +1,7 @@
 package com.underworld.mod.registry;
 
 import com.underworld.mod.UnderWorldMod;
+import com.underworld.mod.entity.ClockEntity;
 import com.underworld.mod.entity.EyesOfFunEntity;
 import com.underworld.mod.entity.FriendEntity;
 import com.underworld.mod.entity.HandsEntity;
@@ -62,6 +63,13 @@ public final class ModEntities {
                     .updateInterval(1)
                     .build(UnderWorldMod.id("the_truth").toString()));
 
+    public static final RegistryObject<EntityType<ClockEntity>> CLOCK = ENTITIES.register("clock",
+            () -> EntityType.Builder.of(ClockEntity::new, MobCategory.MONSTER)
+                    .sized(0.85F, 3.25F)
+                    .clientTrackingRange(20)
+                    .updateInterval(1)
+                    .build(UnderWorldMod.id("clock").toString()));
+
     private ModEntities() {}
 
     public static void registerAttributes(final EntityAttributeCreationEvent event) {
@@ -72,5 +80,6 @@ public final class ModEntities {
         event.put(EYES_OF_FUN.get(), EyesOfFunEntity.createAttributes().build());
         event.put(SMILE.get(), SmileEntity.createAttributes().build());
         event.put(THE_TRUTH.get(), TheTruthEntity.createAttributes().build());
+        event.put(CLOCK.get(), ClockEntity.createAttributes().build());
     }
 }

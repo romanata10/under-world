@@ -25,6 +25,14 @@ public final class DimensionAtmosphereHandler {
             event.setRed(0.015F);
             event.setGreen(0.012F);
             event.setBlue(0.020F);
+        } else if (ModDimensions.isError(level)) {
+            event.setRed(0.75F);
+            event.setGreen(0.85F);
+            event.setBlue(1.00F);
+        } else if (ModDimensions.isTime(level)) {
+            event.setRed(0.67F);
+            event.setGreen(0.77F);
+            event.setBlue(1.00F);
         }
     }
 
@@ -37,6 +45,10 @@ public final class DimensionAtmosphereHandler {
         if (ModDimensions.isMaze(level)) {
             event.setNearPlaneDistance(2.0F);
             event.setFarPlaneDistance(24.0F);
+            event.setCanceled(true);
+        } else if (ModDimensions.isTime(level)) {
+            event.setNearPlaneDistance(48.0F);
+            event.setFarPlaneDistance(160.0F);
             event.setCanceled(true);
         } else if (ModDimensions.isFunWorld(level)) {
             float night = FunWorldDimensionEffects.getNightFactor(level, (float) event.getPartialTick());

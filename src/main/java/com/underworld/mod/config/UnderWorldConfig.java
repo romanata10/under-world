@@ -21,6 +21,7 @@ public class UnderWorldConfig extends Config {
     public TreeMimicSection treeMimic = new TreeMimicSection();
     public TheSkySection theSky = new TheSkySection();
     public TheTruthSection theTruth = new TheTruthSection();
+    public ClockSection clock = new ClockSection();
     public DimensionsSection dimensions = new DimensionsSection();
 
     public UnderWorldConfig() {
@@ -153,6 +154,17 @@ public class UnderWorldConfig extends Config {
         public ValidatedBoolean theTruthSpawnPillarOnRejoin = new ValidatedBoolean(true);
     }
 
+    public static class ClockSection extends ConfigSection {
+        @Comment("Enables rare Overworld encounters with Clock.")
+        public ValidatedBoolean clockEnabled = new ValidatedBoolean(true);
+
+        @Comment("Chance per Overworld surface event check for Clock to manifest.")
+        public ValidatedDouble clockSpawnChance = new ValidatedDouble(0.055D, 1.0D, 0.0D);
+
+        @Comment("Movement speed of the aggressive ticking Clock variant inside The Time.")
+        public ValidatedDouble clockTimeSpeed = new ValidatedDouble(0.42D, 0.70D, 0.20D);
+    }
+
     public static class DimensionsSection extends ConfigSection {
         @Comment("Enables warping players to The Fun World via Void Shrines or friend encounters.")
         public ValidatedBoolean funWorldEnabled = new ValidatedBoolean(true);
@@ -166,10 +178,31 @@ public class UnderWorldConfig extends Config {
         @Comment("When true, Eyes of Fun kills caught victims in one lethal strike if they stop looking.")
         public ValidatedBoolean eyesOfFunInstantKill = new ValidatedBoolean(true);
 
-        @Comment("Enables Maze rift portals and Smile pursuits inside The Maze dimension.")
+        @Comment("Enables Maze rift portals and Smile inside The Maze dimension.")
         public ValidatedBoolean mazeEnabled = new ValidatedBoolean(true);
 
         @Comment("Base movement speed of Smile during relentless Maze corridor chases.")
         public ValidatedDouble smileSprintSpeed = new ValidatedDouble(0.43D, 0.70D, 0.25D);
+
+        @Comment("Allows sleeping in an Overworld bed to randomly warp players to The Error dimension.")
+        public ValidatedBoolean errorDimensionEnabled = new ValidatedBoolean(true);
+
+        @Comment("Chance (0.0 - 1.0) upon sleeping in a bed to be pulled into The Error (default 0.20 = 20%).")
+        public ValidatedDouble errorBedWarpChance = new ValidatedDouble(0.20D, 1.0D, 0.0D);
+
+        @Comment("Ticks spent inside The Error before returning to the Overworld (1800 = 1m 30s).")
+        public ValidatedInt errorStayDurationTicks = new ValidatedInt(1800, 12000, 200);
+
+        @Comment("Enables The Time dimension and warping caught players there via Clock.")
+        public ValidatedBoolean timeDimensionEnabled = new ValidatedBoolean(true);
+
+        @Comment("Spawns the aggressive ticking Clock hunter inside The Time dimension.")
+        public ValidatedBoolean clockTimeHuntEnabled = new ValidatedBoolean(true);
+
+        @Comment("Enables custom dimension music across Under World dimensions.")
+        public ValidatedBoolean customMusicEnabled = new ValidatedBoolean(true);
+
+        @Comment("Plays Under World eerie ambient music in the Overworld as well as mod dimensions.")
+        public ValidatedBoolean customOverworldMusic = new ValidatedBoolean(true);
     }
 }

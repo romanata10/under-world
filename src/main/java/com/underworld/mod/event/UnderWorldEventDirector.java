@@ -2,6 +2,7 @@ package com.underworld.mod.event;
 
 import com.underworld.mod.UnderWorldMod;
 import com.underworld.mod.config.UnderWorldConfigHolder;
+import com.underworld.mod.entity.ClockEntity;
 import com.underworld.mod.entity.EyesOfFunEntity;
 import com.underworld.mod.entity.FriendEntity;
 import com.underworld.mod.entity.HandsEntity;
@@ -15,7 +16,9 @@ import com.underworld.mod.registry.ModEntities;
 import com.underworld.mod.registry.ModSounds;
 import com.underworld.mod.world.FunWorldTimeManager;
 import com.underworld.mod.world.UnderWorldSavedData;
+import com.underworld.mod.world.dimension.ErrorChunkGenerator;
 import com.underworld.mod.world.dimension.MazeChunkGenerator;
+import com.underworld.mod.world.dimension.TimeChunkGenerator;
 import com.underworld.mod.world.structure.VoidShrinePiece;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -31,6 +34,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -43,6 +48,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
@@ -70,6 +76,7 @@ public final class UnderWorldEventDirector {
     private static final List<ScheduledAction> SCHEDULED_ACTIONS = new ArrayList<>();
     private static final List<PendingKick> PENDING_KICKS = new ArrayList<>();
     private static final Map<UUID, Long> SPAWN_PROTECTION_UNTIL_TICK = new ConcurrentHashMap<>();
+    private static final Map<UUID, Boolean> BED_WARP_ROLLS = new ConcurrentHashMap<>();
 
     private UnderWorldEventDirector() {}
 
@@ -122,6 +129,15 @@ public final class UnderWorldEventDirector {
             PENDING_KICKS.clear();
         }
         SPAWN_PROTECTION_UNTIL_TICK.clear();
+        BED_WARP_ROLLS.clear();
+    }
+
+    @SubscribeEvent
+    public static void onLivingHurt(final LivingHurtEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player && ModDimensions.isError(player.level())) {
+            // The Error is a safe glitch anomaly dimension
+            event.setCanceled(true);
+        }
     }
 
     @SubscribeEvent
@@ -267,6 +283,15 @@ public final class UnderWorldEventDirector {
             checkVoidShrineWarps(overworld);
         }
 
+        // Sleep in Overworld bed -> 20% chance warp to The Error
+        if (UnderWorldConfigHolder.get() == null || UnderWorldConfigHolder.get().dimensions.errorDimensionEnabled.get()) {
+            tickBedErrorWarps(overworld);
+        }
+
+        // Safe timer & return for players inside The Error, plus void loop & Clock hunter inside The Time
+        tickErrorDimension(server);
+        tickTimeDimension(server);
+
         // Dimension horror directors (Fun World night Eyes of Fun & Maze Smile)
         if (server.getTickCount() % 80 == 0) {
             tickFunWorld(server);
@@ -391,8 +416,104 @@ public final class UnderWorldEventDirector {
                 if (random.nextDouble() < treeChance) {
                     if (triggerTreeEncounter(overworld, target) != null) {
                         data.setEventCooldownTicks(3600 + random.nextInt(3600));
+                        return;
                     }
                 }
+            }
+
+            if (UnderWorldConfigHolder.get().clock.clockEnabled.get()
+                    && UnderWorldConfigHolder.get().dimensions.timeDimensionEnabled.get()) {
+                double clockChance = UnderWorldConfigHolder.get().clock.clockSpawnChance.get() * 0.16D;
+                if (random.nextDouble() < clockChance) {
+                    if (triggerClockEncounter(overworld, target, false) != null) {
+                        data.setEventCooldownTicks(4200 + random.nextInt(3600));
+                    }
+                }
+            }
+        }
+    }
+
+    private static void tickBedErrorWarps(ServerLevel overworld) {
+        double chance = UnderWorldConfigHolder.getErrorBedWarpChance();
+        for (ServerPlayer player : List.copyOf(overworld.players())) {
+            UUID id = player.getUUID();
+            if (!player.isSleeping()) {
+                BED_WARP_ROLLS.remove(id);
+                continue;
+            }
+            Boolean willWarp = BED_WARP_ROLLS.get(id);
+            if (willWarp == null) {
+                willWarp = overworld.getRandom().nextDouble() < chance;
+                BED_WARP_ROLLS.put(id, willWarp);
+            }
+            if (willWarp && player.getSleepTimer() >= 35) {
+                BED_WARP_ROLLS.remove(id);
+                player.stopSleepInBed(true, true);
+                ModDimensions.sendToError(player);
+            }
+        }
+    }
+
+    private static void tickErrorDimension(MinecraftServer server) {
+        ServerLevel errorLevel = server.getLevel(ModDimensions.THE_ERROR);
+        if (errorLevel == null || errorLevel.players().isEmpty()) {
+            return;
+        }
+        UnderWorldSavedData data = UnderWorldSavedData.get(server);
+        for (ServerPlayer player : List.copyOf(errorLevel.players())) {
+            player.fallDistance = 0.0F;
+            if (player.getY() < -4.0D) {
+                int sy = ErrorChunkGenerator.getSurfaceYAt(8, 8);
+                player.teleportTo(errorLevel, 8.5D, sy + 1.0D, 8.5D, player.getYRot(), player.getXRot());
+            }
+            int remaining = data.getErrorReturnTimer(player.getUUID());
+            if (remaining <= 0) {
+                remaining = UnderWorldConfigHolder.getErrorStayDurationTicks();
+                data.setErrorReturnTimer(player.getUUID(), remaining);
+            }
+            remaining--;
+            if (remaining <= 0) {
+                ModDimensions.returnFromError(player);
+            } else {
+                data.setErrorReturnTimer(player.getUUID(), remaining);
+                if (server.getTickCount() % 20 == 0) {
+                    int secTotal = (remaining + 19) / 20;
+                    int mins = secTotal / 60;
+                    int secs = secTotal % 60;
+                    String formatted = String.format("%02d:%02d", mins, secs);
+                    player.displayClientMessage(Component.translatable("message.under_world.error_timer", formatted), true);
+                }
+            }
+        }
+    }
+
+    private static void tickTimeDimension(MinecraftServer server) {
+        ServerLevel timeLevel = server.getLevel(ModDimensions.THE_TIME);
+        if (timeLevel == null || timeLevel.players().isEmpty()) {
+            return;
+        }
+        for (ServerPlayer player : List.copyOf(timeLevel.players())) {
+            // Endless sky-clock void wrap if falling off a clock disc
+            if (player.getY() < -12.0D) {
+                BlockPos disc = TimeChunkGenerator.findNearestSafeDiscPos(player.getBlockX(), player.getBlockZ());
+                player.fallDistance = 0.0F;
+                player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 110, 0, false, false));
+                player.teleportTo(timeLevel, disc.getX() + 0.5D, 118.0D, disc.getZ() + 0.5D, player.getYRot(), player.getXRot());
+            }
+
+            if (server.getTickCount() % 80 != 0) {
+                continue;
+            }
+            if (UnderWorldConfigHolder.get() != null && !UnderWorldConfigHolder.get().dimensions.clockTimeHuntEnabled.get()) {
+                continue;
+            }
+            if (player.isCreative() || player.isSpectator() || !player.isAlive() || isSpawnProtected(player)) {
+                continue;
+            }
+            AABB nearby = AABB.ofSize(player.position(), 88.0D, 64.0D, 88.0D);
+            int existing = timeLevel.getEntitiesOfClass(ClockEntity.class, nearby).size();
+            if (existing == 0 && timeLevel.getRandom().nextFloat() < 0.70F) {
+                triggerClockEncounter(timeLevel, player, true);
             }
         }
     }
@@ -674,6 +795,35 @@ public final class UnderWorldEventDirector {
     }
 
     @Nullable
+    public static ClockEntity triggerClockEncounter(ServerLevel level, ServerPlayer player, boolean timeVariant) {
+        BlockPos pos;
+        if (ModDimensions.isTime(level)) {
+            double ang = level.getRandom().nextDouble() * Math.PI * 2.0D;
+            int tx = Mth.floor(player.getX() + Math.cos(ang) * 26.0D);
+            int tz = Mth.floor(player.getZ() + Math.sin(ang) * 26.0D);
+            pos = TimeChunkGenerator.findNearestSafeDiscPos(tx, tz);
+        } else {
+            pos = findSpawnPosAroundPlayer(level, player,
+                    UnderWorldConfigHolder.getSpawnMinDistance(),
+                    UnderWorldConfigHolder.getSpawnMaxDistance(),
+                    false);
+        }
+        if (pos == null) {
+            return null;
+        }
+        ClockEntity clock = ModEntities.CLOCK.get().create(level);
+        if (clock == null) {
+            return null;
+        }
+        clock.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D,
+                level.getRandom().nextFloat() * 360.0F, 0.0F);
+        clock.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
+        clock.setTimeVariant(timeVariant || ModDimensions.isTime(level));
+        level.addFreshEntity(clock);
+        return clock;
+    }
+
+    @Nullable
     private static BlockPos findAheadSpawnPos(ServerLevel level, ServerPlayer player) {
         double baseYaw = Math.toRadians(player.getYRot());
         double[] angleOffsets = {0.0D, 0.25D, -0.25D, 0.55D, -0.55D, Math.PI};
@@ -903,7 +1053,8 @@ public final class UnderWorldEventDirector {
         return !level.getEntitiesOfClass(HandsEntity.class, box).isEmpty()
                 || !level.getEntitiesOfClass(TreeMimicEntity.class, box).isEmpty()
                 || !level.getEntitiesOfClass(TheSkyEntity.class, box).isEmpty()
-                || !level.getEntitiesOfClass(TheTruthEntity.class, box).isEmpty();
+                || !level.getEntitiesOfClass(TheTruthEntity.class, box).isEmpty()
+                || !level.getEntitiesOfClass(ClockEntity.class, box).isEmpty();
     }
 
     @Nullable

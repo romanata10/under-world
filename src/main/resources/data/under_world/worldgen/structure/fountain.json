@@ -1,0 +1,7 @@
+{
+  "type": "under_world:fountain",
+  "biomes": "#under_world:has_structure/fountain",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

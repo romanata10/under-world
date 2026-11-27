@@ -44,6 +44,9 @@ public final class ModItems {
     public static final RegistryObject<Item> THE_TRUTH_SPAWN_EGG = ITEMS.register("the_truth_spawn_egg",
             () -> new ForgeSpawnEggItem(ModEntities.THE_TRUTH, 0x050507, 0xE6E6EE, new Item.Properties()));
 
+    public static final RegistryObject<Item> CLOCK_SPAWN_EGG = ITEMS.register("clock_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.CLOCK, 0x0D0D10, 0xECECF2, new Item.Properties()));
+
     // Fun World & Maze block items
     public static final RegistryObject<Item> FUN_GRASS_BLOCK = blockItem("fun_grass_block", ModBlocks.FUN_GRASS_BLOCK);
     public static final RegistryObject<Item> FUN_DIRT = blockItem("fun_dirt", ModBlocks.FUN_DIRT);
@@ -61,6 +64,14 @@ public final class ModItems {
     public static final RegistryObject<Item> MAZE_PORTAL = blockItem("maze_portal", ModBlocks.MAZE_PORTAL);
     public static final RegistryObject<Item> MAZE_TELEPORTER = blockItem("maze_teleporter", ModBlocks.MAZE_TELEPORTER);
 
+    // The Error, The Time & Glitch block items
+    public static final RegistryObject<Item> ERROR_GROUND = blockItem("error_ground", ModBlocks.ERROR_GROUND);
+    public static final RegistryObject<Item> ERROR_SOIL = blockItem("error_soil", ModBlocks.ERROR_SOIL);
+    public static final RegistryObject<Item> GLITCH_BLOCK = blockItem("glitch_block", ModBlocks.GLITCH_BLOCK);
+    public static final RegistryObject<Item> CLOCK_FACE_BLOCK = blockItem("clock_face_block", ModBlocks.CLOCK_FACE_BLOCK);
+    public static final RegistryObject<Item> CLOCK_RIM_BLOCK = blockItem("clock_rim_block", ModBlocks.CLOCK_RIM_BLOCK);
+    public static final RegistryObject<Item> TIME_PORTAL = blockItem("time_portal", ModBlocks.TIME_PORTAL);
+
     public static final RegistryObject<CreativeModeTab> UNDER_WORLD_TAB = CREATIVE_TABS.register("under_world",
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.under_world"))
@@ -73,6 +84,7 @@ public final class ModItems {
                         output.accept(EYES_OF_FUN_SPAWN_EGG.get());
                         output.accept(SMILE_SPAWN_EGG.get());
                         output.accept(THE_TRUTH_SPAWN_EGG.get());
+                        output.accept(CLOCK_SPAWN_EGG.get());
 
                         output.accept(FUN_GRASS_BLOCK.get());
                         output.accept(FUN_DIRT.get());
@@ -90,6 +102,13 @@ public final class ModItems {
                         output.accept(MAZE_CEILING.get());
                         output.accept(MAZE_PORTAL.get());
                         output.accept(MAZE_TELEPORTER.get());
+
+                        output.accept(ERROR_GROUND.get());
+                        output.accept(ERROR_SOIL.get());
+                        output.accept(GLITCH_BLOCK.get());
+                        output.accept(CLOCK_FACE_BLOCK.get());
+                        output.accept(CLOCK_RIM_BLOCK.get());
+                        output.accept(TIME_PORTAL.get());
                     })
                     .build());
 
@@ -108,6 +127,7 @@ public final class ModItems {
             event.accept(EYES_OF_FUN_SPAWN_EGG.get());
             event.accept(SMILE_SPAWN_EGG.get());
             event.accept(THE_TRUTH_SPAWN_EGG.get());
+            event.accept(CLOCK_SPAWN_EGG.get());
         }
     }
 }

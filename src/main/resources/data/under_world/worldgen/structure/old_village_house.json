@@ -1,0 +1,7 @@
+{
+  "type": "under_world:old_village_house",
+  "biomes": "#under_world:has_structure/old_village_house",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

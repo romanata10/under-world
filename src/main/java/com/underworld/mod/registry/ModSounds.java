@@ -30,6 +30,17 @@ public final class ModSounds {
     public static final RegistryObject<SoundEvent> THE_TRUTH_KILL = register("the_truth_kill");
     public static final RegistryObject<SoundEvent> THE_TRUTH_AMBIENT = register("the_truth_ambient");
 
+    public static final RegistryObject<SoundEvent> CLOCK_TICK = register("clock_tick");
+    public static final RegistryObject<SoundEvent> CLOCK_CHIME = register("clock_chime");
+    public static final RegistryObject<SoundEvent> ERROR_WARP = register("error_warp");
+    public static final RegistryObject<SoundEvent> TIME_WARP = register("time_warp");
+
+    public static final RegistryObject<SoundEvent> MUSIC_FUN_WORLD = register("music_fun_world");
+    public static final RegistryObject<SoundEvent> MUSIC_MAZE = register("music_maze");
+    public static final RegistryObject<SoundEvent> MUSIC_THE_ERROR = register("music_the_error");
+    public static final RegistryObject<SoundEvent> MUSIC_THE_TIME = register("music_the_time");
+    public static final RegistryObject<SoundEvent> MUSIC_OVERWORLD = register("music_overworld");
+
     private ModSounds() {}
 
     private static RegistryObject<SoundEvent> register(String name) {

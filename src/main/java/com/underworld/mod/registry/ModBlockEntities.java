@@ -2,6 +2,7 @@ package com.underworld.mod.registry;
 
 import com.underworld.mod.UnderWorldMod;
 import com.underworld.mod.block.FunFlowerBlockEntity;
+import com.underworld.mod.block.GlitchBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -19,6 +20,12 @@ public final class ModBlockEntities {
                     ModBlocks.FUN_FLAT_RED_FLOWER.get(),
                     ModBlocks.FUN_FLAT_BLUE_FLOWER.get(),
                     ModBlocks.FUN_FLAT_WHITE_FLOWER.get()
+            ).build(null));
+
+    public static final RegistryObject<BlockEntityType<GlitchBlockEntity>> GLITCH_BLOCK =
+            BLOCK_ENTITIES.register("glitch_block", () -> BlockEntityType.Builder.of(
+                    GlitchBlockEntity::new,
+                    ModBlocks.GLITCH_BLOCK.get()
             ).build(null));
 
     private ModBlockEntities() {}

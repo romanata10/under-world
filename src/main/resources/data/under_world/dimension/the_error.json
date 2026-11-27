@@ -1,0 +1,10 @@
+{
+  "type": "under_world:the_error",
+  "generator": {
+    "type": "under_world:the_error",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "under_world:error_wastes"
+    }
+  }
+}

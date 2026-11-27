@@ -2,8 +2,10 @@ package com.underworld.mod.registry;
 
 import com.mojang.serialization.Codec;
 import com.underworld.mod.UnderWorldMod;
+import com.underworld.mod.world.dimension.ErrorChunkGenerator;
 import com.underworld.mod.world.dimension.FunWorldChunkGenerator;
 import com.underworld.mod.world.dimension.MazeChunkGenerator;
+import com.underworld.mod.world.dimension.TimeChunkGenerator;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraftforge.registries.DeferredRegister;
@@ -18,6 +20,12 @@ public final class ModChunkGenerators {
 
     public static final RegistryObject<Codec<MazeChunkGenerator>> MAZE =
             CHUNK_GENERATORS.register("maze", () -> MazeChunkGenerator.CODEC);
+
+    public static final RegistryObject<Codec<ErrorChunkGenerator>> THE_ERROR =
+            CHUNK_GENERATORS.register("the_error", () -> ErrorChunkGenerator.CODEC);
+
+    public static final RegistryObject<Codec<TimeChunkGenerator>> THE_TIME =
+            CHUNK_GENERATORS.register("the_time", () -> TimeChunkGenerator.CODEC);
 
     private ModChunkGenerators() {}
 }

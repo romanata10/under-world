@@ -8,6 +8,7 @@
   "entity.under_world.eyes_of_fun": "Глаза Веселья (Eyes of Fun)",
   "entity.under_world.smile": "Улыбка (Smile)",
   "entity.under_world.the_truth": "the truth (Истина)",
+  "entity.under_world.clock": "clock (Часы)",
 
   "item.under_world.friend_spawn_egg": "Яйцо призыва friend",
   "item.under_world.hands_spawn_egg": "Яйцо призыва Hands",
@@ -16,6 +17,7 @@
   "item.under_world.eyes_of_fun_spawn_egg": "Яйцо призыва Eyes of Fun",
   "item.under_world.smile_spawn_egg": "Яйцо призыва Smile",
   "item.under_world.the_truth_spawn_egg": "Яйцо призыва the truth",
+  "item.under_world.clock_spawn_egg": "Яйцо призыва clock",
 
   "block.under_world.fun_grass_block": "Дёрн Весёлого мира",
   "block.under_world.fun_dirt": "Земля Весёлого мира",
@@ -32,9 +34,17 @@
   "block.under_world.maze_ceiling": "Потолок лабиринта",
   "block.under_world.maze_portal": "Разлом в Лабиринт",
   "block.under_world.maze_teleporter": "Терминал выхода из лабиринта",
+  "block.under_world.error_ground": "Блок поверхности Ошибки",
+  "block.under_world.error_soil": "Повреждённая земля Ошибки",
+  "block.under_world.glitch_block": "Глючный блок",
+  "block.under_world.clock_face_block": "Блок циферблата",
+  "block.under_world.clock_rim_block": "Рама часов",
+  "block.under_world.time_portal": "Портал выхода из Времени",
 
   "biome.under_world.fun_meadow": "Луг веселья",
   "biome.under_world.maze_corridors": "Коридоры лабиринта",
+  "biome.under_world.error_wastes": "Повреждённые сектора",
+  "biome.under_world.time_void": "Бесконечное небо часов",
 
   "subtitles.under_world.hands_scream": "Далёкий искажённый крик",
   "subtitles.under_world.hands_glitch": "Треск помех",
@@ -54,6 +64,10 @@
   "subtitles.under_world.the_truth_emerge": "Земля разверзается впереди",
   "subtitles.under_world.the_truth_kill": "Реальность срывается в помехи",
   "subtitles.under_world.the_truth_ambient": "Рядом вибрирует жуткий гул",
+  "subtitles.under_world.clock_tick": "Механическое тиканье часов",
+  "subtitles.under_world.clock_chime": "Бой старинных часов",
+  "subtitles.under_world.error_warp": "Реальность зависает и сбоит",
+  "subtitles.under_world.time_warp": "Время искажается",
 
   "hud.under_world.the_truth.timer": "ВЫЖИВИ: %1$sс",
   "disconnect.under_world.hands": "Соединение потеряно: нечто утащило вас в глубину.",
@@ -61,6 +75,11 @@
   "message.under_world.tree_needs_axe": "Кора слишком толстая — нужен топор!",
   "message.under_world.fun_world_escape_hint": "Что-то ждёт среди красных стен... найдите разлом.",
   "message.under_world.maze_escape": "Вы выбрались из бесконечных коридоров обратно в реальный мир.",
+  "message.under_world.error_entered": "Обнаружен сбой сектора. Возвращение через 01:30...",
+  "message.under_world.error_timer": "СБОЙ ОШИБКИ: %1$s",
+  "message.under_world.error_escape": "Соединение восстановлено. Вы вернулись домой.",
+  "message.under_world.time_entered": "Бесконечные часы кружат в небе. Найдите часы с порталом — замирайте, когда тиканье звучит!",
+  "message.under_world.time_escape": "Вы вошли в портал-часы и выбрались из Времени.",
 
   "death.attack.under_world.hands": "%1$s был разорван существом Hands",
   "death.attack.under_world.tree_mimic": "%1$s был поглощён живым деревом",
@@ -79,6 +98,7 @@
   "command.under_world.trigger.eyes_of_fun": "Запущена ночная охота Eyes of Fun рядом с %1$s.",
   "command.under_world.trigger.smile": "Запущена погоня Smile рядом с %1$s.",
   "command.under_world.trigger.the_truth": "Запущено появление the truth перед игроком %1$s.",
+  "command.under_world.trigger.clock": "Запущено появление clock рядом с %1$s.",
   "command.under_world.dimension.sent": "%1$s перенесён в измерение %2$s.",
   "command.under_world.structure.success": "Сгенерирована структура %1$s рядом с (%2$d, %3$d, %4$d).",
   "command.under_world.events.enabled": "Автоматические хоррор-события Under World ВКЛЮЧЕНЫ в этом мире.",
@@ -95,5 +115,7 @@
   "under_world.settings.theSky": "The Sky",
   "under_world.settings.theTruth": "the truth",
   "under_world.settings.theTruth.desc": "Супер-мега редкая сущность 50x30, 30с таймер и столб булыжника",
-  "under_world.settings.dimensions": "Измерения (Fun World и Лабиринт)"
+  "under_world.settings.clock": "clock",
+  "under_world.settings.clock.desc": "Сущность с головой-часами, затягивающая в The Time и двигающаяся под тиканье",
+  "under_world.settings.dimensions": "Измерения и музыка"
 }

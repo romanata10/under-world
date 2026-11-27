@@ -1,0 +1,7 @@
+{
+  "type": "under_world:glitch_cluster",
+  "biomes": "#under_world:has_structure/glitch_cluster",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

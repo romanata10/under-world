@@ -65,12 +65,23 @@ public final class UnderWorldForgeConfig {
         public final ForgeConfigSpec.BooleanValue theTruthKickOnKill;
         public final ForgeConfigSpec.BooleanValue theTruthSpawnPillarOnRejoin;
 
+        public final ForgeConfigSpec.BooleanValue clockEnabled;
+        public final ForgeConfigSpec.DoubleValue clockSpawnChance;
+        public final ForgeConfigSpec.DoubleValue clockTimeSpeed;
+
         public final ForgeConfigSpec.BooleanValue funWorldEnabled;
         public final ForgeConfigSpec.IntValue funWorldTimeSpeedMultiplier;
         public final ForgeConfigSpec.BooleanValue eyesOfFunEnabled;
         public final ForgeConfigSpec.BooleanValue eyesOfFunInstantKill;
         public final ForgeConfigSpec.BooleanValue mazeEnabled;
         public final ForgeConfigSpec.DoubleValue smileSprintSpeed;
+        public final ForgeConfigSpec.BooleanValue errorDimensionEnabled;
+        public final ForgeConfigSpec.DoubleValue errorBedWarpChance;
+        public final ForgeConfigSpec.IntValue errorStayDurationTicks;
+        public final ForgeConfigSpec.BooleanValue timeDimensionEnabled;
+        public final ForgeConfigSpec.BooleanValue clockTimeHuntEnabled;
+        public final ForgeConfigSpec.BooleanValue customMusicEnabled;
+        public final ForgeConfigSpec.BooleanValue customOverworldMusic;
 
         public Common(ForgeConfigSpec.Builder builder) {
             builder.push("general");
@@ -235,6 +246,18 @@ public final class UnderWorldForgeConfig {
                     .define("theTruthSpawnPillarOnRejoin", true);
             builder.pop();
 
+            builder.push("clock");
+            this.clockEnabled = builder
+                    .comment("Enables rare Overworld encounters with Clock.")
+                    .define("clockEnabled", true);
+            this.clockSpawnChance = builder
+                    .comment("Chance per Overworld surface check for Clock to appear.")
+                    .defineInRange("clockSpawnChance", 0.055D, 0.0D, 1.0D);
+            this.clockTimeSpeed = builder
+                    .comment("Movement speed of the aggressive ticking Clock variant in The Time.")
+                    .defineInRange("clockTimeSpeed", 0.42D, 0.20D, 0.70D);
+            builder.pop();
+
             builder.push("dimensions");
             this.funWorldEnabled = builder
                     .comment("Allows warping players into The Fun World.")
@@ -254,6 +277,27 @@ public final class UnderWorldForgeConfig {
             this.smileSprintSpeed = builder
                     .comment("Base sprint speed of Smile in The Maze.")
                     .defineInRange("smileSprintSpeed", 0.43D, 0.25D, 0.70D);
+            this.errorDimensionEnabled = builder
+                    .comment("Allows sleeping in an Overworld bed to randomly warp players to The Error.")
+                    .define("errorDimensionEnabled", true);
+            this.errorBedWarpChance = builder
+                    .comment("Probability upon sleeping in a bed to be pulled into The Error (0.20 = 20%).")
+                    .defineInRange("errorBedWarpChance", 0.20D, 0.0D, 1.0D);
+            this.errorStayDurationTicks = builder
+                    .comment("Ticks spent in The Error before auto-returning to Overworld (1800 = 1m 30s).")
+                    .defineInRange("errorStayDurationTicks", 1800, 200, 12000);
+            this.timeDimensionEnabled = builder
+                    .comment("Enables The Time dimension and warping caught players there via Clock.")
+                    .define("timeDimensionEnabled", true);
+            this.clockTimeHuntEnabled = builder
+                    .comment("Spawns the aggressive ticking Clock variant inside The Time dimension.")
+                    .define("clockTimeHuntEnabled", true);
+            this.customMusicEnabled = builder
+                    .comment("Enables custom dimension music across Under World dimensions.")
+                    .define("customMusicEnabled", true);
+            this.customOverworldMusic = builder
+                    .comment("Plays Under World eerie ambient music in the Overworld as well.")
+                    .define("customOverworldMusic", true);
             builder.pop();
         }
     }
