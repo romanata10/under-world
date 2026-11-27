@@ -1,6 +1,7 @@
 package com.underworld.mod.client.dimension;
 
 import com.underworld.mod.registry.ModDimensions;
+import com.underworld.mod.world.dimension.BrowserChunkGenerator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.util.Mth;
@@ -33,6 +34,32 @@ public final class DimensionAtmosphereHandler {
             event.setRed(0.67F);
             event.setGreen(0.77F);
             event.setBlue(1.00F);
+        } else if (ModDimensions.isPlains(level)) {
+            float night = level.isNight() ? 1.0F : 0.0F;
+            event.setRed(Mth.lerp(night, 0.76F, 0.02F));
+            event.setGreen(Mth.lerp(night, 0.80F, 0.02F));
+            event.setBlue(Mth.lerp(night, 0.83F, 0.035F));
+        } else if (ModDimensions.isWindOcean(level)) {
+            event.setRed(0.73F);
+            event.setGreen(0.77F);
+            event.setBlue(0.81F);
+        } else if (ModDimensions.isXp(level)) {
+            event.setRed(0.56F);
+            event.setGreen(0.78F);
+            event.setBlue(0.98F);
+        } else if (ModDimensions.isBrowser(level)) {
+            var player = Minecraft.getInstance().player;
+            boolean corrupt = player != null && "minecraft_free_download".equals(
+                    BrowserChunkGenerator.getSiteId(player.getBlockX(), player.getBlockZ()));
+            if (corrupt) {
+                event.setRed(0.02F);
+                event.setGreen(0.02F);
+                event.setBlue(0.03F);
+            } else {
+                event.setRed(0.94F);
+                event.setGreen(0.95F);
+                event.setBlue(0.98F);
+            }
         }
     }
 
@@ -55,6 +82,27 @@ public final class DimensionAtmosphereHandler {
             if (night > 0.2F) {
                 event.setNearPlaneDistance(Mth.lerp(night, 20.0F, 4.0F));
                 event.setFarPlaneDistance(Mth.lerp(night, 128.0F, 36.0F));
+                event.setCanceled(true);
+            }
+        } else if (ModDimensions.isPlains(level)) {
+            if (level.isNight()) {
+                event.setNearPlaneDistance(4.0F);
+                event.setFarPlaneDistance(46.0F);
+            } else {
+                event.setNearPlaneDistance(32.0F);
+                event.setFarPlaneDistance(112.0F);
+            }
+            event.setCanceled(true);
+        } else if (ModDimensions.isWindOcean(level)) {
+            event.setNearPlaneDistance(16.0F);
+            event.setFarPlaneDistance(72.0F);
+            event.setCanceled(true);
+        } else if (ModDimensions.isBrowser(level)) {
+            var player = Minecraft.getInstance().player;
+            if (player != null && "minecraft_free_download".equals(
+                    BrowserChunkGenerator.getSiteId(player.getBlockX(), player.getBlockZ()))) {
+                event.setNearPlaneDistance(4.0F);
+                event.setFarPlaneDistance(36.0F);
                 event.setCanceled(true);
             }
         }

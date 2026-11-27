@@ -42,10 +42,24 @@ public final class ModSounds {
     public static final RegistryObject<SoundEvent> THE_BALL_HUM = register("the_ball_hum");
     public static final RegistryObject<SoundEvent> GEOMETRIC_NIGHTMARE = register("geometric_nightmare");
 
+    public static final RegistryObject<SoundEvent> PYLON_STEP = register("pylon_step");
+    public static final RegistryObject<SoundEvent> PYLON_HUM = register("pylon_hum");
+    public static final RegistryObject<SoundEvent> PYLON_ELECTROCUTE = register("pylon_electrocute");
+    public static final RegistryObject<SoundEvent> TURBINE_STEP = register("turbine_step");
+    public static final RegistryObject<SoundEvent> TURBINE_WHOOSH = register("turbine_whoosh");
+    public static final RegistryObject<SoundEvent> XP_STARTUP = register("xp_startup");
+    public static final RegistryObject<SoundEvent> XP_ERROR = register("xp_error");
+    public static final RegistryObject<SoundEvent> DOT_COM_ROAR = register("dot_com_roar");
+    public static final RegistryObject<SoundEvent> HELL_EVENT = register("hell_event");
+
     public static final RegistryObject<SoundEvent> MUSIC_FUN_WORLD = register("music_fun_world");
     public static final RegistryObject<SoundEvent> MUSIC_MAZE = register("music_maze");
     public static final RegistryObject<SoundEvent> MUSIC_THE_ERROR = register("music_the_error");
     public static final RegistryObject<SoundEvent> MUSIC_THE_TIME = register("music_the_time");
+    public static final RegistryObject<SoundEvent> MUSIC_PLAINS = register("music_plains");
+    public static final RegistryObject<SoundEvent> MUSIC_WIND_OCEAN = register("music_wind_ocean");
+    public static final RegistryObject<SoundEvent> MUSIC_XP = register("music_xp");
+    public static final RegistryObject<SoundEvent> MUSIC_BROWSER = register("music_browser");
     public static final RegistryObject<SoundEvent> MUSIC_OVERWORLD = register("music_overworld");
 
     private ModSounds() {}

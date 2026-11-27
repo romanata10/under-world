@@ -55,6 +55,7 @@ public class DemonFishEntity extends Monster implements GeoEntity {
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private int huntTicksRemaining = 1200;
     private int targetDryTicks = 0;
+    private int dryStrandedTicks = 0;
     private int attackCooldown = 0;
     private int biteAnimTicks = 0;
     private int tongueGrabTicks = 0;
@@ -63,7 +64,7 @@ public class DemonFishEntity extends Monster implements GeoEntity {
     public DemonFishEntity(EntityType<? extends Monster> type, Level level) {
         super(type, level);
         this.xpReward = 30;
-        this.setMaxUpStep(1.0F);
+        this.setMaxUpStep(0.0F);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -221,11 +222,22 @@ public class DemonFishEntity extends Monster implements GeoEntity {
             this.tongueGrabTicks = 0;
         }
 
-        // Smooth aquatic swimming steering toward player
-        steerThroughWaterToward(level, target);
+        // Smooth aquatic swimming steering strictly inside water (never walks on dry land)
+        boolean selfInWater = this.isInWaterOrBubble() || level.getFluidState(this.blockPosition()).is(FluidTags.WATER);
+        if (!selfInWater) {
+            this.dryStrandedTicks++;
+            if (this.dryStrandedTicks >= 50) {
+                vanishInWater(level);
+                return;
+            }
+        } else {
+            this.dryStrandedTicks = 0;
+        }
 
-        // Break blocks if the player tries to dig underwater/wall themselves off below surface!
-        if (UnderWorldConfigHolder.isDemonFishBreakBlocksEnabled() && this.blockBreakCooldown <= 0
+        steerThroughWaterToward(level, target, playerInWater || isSubmergedNearWater(level, target.blockPosition()));
+
+        // Break blocks ONLY if submerged/adjacent to water when pursuing dug underwater targets
+        if (selfInWater && UnderWorldConfigHolder.isDemonFishBreakBlocksEnabled() && this.blockBreakCooldown <= 0
                 && (playerInWater || isSubmergedNearWater(level, target.blockPosition()))) {
             if (breakUnderwaterObstructions(level, target)) {
                 this.blockBreakCooldown = 6;
@@ -253,7 +265,7 @@ public class DemonFishEntity extends Monster implements GeoEntity {
         }
     }
 
-    private void steerThroughWaterToward(ServerLevel level, ServerPlayer target) {
+    private void steerThroughWaterToward(ServerLevel level, ServerPlayer target, boolean targetSubmerged) {
         Vec3 targetAim = target.position().add(0.0D, target.getBbHeight() * 0.45D, 0.0D);
         Vec3 delta = targetAim.subtract(this.position());
         double dist = delta.length();
@@ -268,15 +280,59 @@ public class DemonFishEntity extends Monster implements GeoEntity {
 
         boolean selfInWater = this.isInWaterOrBubble() || level.getFluidState(this.blockPosition()).is(FluidTags.WATER);
         if (selfInWater) {
+            BlockPos aheadPos = BlockPos.containing(this.getX() + dir.x * 1.15D, this.getY() + 0.1D, this.getZ() + dir.z * 1.15D);
+            boolean aheadIsWater = level.getFluidState(aheadPos).is(FluidTags.WATER)
+                    || level.getFluidState(aheadPos.below()).is(FluidTags.WATER);
+
+            if (!aheadIsWater && (!targetSubmerged || this.distanceToSqr(target) > 10.0D * 10.0D)) {
+                // Halt at shoreline edge instead of sliding up onto dry land
+                this.setNoGravity(true);
+                this.setDeltaMovement(0.0D, Math.min(0.02D, this.getDeltaMovement().y * 0.3D), 0.0D);
+                return;
+            }
             double speed = 0.37D;
             this.setNoGravity(true);
             this.setDeltaMovement(this.getDeltaMovement().scale(0.65D).add(dir.scale(speed * 0.42D)));
         } else {
+            // Never walk or glide across dry land — flop helplessly in place / retreat only toward nearest water
             this.setNoGravity(false);
-            // Flop/lunge toward water/target
             Vec3 cur = this.getDeltaMovement();
-            this.setDeltaMovement(dir.x * 0.24D, cur.y, dir.z * 0.24D);
+            Vec3 waterRetreat = findNearbyWaterRetreat(level);
+            if (waterRetreat != null) {
+                double flopY = (this.onGround() && this.tickCount % 12 == 0) ? 0.22D : cur.y;
+                this.setDeltaMovement(waterRetreat.x * 0.14D, flopY, waterRetreat.z * 0.14D);
+            } else {
+                double flopY = (this.onGround() && this.tickCount % 14 == 0) ? 0.18D : cur.y;
+                this.setDeltaMovement(cur.x * 0.15D, flopY, cur.z * 0.15D);
+            }
         }
+    }
+
+    @Nullable
+    private Vec3 findNearbyWaterRetreat(ServerLevel level) {
+        BlockPos self = this.blockPosition();
+        BlockPos best = null;
+        double bestDistSq = Double.MAX_VALUE;
+        for (int dx = -4; dx <= 4; dx++) {
+            for (int dy = -2; dy <= 1; dy++) {
+                for (int dz = -4; dz <= 4; dz++) {
+                    BlockPos p = self.offset(dx, dy, dz);
+                    if (level.getFluidState(p).is(FluidTags.WATER)) {
+                        double d = p.distSqr(self);
+                        if (d < bestDistSq) {
+                            bestDistSq = d;
+                            best = p;
+                        }
+                    }
+                }
+            }
+        }
+        if (best == null) {
+            return null;
+        }
+        Vec3 diff = Vec3.atCenterOf(best).subtract(this.position());
+        double len = diff.length();
+        return len > 0.05D ? diff.scale(1.0D / len) : null;
     }
 
     private boolean isSubmergedNearWater(ServerLevel level, BlockPos pos) {
@@ -343,11 +399,11 @@ public class DemonFishEntity extends Monster implements GeoEntity {
         if (speed < 0.0F || speed > 40.0F || state.is(Blocks.OBSIDIAN) || state.is(Blocks.BEDROCK)) {
             return false;
         }
-        boolean hasAdjacentWater = hasNeighborWater(level, pos);
-        level.destroyBlock(pos, false);
-        if (hasAdjacentWater) {
-            level.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
+        if (!hasNeighborWater(level, pos)) {
+            return false;
         }
+        level.destroyBlock(pos, false);
+        level.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
         return true;
     }
 

@@ -1,129 +1,407 @@
 {
   "hands_scream": {
     "subtitle": "subtitles.under_world.hands_scream",
-    "sounds": [{ "name": "under_world:hands_scream", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:hands_scream",
+        "stream": false
+      }
+    ]
   },
   "hands_glitch": {
     "subtitle": "subtitles.under_world.hands_glitch",
-    "sounds": [{ "name": "under_world:hands_glitch", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:hands_glitch",
+        "stream": false
+      }
+    ]
   },
   "hands_burrow": {
     "subtitle": "subtitles.under_world.hands_burrow",
-    "sounds": [{ "name": "under_world:hands_burrow", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:hands_burrow",
+        "stream": false
+      }
+    ]
   },
   "tree_awaken": {
     "subtitle": "subtitles.under_world.tree_awaken",
-    "sounds": [{ "name": "under_world:tree_awaken", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:tree_awaken",
+        "stream": false
+      }
+    ]
   },
   "tree_step": {
     "subtitle": "subtitles.under_world.tree_step",
-    "sounds": [{ "name": "under_world:tree_step", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:tree_step",
+        "stream": false
+      }
+    ]
   },
   "the_sky_roar": {
     "subtitle": "subtitles.under_world.the_sky_roar",
-    "sounds": [{ "name": "under_world:the_sky_roar", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:the_sky_roar",
+        "stream": false
+      }
+    ]
   },
   "the_sky_stomp": {
     "subtitle": "subtitles.under_world.the_sky_stomp",
-    "sounds": [{ "name": "under_world:the_sky_stomp", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:the_sky_stomp",
+        "stream": false
+      }
+    ]
   },
   "friend_vanish": {
     "subtitle": "subtitles.under_world.friend_vanish",
-    "sounds": [{ "name": "under_world:friend_vanish", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:friend_vanish",
+        "stream": false
+      }
+    ]
   },
   "fun_world_warp": {
     "subtitle": "subtitles.under_world.fun_world_warp",
-    "sounds": [{ "name": "under_world:fun_world_warp", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:fun_world_warp",
+        "stream": false
+      }
+    ]
   },
   "eyes_of_fun_spot": {
     "subtitle": "subtitles.under_world.eyes_of_fun_spot",
-    "sounds": [{ "name": "under_world:eyes_of_fun_spot", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:eyes_of_fun_spot",
+        "stream": false
+      }
+    ]
   },
   "eyes_of_fun_kill": {
     "subtitle": "subtitles.under_world.eyes_of_fun_kill",
-    "sounds": [{ "name": "under_world:eyes_of_fun_kill", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:eyes_of_fun_kill",
+        "stream": false
+      }
+    ]
   },
   "smile_roar": {
     "subtitle": "subtitles.under_world.smile_roar",
-    "sounds": [{ "name": "under_world:smile_roar", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:smile_roar",
+        "stream": false
+      }
+    ]
   },
   "smile_step": {
     "subtitle": "subtitles.under_world.smile_step",
-    "sounds": [{ "name": "under_world:smile_step", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:smile_step",
+        "stream": false
+      }
+    ]
   },
   "maze_portal": {
     "subtitle": "subtitles.under_world.maze_portal",
-    "sounds": [{ "name": "under_world:maze_portal", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:maze_portal",
+        "stream": false
+      }
+    ]
   },
   "the_truth_roar": {
     "subtitle": "subtitles.under_world.the_truth_roar",
-    "sounds": [{ "name": "under_world:the_truth_roar", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:the_truth_roar",
+        "stream": false
+      }
+    ]
   },
   "the_truth_emerge": {
     "subtitle": "subtitles.under_world.the_truth_emerge",
-    "sounds": [{ "name": "under_world:the_truth_emerge", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:the_truth_emerge",
+        "stream": false
+      }
+    ]
   },
   "the_truth_kill": {
     "subtitle": "subtitles.under_world.the_truth_kill",
-    "sounds": [{ "name": "under_world:the_truth_kill", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:the_truth_kill",
+        "stream": false
+      }
+    ]
   },
   "the_truth_ambient": {
     "subtitle": "subtitles.under_world.the_truth_ambient",
-    "sounds": [{ "name": "under_world:the_truth_ambient", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:the_truth_ambient",
+        "stream": false
+      }
+    ]
   },
   "clock_tick": {
     "subtitle": "subtitles.under_world.clock_tick",
-    "sounds": [{ "name": "under_world:clock_tick", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:clock_tick",
+        "stream": false
+      }
+    ]
   },
   "clock_chime": {
     "subtitle": "subtitles.under_world.clock_chime",
-    "sounds": [{ "name": "under_world:clock_chime", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:clock_chime",
+        "stream": false
+      }
+    ]
   },
   "error_warp": {
     "subtitle": "subtitles.under_world.error_warp",
-    "sounds": [{ "name": "under_world:error_warp", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:error_warp",
+        "stream": false
+      }
+    ]
   },
   "time_warp": {
     "subtitle": "subtitles.under_world.time_warp",
-    "sounds": [{ "name": "under_world:time_warp", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:time_warp",
+        "stream": false
+      }
+    ]
   },
   "mimic_burst": {
     "subtitle": "subtitles.under_world.mimic_burst",
-    "sounds": [{ "name": "under_world:mimic_burst", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:mimic_burst",
+        "stream": false
+      }
+    ]
   },
   "mimic_chase": {
     "subtitle": "subtitles.under_world.mimic_chase",
-    "sounds": [{ "name": "under_world:mimic_chase", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:mimic_chase",
+        "stream": false
+      }
+    ]
   },
   "demon_fish_ambush": {
     "subtitle": "subtitles.under_world.demon_fish_ambush",
-    "sounds": [{ "name": "under_world:demon_fish_ambush", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:demon_fish_ambush",
+        "stream": false
+      }
+    ]
   },
   "demon_fish_tongue": {
     "subtitle": "subtitles.under_world.demon_fish_tongue",
-    "sounds": [{ "name": "under_world:demon_fish_tongue", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:demon_fish_tongue",
+        "stream": false
+      }
+    ]
   },
   "the_ball_hum": {
     "subtitle": "subtitles.under_world.the_ball_hum",
-    "sounds": [{ "name": "under_world:the_ball_hum", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:the_ball_hum",
+        "stream": false
+      }
+    ]
   },
   "geometric_nightmare": {
     "subtitle": "subtitles.under_world.geometric_nightmare",
-    "sounds": [{ "name": "under_world:geometric_nightmare", "stream": false }]
+    "sounds": [
+      {
+        "name": "under_world:geometric_nightmare",
+        "stream": false
+      }
+    ]
   },
   "music_fun_world": {
-    "sounds": [{ "name": "under_world:music_fun_world", "stream": true }]
+    "sounds": [
+      {
+        "name": "under_world:music_fun_world",
+        "stream": true
+      }
+    ]
   },
   "music_maze": {
-    "sounds": [{ "name": "under_world:music_maze", "stream": true }]
+    "sounds": [
+      {
+        "name": "under_world:music_maze",
+        "stream": true
+      }
+    ]
   },
   "music_the_error": {
-    "sounds": [{ "name": "under_world:music_the_error", "stream": true }]
+    "sounds": [
+      {
+        "name": "under_world:music_the_error",
+        "stream": true
+      }
+    ]
   },
   "music_the_time": {
-    "sounds": [{ "name": "under_world:music_the_time", "stream": true }]
+    "sounds": [
+      {
+        "name": "under_world:music_the_time",
+        "stream": true
+      }
+    ]
   },
   "music_overworld": {
-    "sounds": [{ "name": "under_world:music_overworld", "stream": true }]
+    "sounds": [
+      {
+        "name": "under_world:music_overworld",
+        "stream": true
+      }
+    ]
+  },
+  "pylon_step": {
+    "subtitle": "subtitles.under_world.pylon_step",
+    "sounds": [
+      {
+        "name": "under_world:pylon_step",
+        "stream": false
+      }
+    ]
+  },
+  "pylon_hum": {
+    "subtitle": "subtitles.under_world.pylon_hum",
+    "sounds": [
+      {
+        "name": "under_world:pylon_hum",
+        "stream": false
+      }
+    ]
+  },
+  "pylon_electrocute": {
+    "subtitle": "subtitles.under_world.pylon_electrocute",
+    "sounds": [
+      {
+        "name": "under_world:pylon_electrocute",
+        "stream": false
+      }
+    ]
+  },
+  "turbine_step": {
+    "subtitle": "subtitles.under_world.turbine_step",
+    "sounds": [
+      {
+        "name": "under_world:turbine_step",
+        "stream": false
+      }
+    ]
+  },
+  "turbine_whoosh": {
+    "subtitle": "subtitles.under_world.turbine_whoosh",
+    "sounds": [
+      {
+        "name": "under_world:turbine_whoosh",
+        "stream": false
+      }
+    ]
+  },
+  "xp_startup": {
+    "subtitle": "subtitles.under_world.xp_startup",
+    "sounds": [
+      {
+        "name": "under_world:xp_startup",
+        "stream": false
+      }
+    ]
+  },
+  "xp_error": {
+    "subtitle": "subtitles.under_world.xp_error",
+    "sounds": [
+      {
+        "name": "under_world:xp_error",
+        "stream": false
+      }
+    ]
+  },
+  "dot_com_roar": {
+    "subtitle": "subtitles.under_world.dot_com_roar",
+    "sounds": [
+      {
+        "name": "under_world:dot_com_roar",
+        "stream": false
+      }
+    ]
+  },
+  "hell_event": {
+    "subtitle": "subtitles.under_world.hell_event",
+    "sounds": [
+      {
+        "name": "under_world:hell_event",
+        "stream": false
+      }
+    ]
+  },
+  "music_plains": {
+    "sounds": [
+      {
+        "name": "under_world:music_plains",
+        "stream": true
+      }
+    ]
+  },
+  "music_wind_ocean": {
+    "sounds": [
+      {
+        "name": "under_world:music_wind_ocean",
+        "stream": true
+      }
+    ]
+  },
+  "music_xp": {
+    "sounds": [
+      {
+        "name": "under_world:music_xp",
+        "stream": true
+      }
+    ]
+  },
+  "music_browser": {
+    "sounds": [
+      {
+        "name": "under_world:music_browser",
+        "stream": true
+      }
+    ]
   }
 }

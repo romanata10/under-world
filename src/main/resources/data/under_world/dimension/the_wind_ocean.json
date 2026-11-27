@@ -1,0 +1,10 @@
+{
+  "type": "under_world:the_wind_ocean",
+  "generator": {
+    "type": "under_world:the_wind_ocean",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "under_world:wind_ocean"
+    }
+  }
+}

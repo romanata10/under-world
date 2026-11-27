@@ -1,0 +1,10 @@
+{
+  "type": "under_world:the_xp",
+  "generator": {
+    "type": "under_world:the_xp",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "under_world:xp_desktop"
+    }
+  }
+}

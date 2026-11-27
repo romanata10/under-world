@@ -9,12 +9,15 @@ import com.underworld.mod.entity.DemonFishEntity;
 import com.underworld.mod.entity.EyesOfFunEntity;
 import com.underworld.mod.entity.FriendEntity;
 import com.underworld.mod.entity.HandsEntity;
+import com.underworld.mod.entity.LivingPylonEntity;
 import com.underworld.mod.entity.SmileEntity;
 import com.underworld.mod.entity.TheBallEntity;
+import com.underworld.mod.entity.TheDotComEntity;
 import com.underworld.mod.entity.TheMimicEntity;
 import com.underworld.mod.entity.TheSkyEntity;
 import com.underworld.mod.entity.TheTruthEntity;
 import com.underworld.mod.entity.TreeMimicEntity;
+import com.underworld.mod.entity.WindTurbineStalkerEntity;
 import com.underworld.mod.event.UnderWorldEventDirector;
 import com.underworld.mod.network.NetworkHandler;
 import com.underworld.mod.registry.ModDimensions;
@@ -61,7 +64,10 @@ public final class UnderWorldCommands {
                 .then(buildSpawnNode("clock", ModEntities.CLOCK, false))
                 .then(buildSpawnNode("the_mimic", ModEntities.THE_MIMIC, false))
                 .then(buildSpawnNode("demon_fish", ModEntities.DEMON_FISH, false))
-                .then(buildSpawnNode("the_ball", ModEntities.THE_BALL, false));
+                .then(buildSpawnNode("the_ball", ModEntities.THE_BALL, false))
+                .then(buildSpawnNode("living_pylon", ModEntities.LIVING_PYLON, false))
+                .then(buildSpawnNode("wind_turbine_stalker", ModEntities.WIND_TURBINE_STALKER, false))
+                .then(buildSpawnNode("the_dot_com", ModEntities.THE_DOT_COM, false));
 
         // /underworld trigger <event> [<player>]
         LiteralArgumentBuilder<CommandSourceStack> triggerCmd = Commands.literal("trigger")
@@ -110,9 +116,25 @@ public final class UnderWorldCommands {
                 .then(Commands.literal("the_ball")
                         .executes(ctx -> executeTriggerTheBall(ctx.getSource(), ctx.getSource().getPlayerOrException()))
                         .then(Commands.argument("player", EntityArgument.player())
-                                .executes(ctx -> executeTriggerTheBall(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))));
+                                .executes(ctx -> executeTriggerTheBall(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+                .then(Commands.literal("living_pylon")
+                        .executes(ctx -> executeTriggerLivingPylon(ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeTriggerLivingPylon(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+                .then(Commands.literal("wind_turbine")
+                        .executes(ctx -> executeTriggerWindTurbine(ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeTriggerWindTurbine(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+                .then(Commands.literal("the_dot_com")
+                        .executes(ctx -> executeTriggerDotCom(ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeTriggerDotCom(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+                .then(Commands.literal("welcome_to_the_hell")
+                        .executes(ctx -> executeTriggerWelcomeToTheHell(ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeTriggerWelcomeToTheHell(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))));
 
-        // /underworld tp <overworld|fun_world|maze|the_error|the_time> [<player>]
+        // /underworld tp <overworld|fun_world|maze|the_error|the_time|the_plains|the_wind_ocean|the_xp|the_browser> [<player>]
         LiteralArgumentBuilder<CommandSourceStack> tpCmd = Commands.literal("tp")
                 .then(Commands.literal("overworld")
                         .executes(ctx -> executeDimensionTp(ctx.getSource(), ctx.getSource().getPlayerOrException(), "overworld"))
@@ -133,9 +155,25 @@ public final class UnderWorldCommands {
                 .then(Commands.literal("the_time")
                         .executes(ctx -> executeDimensionTp(ctx.getSource(), ctx.getSource().getPlayerOrException(), "the_time"))
                         .then(Commands.argument("player", EntityArgument.player())
-                                .executes(ctx -> executeDimensionTp(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"), "the_time"))));
+                                .executes(ctx -> executeDimensionTp(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"), "the_time"))))
+                .then(Commands.literal("the_plains")
+                        .executes(ctx -> executeDimensionTp(ctx.getSource(), ctx.getSource().getPlayerOrException(), "the_plains"))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeDimensionTp(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"), "the_plains"))))
+                .then(Commands.literal("the_wind_ocean")
+                        .executes(ctx -> executeDimensionTp(ctx.getSource(), ctx.getSource().getPlayerOrException(), "the_wind_ocean"))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeDimensionTp(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"), "the_wind_ocean"))))
+                .then(Commands.literal("the_xp")
+                        .executes(ctx -> executeDimensionTp(ctx.getSource(), ctx.getSource().getPlayerOrException(), "the_xp"))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeDimensionTp(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"), "the_xp"))))
+                .then(Commands.literal("the_browser")
+                        .executes(ctx -> executeDimensionTp(ctx.getSource(), ctx.getSource().getPlayerOrException(), "the_browser"))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeDimensionTp(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"), "the_browser"))));
 
-        // /underworld structure <name> [<player>] (all classic + lore structures)
+        // /underworld structure <name> [<player>] (all classic + lore + v2.4.0 structures)
         LiteralArgumentBuilder<CommandSourceStack> structureCmd = Commands.literal("structure")
                 .then(buildStructureNode("void_shrine"))
                 .then(buildStructureNode("broken_shaft"))
@@ -146,6 +184,7 @@ public final class UnderWorldCommands {
                 .then(buildStructureNode("old_village_house"))
                 .then(buildStructureNode("clock_statue"))
                 .then(buildStructureNode("leaf_maze"))
+                .then(buildStructureNode("power_pylon"))
                 .then(buildStructureNode("hillside_house"))
                 .then(buildStructureNode("clan_base"))
                 .then(buildStructureNode("mario_pixel_art"))
@@ -153,7 +192,8 @@ public final class UnderWorldCommands {
                 .then(buildStructureNode("abandoned_treehouse"))
                 .then(buildStructureNode("secret_dugout"))
                 .then(buildStructureNode("old_spawn_hub"))
-                .then(buildStructureNode("villager_trading_hall"));
+                .then(buildStructureNode("villager_trading_hall"))
+                .then(buildStructureNode("computer_desk"));
 
         // /underworld lore <name> [<player>] (server-lore structures + random)
         LiteralArgumentBuilder<CommandSourceStack> loreCmd = Commands.literal("lore")
@@ -165,6 +205,7 @@ public final class UnderWorldCommands {
                 .then(buildStructureNode("secret_dugout"))
                 .then(buildStructureNode("old_spawn_hub"))
                 .then(buildStructureNode("villager_trading_hall"))
+                .then(buildStructureNode("computer_desk"))
                 .then(Commands.literal("random")
                         .executes(ctx -> executeRandomLoreStructure(ctx.getSource(), ctx.getSource().getPlayerOrException()))
                         .then(Commands.argument("player", EntityArgument.player())
@@ -211,6 +252,11 @@ public final class UnderWorldCommands {
         BlockPos pos;
         if (type == ModEntities.DEMON_FISH.get()) {
             pos = UnderWorldEventDirector.findWaterSpawnPosAroundPlayer(level, target, 8, Math.max(12, maxDist));
+            if (pos == null) {
+                pos = UnderWorldEventDirector.findSpawnPosAroundPlayer(level, target, minDist, maxDist, false);
+            }
+        } else if (type == ModEntities.WIND_TURBINE_STALKER.get()) {
+            pos = UnderWorldEventDirector.findWaterSpawnPosAroundPlayer(level, target, minDist, Math.max(24, maxDist));
             if (pos == null) {
                 pos = UnderWorldEventDirector.findSpawnPosAroundPlayer(level, target, minDist, maxDist, false);
             }
@@ -373,6 +419,42 @@ public final class UnderWorldCommands {
         return 1;
     }
 
+    private static int executeTriggerLivingPylon(CommandSourceStack source, ServerPlayer target) {
+        LivingPylonEntity entity = UnderWorldEventDirector.triggerLivingPylonEncounter(target.serverLevel(), target);
+        if (entity == null) {
+            source.sendFailure(Component.translatable("command.under_world.spawn.failed", target.getName()));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable("command.under_world.trigger.living_pylon", target.getName()), true);
+        return 1;
+    }
+
+    private static int executeTriggerWindTurbine(CommandSourceStack source, ServerPlayer target) {
+        WindTurbineStalkerEntity entity = UnderWorldEventDirector.triggerWindTurbineEncounter(target.serverLevel(), target, true);
+        if (entity == null) {
+            source.sendFailure(Component.translatable("command.under_world.spawn.failed", target.getName()));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable("command.under_world.trigger.wind_turbine", target.getName()), true);
+        return 1;
+    }
+
+    private static int executeTriggerDotCom(CommandSourceStack source, ServerPlayer target) {
+        TheDotComEntity entity = UnderWorldEventDirector.triggerDotComEncounter(target.serverLevel(), target);
+        if (entity == null) {
+            source.sendFailure(Component.translatable("command.under_world.spawn.failed", target.getName()));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable("command.under_world.trigger.the_dot_com", target.getName()), true);
+        return 1;
+    }
+
+    private static int executeTriggerWelcomeToTheHell(CommandSourceStack source, ServerPlayer target) {
+        UnderWorldEventDirector.triggerWelcomeToTheHellEvent(source.getServer(), target);
+        source.sendSuccess(() -> Component.translatable("command.under_world.trigger.welcome_to_the_hell", target.getName()), true);
+        return 1;
+    }
+
     private static int executeRandomLoreStructure(CommandSourceStack source, ServerPlayer target) {
         String id = LoreStructureSpawner.LORE_STRUCTURE_IDS[
                 target.serverLevel().getRandom().nextInt(LoreStructureSpawner.LORE_STRUCTURE_IDS.length)
@@ -386,6 +468,10 @@ public final class UnderWorldCommands {
             case "maze" -> ModDimensions.sendToMaze(target);
             case "the_error" -> ModDimensions.sendToError(target);
             case "the_time" -> ModDimensions.sendToTime(target);
+            case "the_plains" -> ModDimensions.sendToPlains(target);
+            case "the_wind_ocean" -> ModDimensions.sendToWindOcean(target);
+            case "the_xp" -> ModDimensions.sendToXp(target);
+            case "the_browser" -> ModDimensions.sendToBrowser(target);
             default -> ModDimensions.returnToOverworld(target);
         };
         if (!ok) {

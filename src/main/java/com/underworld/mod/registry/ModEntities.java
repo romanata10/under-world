@@ -6,12 +6,15 @@ import com.underworld.mod.entity.DemonFishEntity;
 import com.underworld.mod.entity.EyesOfFunEntity;
 import com.underworld.mod.entity.FriendEntity;
 import com.underworld.mod.entity.HandsEntity;
+import com.underworld.mod.entity.LivingPylonEntity;
 import com.underworld.mod.entity.SmileEntity;
 import com.underworld.mod.entity.TheBallEntity;
+import com.underworld.mod.entity.TheDotComEntity;
 import com.underworld.mod.entity.TheMimicEntity;
 import com.underworld.mod.entity.TheSkyEntity;
 import com.underworld.mod.entity.TheTruthEntity;
 import com.underworld.mod.entity.TreeMimicEntity;
+import com.underworld.mod.entity.WindTurbineStalkerEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -94,6 +97,27 @@ public final class ModEntities {
                     .updateInterval(1)
                     .build(UnderWorldMod.id("the_ball").toString()));
 
+    public static final RegistryObject<EntityType<LivingPylonEntity>> LIVING_PYLON = ENTITIES.register("living_pylon",
+            () -> EntityType.Builder.of(LivingPylonEntity::new, MobCategory.MONSTER)
+                    .sized(1.85F, 8.6F)
+                    .clientTrackingRange(24)
+                    .updateInterval(1)
+                    .build(UnderWorldMod.id("living_pylon").toString()));
+
+    public static final RegistryObject<EntityType<WindTurbineStalkerEntity>> WIND_TURBINE_STALKER = ENTITIES.register("wind_turbine_stalker",
+            () -> EntityType.Builder.of(WindTurbineStalkerEntity::new, MobCategory.MONSTER)
+                    .sized(1.6F, 10.5F)
+                    .clientTrackingRange(24)
+                    .updateInterval(1)
+                    .build(UnderWorldMod.id("wind_turbine_stalker").toString()));
+
+    public static final RegistryObject<EntityType<TheDotComEntity>> THE_DOT_COM = ENTITIES.register("the_dot_com",
+            () -> EntityType.Builder.of(TheDotComEntity::new, MobCategory.MONSTER)
+                    .sized(1.15F, 4.9F)
+                    .clientTrackingRange(24)
+                    .updateInterval(1)
+                    .build(UnderWorldMod.id("the_dot_com").toString()));
+
     private ModEntities() {}
 
     public static void registerAttributes(final EntityAttributeCreationEvent event) {
@@ -108,5 +132,8 @@ public final class ModEntities {
         event.put(THE_MIMIC.get(), TheMimicEntity.createAttributes().build());
         event.put(DEMON_FISH.get(), DemonFishEntity.createAttributes().build());
         event.put(THE_BALL.get(), TheBallEntity.createAttributes().build());
+        event.put(LIVING_PYLON.get(), LivingPylonEntity.createAttributes().build());
+        event.put(WIND_TURBINE_STALKER.get(), WindTurbineStalkerEntity.createAttributes().build());
+        event.put(THE_DOT_COM.get(), TheDotComEntity.createAttributes().build());
     }
 }

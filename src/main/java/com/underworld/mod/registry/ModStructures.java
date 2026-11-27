@@ -15,6 +15,8 @@ import com.underworld.mod.world.structure.LeafMazePiece;
 import com.underworld.mod.world.structure.LeafMazeStructure;
 import com.underworld.mod.world.structure.OldVillageHousePiece;
 import com.underworld.mod.world.structure.OldVillageHouseStructure;
+import com.underworld.mod.world.structure.PowerPylonPiece;
+import com.underworld.mod.world.structure.PowerPylonStructure;
 import com.underworld.mod.world.structure.VoidShrinePiece;
 import com.underworld.mod.world.structure.VoidShrineStructure;
 import com.underworld.mod.world.structure.WheatFarmPiece;
@@ -59,6 +61,9 @@ public final class ModStructures {
     public static final RegistryObject<StructureType<LeafMazeStructure>> LEAF_MAZE =
             STRUCTURE_TYPES.register("leaf_maze", () -> () -> LeafMazeStructure.CODEC);
 
+    public static final RegistryObject<StructureType<PowerPylonStructure>> POWER_PYLON =
+            STRUCTURE_TYPES.register("power_pylon", () -> () -> PowerPylonStructure.CODEC);
+
     public static final RegistryObject<StructurePieceType> VOID_SHRINE_PIECE =
             STRUCTURE_PIECES.register("void_shrine", () -> (StructurePieceType.ContextlessType) VoidShrinePiece::new);
 
@@ -85,6 +90,9 @@ public final class ModStructures {
 
     public static final RegistryObject<StructurePieceType> LEAF_MAZE_PIECE =
             STRUCTURE_PIECES.register("leaf_maze", () -> (StructurePieceType.ContextlessType) LeafMazePiece::new);
+
+    public static final RegistryObject<StructurePieceType> POWER_PYLON_PIECE =
+            STRUCTURE_PIECES.register("power_pylon", () -> (StructurePieceType.ContextlessType) PowerPylonPiece::new);
 
     private ModStructures() {}
 }

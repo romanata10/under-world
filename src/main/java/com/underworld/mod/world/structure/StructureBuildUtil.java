@@ -164,6 +164,26 @@ public final class StructureBuildUtil {
         applySignText(level, pos, color, glowing, lines);
     }
 
+    public static void placeWallOrStandingSign(ServerLevelAccessor level, BoundingBox box, BlockPos pos,
+                                               Direction facing, DyeColor color, boolean glowing, String... lines) {
+        placeStandingSign(level, box, pos, facingToRotation16(facing), Blocks.OAK_SIGN, color, glowing, lines);
+    }
+
+    public static void placeWallOrStandingSign(ServerLevelAccessor level, BlockPos pos,
+                                               Direction facing, boolean glowing, String... lines) {
+        placeStandingSign(level, new BoundingBox(pos), pos, facingToRotation16(facing), Blocks.OAK_SIGN,
+                glowing ? DyeColor.RED : DyeColor.BLACK, glowing, lines);
+    }
+
+    private static int facingToRotation16(Direction facing) {
+        return switch (facing) {
+            case NORTH -> 8;
+            case EAST -> 12;
+            case WEST -> 4;
+            default -> 0;
+        };
+    }
+
     private static void applySignText(ServerLevelAccessor level, BlockPos pos, DyeColor color, boolean glowing, String... lines) {
         if (level.getBlockEntity(pos) instanceof SignBlockEntity sign) {
             Component[] msgs = new Component[]{

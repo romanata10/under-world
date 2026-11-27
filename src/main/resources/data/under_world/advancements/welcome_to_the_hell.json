@@ -1,0 +1,22 @@
+{
+  "display": {
+    "icon": {
+      "item": "under_world:glitch_block"
+    },
+    "title": {
+      "translate": "advancement.under_world.welcome_to_the_hell.title"
+    },
+    "description": {
+      "translate": "advancement.under_world.welcome_to_the_hell.desc"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "criteria": {
+    "hell_event": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

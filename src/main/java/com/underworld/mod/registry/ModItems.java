@@ -56,6 +56,15 @@ public final class ModItems {
     public static final RegistryObject<Item> THE_BALL_SPAWN_EGG = ITEMS.register("the_ball_spawn_egg",
             () -> new ForgeSpawnEggItem(ModEntities.THE_BALL, 0x020203, 0x20202A, new Item.Properties()));
 
+    public static final RegistryObject<Item> LIVING_PYLON_SPAWN_EGG = ITEMS.register("living_pylon_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.LIVING_PYLON, 0x5C2E26, 0xFF3E26, new Item.Properties()));
+
+    public static final RegistryObject<Item> WIND_TURBINE_STALKER_SPAWN_EGG = ITEMS.register("wind_turbine_stalker_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.WIND_TURBINE_STALKER, 0xE6EAEF, 0xD61C2B, new Item.Properties()));
+
+    public static final RegistryObject<Item> THE_DOT_COM_SPAWN_EGG = ITEMS.register("the_dot_com_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.THE_DOT_COM, 0x3CE04A, 0xDE121C, new Item.Properties()));
+
     // Fun World & Maze block items
     public static final RegistryObject<Item> FUN_GRASS_BLOCK = blockItem("fun_grass_block", ModBlocks.FUN_GRASS_BLOCK);
     public static final RegistryObject<Item> FUN_DIRT = blockItem("fun_dirt", ModBlocks.FUN_DIRT);
@@ -81,6 +90,32 @@ public final class ModItems {
     public static final RegistryObject<Item> CLOCK_RIM_BLOCK = blockItem("clock_rim_block", ModBlocks.CLOCK_RIM_BLOCK);
     public static final RegistryObject<Item> TIME_PORTAL = blockItem("time_portal", ModBlocks.TIME_PORTAL);
 
+    // v2.4.0 block items & Computer reward
+    public static final RegistryObject<Item> PLAINS_GRASS_BLOCK = blockItem("plains_grass_block", ModBlocks.PLAINS_GRASS_BLOCK);
+    public static final RegistryObject<Item> PLAINS_PATH_BLOCK = blockItem("plains_path_block", ModBlocks.PLAINS_PATH_BLOCK);
+    public static final RegistryObject<Item> PLAINS_PORTAL_GRASS = blockItem("plains_portal_grass", ModBlocks.PLAINS_PORTAL_GRASS);
+    public static final RegistryObject<Item> PYLON_STEEL = blockItem("pylon_steel", ModBlocks.PYLON_STEEL);
+    public static final RegistryObject<Item> WIND_TURBINE_PORTAL = blockItem("wind_turbine_portal", ModBlocks.WIND_TURBINE_PORTAL);
+    public static final RegistryObject<Item> TURBINE_PILLAR = blockItem("turbine_pillar", ModBlocks.TURBINE_PILLAR);
+    public static final RegistryObject<Item> TURBINE_BLADE = blockItem("turbine_blade", ModBlocks.TURBINE_BLADE);
+    public static final RegistryObject<Item> OIL_RIG_STEEL = blockItem("oil_rig_steel", ModBlocks.OIL_RIG_STEEL);
+    public static final RegistryObject<Item> OIL_RIG_PORTAL = blockItem("oil_rig_portal", ModBlocks.OIL_RIG_PORTAL);
+    public static final RegistryObject<Item> XP_GRASS_BLOCK = blockItem("xp_grass_block", ModBlocks.XP_GRASS_BLOCK);
+    public static final RegistryObject<Item> XP_ICON_BLOCK = blockItem("xp_icon_block", ModBlocks.XP_ICON_BLOCK);
+    public static final RegistryObject<Item> XP_ICON_FALLEN = blockItem("xp_icon_fallen", ModBlocks.XP_ICON_FALLEN);
+    public static final RegistryObject<Item> CHROME_PORTAL = blockItem("chrome_portal", ModBlocks.CHROME_PORTAL);
+    public static final RegistryObject<Item> BROWSER_TILE = blockItem("browser_tile", ModBlocks.BROWSER_TILE);
+    public static final RegistryObject<Item> BROWSER_BAR_BLOCK = blockItem("browser_bar_block", ModBlocks.BROWSER_BAR_BLOCK);
+    public static final RegistryObject<Item> SITE_YOUTUBE_BLOCK = blockItem("site_youtube_block", ModBlocks.SITE_YOUTUBE_BLOCK);
+    public static final RegistryObject<Item> SITE_ROBLOX_BLOCK = blockItem("site_roblox_block", ModBlocks.SITE_ROBLOX_BLOCK);
+    public static final RegistryObject<Item> SITE_STEAM_BLOCK = blockItem("site_steam_block", ModBlocks.SITE_STEAM_BLOCK);
+    public static final RegistryObject<Item> SITE_REDDIT_BLOCK = blockItem("site_reddit_block", ModBlocks.SITE_REDDIT_BLOCK);
+    public static final RegistryObject<Item> SITE_GLITCH_BLOCK = blockItem("site_glitch_block", ModBlocks.SITE_GLITCH_BLOCK);
+    public static final RegistryObject<Item> DOWNLOAD_BUTTON_BLOCK = blockItem("download_button_block", ModBlocks.DOWNLOAD_BUTTON_BLOCK);
+    public static final RegistryObject<Item> BROWSER_EXIT_PORTAL = blockItem("browser_exit_portal", ModBlocks.BROWSER_EXIT_PORTAL);
+    public static final RegistryObject<Item> COMPUTER = ITEMS.register("computer",
+            () -> new BlockItem(ModBlocks.COMPUTER.get(), new Item.Properties().stacksTo(16)));
+
     public static final RegistryObject<CreativeModeTab> UNDER_WORLD_TAB = CREATIVE_TABS.register("under_world",
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.under_world"))
@@ -97,6 +132,33 @@ public final class ModItems {
                         output.accept(THE_MIMIC_SPAWN_EGG.get());
                         output.accept(DEMON_FISH_SPAWN_EGG.get());
                         output.accept(THE_BALL_SPAWN_EGG.get());
+                        output.accept(LIVING_PYLON_SPAWN_EGG.get());
+                        output.accept(WIND_TURBINE_STALKER_SPAWN_EGG.get());
+                        output.accept(THE_DOT_COM_SPAWN_EGG.get());
+
+                        output.accept(COMPUTER.get());
+                        output.accept(PLAINS_GRASS_BLOCK.get());
+                        output.accept(PLAINS_PATH_BLOCK.get());
+                        output.accept(PLAINS_PORTAL_GRASS.get());
+                        output.accept(PYLON_STEEL.get());
+                        output.accept(WIND_TURBINE_PORTAL.get());
+                        output.accept(TURBINE_PILLAR.get());
+                        output.accept(TURBINE_BLADE.get());
+                        output.accept(OIL_RIG_STEEL.get());
+                        output.accept(OIL_RIG_PORTAL.get());
+                        output.accept(XP_GRASS_BLOCK.get());
+                        output.accept(XP_ICON_BLOCK.get());
+                        output.accept(XP_ICON_FALLEN.get());
+                        output.accept(CHROME_PORTAL.get());
+                        output.accept(BROWSER_TILE.get());
+                        output.accept(BROWSER_BAR_BLOCK.get());
+                        output.accept(SITE_YOUTUBE_BLOCK.get());
+                        output.accept(SITE_ROBLOX_BLOCK.get());
+                        output.accept(SITE_STEAM_BLOCK.get());
+                        output.accept(SITE_REDDIT_BLOCK.get());
+                        output.accept(SITE_GLITCH_BLOCK.get());
+                        output.accept(DOWNLOAD_BUTTON_BLOCK.get());
+                        output.accept(BROWSER_EXIT_PORTAL.get());
 
                         output.accept(FUN_GRASS_BLOCK.get());
                         output.accept(FUN_DIRT.get());
@@ -140,6 +202,12 @@ public final class ModItems {
             event.accept(SMILE_SPAWN_EGG.get());
             event.accept(THE_TRUTH_SPAWN_EGG.get());
             event.accept(CLOCK_SPAWN_EGG.get());
+            event.accept(THE_MIMIC_SPAWN_EGG.get());
+            event.accept(DEMON_FISH_SPAWN_EGG.get());
+            event.accept(THE_BALL_SPAWN_EGG.get());
+            event.accept(LIVING_PYLON_SPAWN_EGG.get());
+            event.accept(WIND_TURBINE_STALKER_SPAWN_EGG.get());
+            event.accept(THE_DOT_COM_SPAWN_EGG.get());
         }
     }
 }

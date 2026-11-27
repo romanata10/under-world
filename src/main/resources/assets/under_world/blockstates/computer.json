@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "under_world:block/computer"
+    },
+    "facing=east": {
+      "model": "under_world:block/computer",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "under_world:block/computer",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "under_world:block/computer",
+      "y": 270
+    }
+  }
+}
