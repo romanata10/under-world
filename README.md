@@ -1,4 +1,4 @@
-# Under World (`under_world`) — v2.2.0
+# Under World (`under_world`) — v2.3.0
 
 A Minecraft **1.20.1 Forge** psychological & Dreamcore horror mod inspired by *The Broken Script*, built with **GeckoLib 4**, **Fzzy Config**, **Configured**, and full multiplayer server/client synchronization.
 
@@ -10,7 +10,7 @@ A Minecraft **1.20.1 Forge** psychological & Dreamcore horror mod inspired by *T
 - **Fzzy Config**: `0.7.5+1.20.1+forge` (plus **Kotlin for Forge** `4.11.0+`)
 - **Configured** *(optional client GUI integration)*: `2.2.3+`
 
-## Entities (v1 + v2)
+## Entities (v1 – v2.3)
 
 - **`friend`** (`under_world:friend`):
   - Appears once per world on Day 1 evening (`dayTime >= 12500`), broadcasts a yellow server join message with a vanilla cave sound, spawns in the world, and stays permanently listed in the multiplayer player tab list.
@@ -37,6 +37,16 @@ A Minecraft **1.20.1 Forge** psychological & Dreamcore horror mod inspired by *T
   - Tall lanky monochrome silhouette with a circular gray-rimmed white analog clock head, black-veined narrow white torso, branching crooked legs, and extra-long clawed arms.
   - In the Overworld: either stalks and vanishes on eye contact, or chases the player and warps them into **The Time**.
   - Inside **The Time**: aggressive hunter variant that **freezes completely in silence and sprints only while the clock ticking sound plays**.
+- **`the_mimic`** (`under_world:the_mimic`) *(v2.3)*:
+  - Appears disguised as Steve with unsettling head-twitching glitches.
+  - Upon approaching, bursts into black pixel blocks & ink smoke to reveal a pitch-black 4-tentacled multi-eyed horror (`under_world:the_mimic`) and chases for 30 seconds accompanied by screen shaking.
+  - If it catches a player, it **steals that player's skin and nametag**, reverts to wandering disguise looking for other players in multiplayer (or vanishes into black pixels after 30s without catching anyone).
+- **`Demon Fish`** (`under_world:demon_fish`) *(v2.3)*:
+  - Pitch-black aquatic horror with white crescent eyes, jagged pale fangs, and dorsal spines that spawns when players swim or travel by boat.
+  - Can lash out with its tongue to **grab and shatter boats**, smashes dug underwater blocks to flood hiding holes, and vanishes if you escape onto dry land or survive 1 minute.
+- **`The Ball`** (`under_world:the_ball`) *(v2.3)*:
+  - Floating pitch-black void sphere hovering in the Overworld that smoothly shrinks, expands, and stretches wide.
+  - Touching it makes it vanish and inflicts **Geometric Nightmare** (`under_world:geometric_nightmare` — effect-only, no potion items), warping FOV, tilting the camera, and flooding the screen with geometric shapes.
 
 ## Mechanics, Dimensions & Soundtracks (v2.0 – v2.2)
 
@@ -55,28 +65,36 @@ A Minecraft **1.20.1 Forge** psychological & Dreamcore horror mod inspired by *T
   - **20% chance** upon sleeping in an Overworld bed to wake inside a broken magenta-and-black missing-texture world beneath a normal bright blue cloudy sky.
   - Features missing void chunks, chunks lifted high into the sky, floating water pockets in midair, stretched glitch trees, and flashing glitch blocks.
   - Completely **safe** (damage protected); automatically returns you to the Overworld after **1 minute 30 seconds** (`1800` ticks).
-- **The Time** (`under_world:the_time`) *(v2.2)*:
+- **The Time** (`under_world:the_time`) *(v2.2 / v2.3)*:
   - Endless bright cloudy sky filled above and below with grids of horizontal floating analog clock discs.
   - Entered when caught by `clock` in the Overworld; haunted by the ticking aggressive `clock` hunter.
+  - Fall damage is negated in **The Time**, and falling below `Y < -12` wraps you safely back above a disc with extended Slow Falling.
   - Escape only by finding a rare **Portal Clock Disc** containing `under_world:time_portal`.
 
-## Worldgen Structures (v2.0 – v2.2)
+## Structures & Dynamic Survival Lore Events (v2.0 – v2.3)
 
-- `under_world:void_shrine` & `under_world:broken_shaft` *(v2.0)*
-- `under_world:fountain` *(v2.2)* — Weathered cobblestone & mossy stone fountain basin
-- `under_world:glitch_cluster` *(v2.2)* — Broken monolith of `under_world:glitch_block` flashing live textures from across every block in the game
-- `under_world:elongated_tree` *(v2.2)* — Unnaturally stretched giant oak tree
-- `under_world:wheat_farm` *(v2.2)* — Fenced irrigated wheat farm plot with hay bales and supply chest
-- `under_world:old_village_house` *(v2.2)* — Nostalgic 1.12.2-style cobblestone & oak village cottage
-- `under_world:clock_statue` *(v2.2)* — Monumental standing grandfather clock tower
-- `under_world:leaf_maze` *(v2.2)* — Compact 15×15 oak-leaf hedge maze with treasure center
+All classic structures AND all 8 new **Server-Lore Structures** spawn dynamically during active survival gameplay as world events around players (configurable interval), and can also be placed with `/underworld lore` or `/underworld structure`:
+
+### Classic & Oddity Structures *(worldgen + dynamic survival events)*
+- `void_shrine`, `broken_shaft`, `fountain`, `glitch_cluster`, `elongated_tree`, `wheat_farm`, `old_village_house`, `clock_statue`, `leaf_maze`
+
+### Server-Lore Structures *(v2.3, with EN/RU signs & `WrittenBookItem` logs)*
+- `hillside_house` — Hillside recessed glass-facade house with grass roof overhang, stone staircase, glowstone floor inlays, stacked chests, and Kira_99's log
+- `clan_base` — Terraced modern-alpha oak & grass clan compound with pool, glass upper rooms, corner torches, and a **hidden secret basement** hiding ServerAdmin's confession lectern
+- `mario_pixel_art` — Colossal unfinished 16-row Super Mario wool pixel art with leftover ladder scaffolding & Dima_2015's notes
+- `server_monument` — Mossy stone-brick memorial statue with one corrupted glitch eye & Server Archive #1
+- `abandoned_treehouse` — High oak-canopy lookout cabin with rope ladder & Misha_Play's diary
+- `secret_dugout` — Concealed grass-mound bunker with redstone torch lighting & Alex_2014's survival entry
+- `old_spawn_hub` — Classic multiplayer spawn pavilion with central glowstone fountain, rules/staff signboards & lockdown notice
+- `villager_trading_hall` — Enclosed 3-stall market hall housing real Librarians/Armorers/Farmers & Trader_Vova's final log
 
 ## Commands (`/underworld`, op level 2)
 
-- `/underworld spawn <friend|hands|tree|tree_mimic|the_sky|eyes_of_fun|smile|the_truth|clock> [<player>]`
-- `/underworld trigger <friend_join|friend_chat|hands_encounter|tree_encounter|the_sky_event|eyes_of_fun|smile|the_truth|clock> [<player>]`
+- `/underworld spawn <friend|hands|tree|tree_mimic|the_sky|eyes_of_fun|smile|the_truth|clock|the_mimic|demon_fish|the_ball> [<player>]`
+- `/underworld trigger <friend_join|friend_chat|hands_encounter|tree_encounter|the_sky_event|eyes_of_fun|smile|the_truth|clock|the_mimic|demon_fish|the_ball> [<player>]`
+- `/underworld lore <hillside_house|clan_base|mario_pixel_art|server_monument|abandoned_treehouse|secret_dugout|old_spawn_hub|villager_trading_hall|random> [<player>]`
+- `/underworld structure <all classic + lore structure IDs> [<player>]`
 - `/underworld tp <overworld|fun_world|maze|the_error|the_time> [<player>]`
-- `/underworld structure <void_shrine|broken_shaft|fountain|glitch_cluster|elongated_tree|wheat_farm|old_village_house|clock_statue|leaf_maze> [<player>]`
 - `/underworld events <enable|disable|status>`
 - `/underworld reset friend`
 

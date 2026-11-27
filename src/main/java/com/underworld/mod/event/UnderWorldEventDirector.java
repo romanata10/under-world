@@ -3,10 +3,13 @@ package com.underworld.mod.event;
 import com.underworld.mod.UnderWorldMod;
 import com.underworld.mod.config.UnderWorldConfigHolder;
 import com.underworld.mod.entity.ClockEntity;
+import com.underworld.mod.entity.DemonFishEntity;
 import com.underworld.mod.entity.EyesOfFunEntity;
 import com.underworld.mod.entity.FriendEntity;
 import com.underworld.mod.entity.HandsEntity;
 import com.underworld.mod.entity.SmileEntity;
+import com.underworld.mod.entity.TheBallEntity;
+import com.underworld.mod.entity.TheMimicEntity;
 import com.underworld.mod.entity.TheSkyEntity;
 import com.underworld.mod.entity.TheTruthEntity;
 import com.underworld.mod.entity.TreeMimicEntity;
@@ -20,6 +23,7 @@ import com.underworld.mod.world.dimension.ErrorChunkGenerator;
 import com.underworld.mod.world.dimension.MazeChunkGenerator;
 import com.underworld.mod.world.dimension.TimeChunkGenerator;
 import com.underworld.mod.world.structure.VoidShrinePiece;
+import com.underworld.mod.world.structure.lore.LoreStructureSpawner;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -32,6 +36,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -40,6 +46,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
@@ -134,9 +141,17 @@ public final class UnderWorldEventDirector {
 
     @SubscribeEvent
     public static void onLivingHurt(final LivingHurtEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player && ModDimensions.isError(player.level())) {
-            // The Error is a safe glitch anomaly dimension
-            event.setCanceled(true);
+        if (event.getEntity() instanceof ServerPlayer player) {
+            if (ModDimensions.isError(player.level())) {
+                // The Error is a safe glitch anomaly dimension
+                event.setCanceled(true);
+                return;
+            }
+            if (ModDimensions.isTime(player.level()) && event.getSource().is(DamageTypeTags.IS_FALL)) {
+                // Prevent fatal fall-damage loops on endless clock discs in The Time
+                event.setCanceled(true);
+                return;
+            }
         }
     }
 
@@ -342,6 +357,24 @@ public final class UnderWorldEventDirector {
             }
         }
 
+        // 2c. Dynamic survival structure events (both classic oddity/nostalgia & server-lore builds)
+        if (UnderWorldConfigHolder.isDynamicStructureEventsEnabled()) {
+            int structCd = data.getStructureEventCooldownTicks() - 1;
+            if (structCd <= 0) {
+                int interval = UnderWorldConfigHolder.getDynamicStructureIntervalTicks();
+                data.setStructureEventCooldownTicks(interval + overworld.getRandom().nextInt(Math.max(200, interval / 2)));
+                ServerPlayer structTarget = pickSurvivalPlayer(overworld);
+                if (structTarget != null && !isSpawnProtected(structTarget)) {
+                    String spawned = LoreStructureSpawner.trySpawnDynamicStructureAround(overworld, structTarget, data);
+                    if (spawned != null && UnderWorldConfigHolder.get().general.debugLogging.get()) {
+                        UnderWorldMod.LOGGER.info("Dynamic survival structure {} appeared near {}", spawned, structTarget.getGameProfile().getName());
+                    }
+                }
+            } else {
+                data.setStructureEventCooldownTicks(structCd);
+            }
+        }
+
         // 3. Rare automatic encounters checked every 5 seconds (100 ticks)
         if (data.getTruthCooldownTicks() > 0) {
             data.setTruthCooldownTicks(data.getTruthCooldownTicks() - 1);
@@ -370,6 +403,20 @@ public final class UnderWorldEventDirector {
         BlockPos playerPos = target.blockPosition();
         boolean seeSky = overworld.canSeeSky(playerPos);
 
+        // Aquatic Demon Fish hunt when swimming or boating in water!
+        boolean inWaterOrBoat = target.isInWaterOrBubble()
+                || target.getVehicle() instanceof Boat
+                || overworld.getFluidState(playerPos.below()).is(FluidTags.WATER);
+        if (inWaterOrBoat && UnderWorldConfigHolder.get().demonFish.demonFishEnabled.get()) {
+            double dfChance = UnderWorldConfigHolder.get().demonFish.demonFishSpawnChance.get() * 0.30D;
+            if (random.nextDouble() < dfChance) {
+                if (triggerDemonFishEncounter(overworld, target) != null) {
+                    data.setEventCooldownTicks(3200 + random.nextInt(2400));
+                    return;
+                }
+            }
+        }
+
         // Super-mega-rare automatic event: The Truth
         if (data.getTruthCooldownTicks() <= 0
                 && !hasActiveTruth(server)
@@ -397,13 +444,33 @@ public final class UnderWorldEventDirector {
             }
         }
 
-        // Surface encounters: The Sky (super rare) or Tree? (rare)
+        // Surface encounters: The Sky, Tree?, Clock, The Mimic, The Ball
         if (seeSky) {
             if (UnderWorldConfigHolder.get().theSky.theSkyEnabled.get()) {
                 double skyChance = UnderWorldConfigHolder.get().theSky.theSkySpawnChance.get() * 0.15D;
                 if (random.nextDouble() < skyChance) {
                     if (triggerTheSkyEncounter(overworld, target, 50, 80) != null) {
                         data.setEventCooldownTicks(4800 + random.nextInt(4800));
+                        return;
+                    }
+                }
+            }
+
+            if (UnderWorldConfigHolder.get().theMimic.theMimicEnabled.get()) {
+                double mimicChance = UnderWorldConfigHolder.get().theMimic.theMimicSpawnChance.get() * 0.20D;
+                if (random.nextDouble() < mimicChance) {
+                    if (triggerTheMimicEncounter(overworld, target) != null) {
+                        data.setEventCooldownTicks(3400 + random.nextInt(3000));
+                        return;
+                    }
+                }
+            }
+
+            if (UnderWorldConfigHolder.get().theBall.theBallEnabled.get()) {
+                double ballChance = UnderWorldConfigHolder.get().theBall.theBallSpawnChance.get() * 0.18D;
+                if (random.nextDouble() < ballChance) {
+                    if (triggerTheBallEncounter(overworld, target) != null) {
+                        data.setEventCooldownTicks(3000 + random.nextInt(3000));
                         return;
                     }
                 }
@@ -493,12 +560,12 @@ public final class UnderWorldEventDirector {
             return;
         }
         for (ServerPlayer player : List.copyOf(timeLevel.players())) {
-            // Endless sky-clock void wrap if falling off a clock disc
+            // Endless sky-clock void wrap if falling off a clock disc — safe drop height + extended slow falling
             if (player.getY() < -12.0D) {
                 BlockPos disc = TimeChunkGenerator.findNearestSafeDiscPos(player.getBlockX(), player.getBlockZ());
                 player.fallDistance = 0.0F;
-                player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 110, 0, false, false));
-                player.teleportTo(timeLevel, disc.getX() + 0.5D, 118.0D, disc.getZ() + 0.5D, player.getYRot(), player.getXRot());
+                player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 300, 0, false, false));
+                player.teleportTo(timeLevel, disc.getX() + 0.5D, disc.getY() + 18.0D, disc.getZ() + 0.5D, player.getYRot(), player.getXRot());
             }
 
             if (server.getTickCount() % 80 != 0) {
@@ -824,6 +891,81 @@ public final class UnderWorldEventDirector {
     }
 
     @Nullable
+    public static TheMimicEntity triggerTheMimicEncounter(ServerLevel level, ServerPlayer player) {
+        BlockPos pos = findSpawnPosAroundPlayer(level, player, 18, 34, false);
+        if (pos == null) {
+            return null;
+        }
+        TheMimicEntity mimic = ModEntities.THE_MIMIC.get().create(level);
+        if (mimic == null) {
+            return null;
+        }
+        mimic.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D,
+                level.getRandom().nextFloat() * 360.0F, 0.0F);
+        mimic.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
+        level.addFreshEntity(mimic);
+        return mimic;
+    }
+
+    @Nullable
+    public static DemonFishEntity triggerDemonFishEncounter(ServerLevel level, ServerPlayer player) {
+        BlockPos pos = findWaterSpawnPosAroundPlayer(level, player, 10, 24);
+        if (pos == null) {
+            pos = findSpawnPosAroundPlayer(level, player, 10, 22, false);
+        }
+        if (pos == null) {
+            return null;
+        }
+        DemonFishEntity fish = ModEntities.DEMON_FISH.get().create(level);
+        if (fish == null) {
+            return null;
+        }
+        fish.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D,
+                level.getRandom().nextFloat() * 360.0F, 0.0F);
+        fish.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
+        fish.setTarget(player);
+        level.addFreshEntity(fish);
+        level.playSound(null, pos, ModSounds.DEMON_FISH_AMBUSH.get(), SoundSource.HOSTILE, 1.5F, 0.85F);
+        return fish;
+    }
+
+    @Nullable
+    public static TheBallEntity triggerTheBallEncounter(ServerLevel level, ServerPlayer player) {
+        BlockPos pos = findSpawnPosAroundPlayer(level, player, 16, 30, false);
+        if (pos == null) {
+            return null;
+        }
+        TheBallEntity ball = ModEntities.THE_BALL.get().create(level);
+        if (ball == null) {
+            return null;
+        }
+        ball.moveTo(pos.getX() + 0.5D, pos.getY() + 1.8D, pos.getZ() + 0.5D, 0.0F, 0.0F);
+        ball.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
+        level.addFreshEntity(ball);
+        level.playSound(null, pos, ModSounds.THE_BALL_HUM.get(), SoundSource.AMBIENT, 1.3F, 0.85F);
+        return ball;
+    }
+
+    @Nullable
+    public static BlockPos findWaterSpawnPosAroundPlayer(ServerLevel level, ServerPlayer player, int minDist, int maxDist) {
+        RandomSource random = level.getRandom();
+        for (int attempt = 0; attempt < 32; attempt++) {
+            double ang = random.nextDouble() * Math.PI * 2.0D;
+            double dist = minDist + random.nextDouble() * (maxDist - minDist);
+            int tx = Mth.floor(player.getX() + Math.cos(ang) * dist);
+            int tz = Mth.floor(player.getZ() + Math.sin(ang) * dist);
+            int surfY = level.getHeight(Heightmap.Types.WORLD_SURFACE, tx, tz);
+            for (int dy = 1; dy <= 5; dy++) {
+                BlockPos p = new BlockPos(tx, surfY - dy, tz);
+                if (level.getFluidState(p).is(FluidTags.WATER)) {
+                    return p;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Nullable
     private static BlockPos findAheadSpawnPos(ServerLevel level, ServerPlayer player) {
         double baseYaw = Math.toRadians(player.getYRot());
         double[] angleOffsets = {0.0D, 0.25D, -0.25D, 0.55D, -0.55D, Math.PI};
@@ -1054,7 +1196,10 @@ public final class UnderWorldEventDirector {
                 || !level.getEntitiesOfClass(TreeMimicEntity.class, box).isEmpty()
                 || !level.getEntitiesOfClass(TheSkyEntity.class, box).isEmpty()
                 || !level.getEntitiesOfClass(TheTruthEntity.class, box).isEmpty()
-                || !level.getEntitiesOfClass(ClockEntity.class, box).isEmpty();
+                || !level.getEntitiesOfClass(ClockEntity.class, box).isEmpty()
+                || !level.getEntitiesOfClass(TheMimicEntity.class, box).isEmpty()
+                || !level.getEntitiesOfClass(DemonFishEntity.class, box).isEmpty()
+                || !level.getEntitiesOfClass(TheBallEntity.class, box).isEmpty();
     }
 
     @Nullable

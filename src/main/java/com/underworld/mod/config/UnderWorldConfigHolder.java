@@ -55,6 +55,8 @@ public final class UnderWorldConfigHolder {
             c.spawnMaxDistance.set(fzzyConfig.general.spawnMaxDistance.get());
             c.debugLogging.set(fzzyConfig.general.debugLogging.get());
             c.antiSpawnKillEnabled.set(fzzyConfig.general.antiSpawnKillEnabled.get());
+            c.dynamicStructureEventsEnabled.set(fzzyConfig.general.dynamicStructureEventsEnabled.get());
+            c.dynamicStructureIntervalTicks.set(fzzyConfig.general.dynamicStructureIntervalTicks.get());
 
             c.friendEnabled.set(fzzyConfig.friend.friendEnabled.get());
             c.friendEveningTime.set(fzzyConfig.friend.friendEveningTime.get());
@@ -96,6 +98,20 @@ public final class UnderWorldConfigHolder {
             c.clockSpawnChance.set(fzzyConfig.clock.clockSpawnChance.get());
             c.clockTimeSpeed.set(fzzyConfig.clock.clockTimeSpeed.get());
 
+            c.theMimicEnabled.set(fzzyConfig.theMimic.theMimicEnabled.get());
+            c.theMimicSpawnChance.set(fzzyConfig.theMimic.theMimicSpawnChance.get());
+            c.theMimicTriggerRange.set(fzzyConfig.theMimic.theMimicTriggerRange.get());
+            c.theMimicChaseDurationTicks.set(fzzyConfig.theMimic.theMimicChaseDurationTicks.get());
+
+            c.demonFishEnabled.set(fzzyConfig.demonFish.demonFishEnabled.get());
+            c.demonFishSpawnChance.set(fzzyConfig.demonFish.demonFishSpawnChance.get());
+            c.demonFishChaseDurationTicks.set(fzzyConfig.demonFish.demonFishChaseDurationTicks.get());
+            c.demonFishBreakBlocks.set(fzzyConfig.demonFish.demonFishBreakBlocks.get());
+
+            c.theBallEnabled.set(fzzyConfig.theBall.theBallEnabled.get());
+            c.theBallSpawnChance.set(fzzyConfig.theBall.theBallSpawnChance.get());
+            c.theBallEffectDurationTicks.set(fzzyConfig.theBall.theBallEffectDurationTicks.get());
+
             c.funWorldEnabled.set(fzzyConfig.dimensions.funWorldEnabled.get());
             c.funWorldTimeSpeedMultiplier.set(fzzyConfig.dimensions.funWorldTimeSpeedMultiplier.get());
             c.eyesOfFunEnabled.set(fzzyConfig.dimensions.eyesOfFunEnabled.get());
@@ -130,6 +146,8 @@ public final class UnderWorldConfigHolder {
             fzzyConfig.general.spawnMaxDistance.trySet(c.spawnMaxDistance.get());
             fzzyConfig.general.debugLogging.trySet(c.debugLogging.get());
             fzzyConfig.general.antiSpawnKillEnabled.trySet(c.antiSpawnKillEnabled.get());
+            fzzyConfig.general.dynamicStructureEventsEnabled.trySet(c.dynamicStructureEventsEnabled.get());
+            fzzyConfig.general.dynamicStructureIntervalTicks.trySet(c.dynamicStructureIntervalTicks.get());
 
             fzzyConfig.friend.friendEnabled.trySet(c.friendEnabled.get());
             fzzyConfig.friend.friendEveningTime.trySet(c.friendEveningTime.get());
@@ -170,6 +188,20 @@ public final class UnderWorldConfigHolder {
             fzzyConfig.clock.clockEnabled.trySet(c.clockEnabled.get());
             fzzyConfig.clock.clockSpawnChance.trySet(c.clockSpawnChance.get());
             fzzyConfig.clock.clockTimeSpeed.trySet(c.clockTimeSpeed.get());
+
+            fzzyConfig.theMimic.theMimicEnabled.trySet(c.theMimicEnabled.get());
+            fzzyConfig.theMimic.theMimicSpawnChance.trySet(c.theMimicSpawnChance.get());
+            fzzyConfig.theMimic.theMimicTriggerRange.trySet(c.theMimicTriggerRange.get());
+            fzzyConfig.theMimic.theMimicChaseDurationTicks.trySet(c.theMimicChaseDurationTicks.get());
+
+            fzzyConfig.demonFish.demonFishEnabled.trySet(c.demonFishEnabled.get());
+            fzzyConfig.demonFish.demonFishSpawnChance.trySet(c.demonFishSpawnChance.get());
+            fzzyConfig.demonFish.demonFishChaseDurationTicks.trySet(c.demonFishChaseDurationTicks.get());
+            fzzyConfig.demonFish.demonFishBreakBlocks.trySet(c.demonFishBreakBlocks.get());
+
+            fzzyConfig.theBall.theBallEnabled.trySet(c.theBallEnabled.get());
+            fzzyConfig.theBall.theBallSpawnChance.trySet(c.theBallSpawnChance.get());
+            fzzyConfig.theBall.theBallEffectDurationTicks.trySet(c.theBallEffectDurationTicks.get());
 
             fzzyConfig.dimensions.funWorldEnabled.trySet(c.funWorldEnabled.get());
             fzzyConfig.dimensions.funWorldTimeSpeedMultiplier.trySet(c.funWorldTimeSpeedMultiplier.get());
@@ -237,5 +269,33 @@ public final class UnderWorldConfigHolder {
 
     public static boolean isOverworldCustomMusicEnabled() {
         return fzzyConfig == null || fzzyConfig.dimensions.customOverworldMusic.get();
+    }
+
+    public static boolean isDynamicStructureEventsEnabled() {
+        return fzzyConfig == null || fzzyConfig.general.dynamicStructureEventsEnabled.get();
+    }
+
+    public static int getDynamicStructureIntervalTicks() {
+        return fzzyConfig == null ? 4800 : fzzyConfig.general.dynamicStructureIntervalTicks.get();
+    }
+
+    public static double getTheMimicTriggerRange() {
+        return fzzyConfig == null ? 9.5D : fzzyConfig.theMimic.theMimicTriggerRange.get();
+    }
+
+    public static int getTheMimicChaseDurationTicks() {
+        return fzzyConfig == null ? 600 : fzzyConfig.theMimic.theMimicChaseDurationTicks.get();
+    }
+
+    public static int getDemonFishChaseDurationTicks() {
+        return fzzyConfig == null ? 1200 : fzzyConfig.demonFish.demonFishChaseDurationTicks.get();
+    }
+
+    public static boolean isDemonFishBreakBlocksEnabled() {
+        return fzzyConfig == null || fzzyConfig.demonFish.demonFishBreakBlocks.get();
+    }
+
+    public static int getTheBallEffectDurationTicks() {
+        return fzzyConfig == null ? 400 : fzzyConfig.theBall.theBallEffectDurationTicks.get();
     }
 }

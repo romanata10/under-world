@@ -87,6 +87,30 @@
     "subtitle": "subtitles.under_world.time_warp",
     "sounds": [{ "name": "under_world:time_warp", "stream": false }]
   },
+  "mimic_burst": {
+    "subtitle": "subtitles.under_world.mimic_burst",
+    "sounds": [{ "name": "under_world:mimic_burst", "stream": false }]
+  },
+  "mimic_chase": {
+    "subtitle": "subtitles.under_world.mimic_chase",
+    "sounds": [{ "name": "under_world:mimic_chase", "stream": false }]
+  },
+  "demon_fish_ambush": {
+    "subtitle": "subtitles.under_world.demon_fish_ambush",
+    "sounds": [{ "name": "under_world:demon_fish_ambush", "stream": false }]
+  },
+  "demon_fish_tongue": {
+    "subtitle": "subtitles.under_world.demon_fish_tongue",
+    "sounds": [{ "name": "under_world:demon_fish_tongue", "stream": false }]
+  },
+  "the_ball_hum": {
+    "subtitle": "subtitles.under_world.the_ball_hum",
+    "sounds": [{ "name": "under_world:the_ball_hum", "stream": false }]
+  },
+  "geometric_nightmare": {
+    "subtitle": "subtitles.under_world.geometric_nightmare",
+    "sounds": [{ "name": "under_world:geometric_nightmare", "stream": false }]
+  },
   "music_fun_world": {
     "sounds": [{ "name": "under_world:music_fun_world", "stream": true }]
   },

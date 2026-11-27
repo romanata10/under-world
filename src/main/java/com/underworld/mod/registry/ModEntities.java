@@ -2,10 +2,13 @@ package com.underworld.mod.registry;
 
 import com.underworld.mod.UnderWorldMod;
 import com.underworld.mod.entity.ClockEntity;
+import com.underworld.mod.entity.DemonFishEntity;
 import com.underworld.mod.entity.EyesOfFunEntity;
 import com.underworld.mod.entity.FriendEntity;
 import com.underworld.mod.entity.HandsEntity;
 import com.underworld.mod.entity.SmileEntity;
+import com.underworld.mod.entity.TheBallEntity;
+import com.underworld.mod.entity.TheMimicEntity;
 import com.underworld.mod.entity.TheSkyEntity;
 import com.underworld.mod.entity.TheTruthEntity;
 import com.underworld.mod.entity.TreeMimicEntity;
@@ -70,6 +73,27 @@ public final class ModEntities {
                     .updateInterval(1)
                     .build(UnderWorldMod.id("clock").toString()));
 
+    public static final RegistryObject<EntityType<TheMimicEntity>> THE_MIMIC = ENTITIES.register("the_mimic",
+            () -> EntityType.Builder.of(TheMimicEntity::new, MobCategory.MONSTER)
+                    .sized(0.75F, 2.25F)
+                    .clientTrackingRange(18)
+                    .updateInterval(1)
+                    .build(UnderWorldMod.id("the_mimic").toString()));
+
+    public static final RegistryObject<EntityType<DemonFishEntity>> DEMON_FISH = ENTITIES.register("demon_fish",
+            () -> EntityType.Builder.of(DemonFishEntity::new, MobCategory.WATER_CREATURE)
+                    .sized(1.15F, 0.85F)
+                    .clientTrackingRange(18)
+                    .updateInterval(1)
+                    .build(UnderWorldMod.id("demon_fish").toString()));
+
+    public static final RegistryObject<EntityType<TheBallEntity>> THE_BALL = ENTITIES.register("the_ball",
+            () -> EntityType.Builder.of(TheBallEntity::new, MobCategory.AMBIENT)
+                    .sized(1.35F, 1.35F)
+                    .clientTrackingRange(16)
+                    .updateInterval(1)
+                    .build(UnderWorldMod.id("the_ball").toString()));
+
     private ModEntities() {}
 
     public static void registerAttributes(final EntityAttributeCreationEvent event) {
@@ -81,5 +105,8 @@ public final class ModEntities {
         event.put(SMILE.get(), SmileEntity.createAttributes().build());
         event.put(THE_TRUTH.get(), TheTruthEntity.createAttributes().build());
         event.put(CLOCK.get(), ClockEntity.createAttributes().build());
+        event.put(THE_MIMIC.get(), TheMimicEntity.createAttributes().build());
+        event.put(DEMON_FISH.get(), DemonFishEntity.createAttributes().build());
+        event.put(THE_BALL.get(), TheBallEntity.createAttributes().build());
     }
 }

@@ -47,6 +47,15 @@ public final class ModItems {
     public static final RegistryObject<Item> CLOCK_SPAWN_EGG = ITEMS.register("clock_spawn_egg",
             () -> new ForgeSpawnEggItem(ModEntities.CLOCK, 0x0D0D10, 0xECECF2, new Item.Properties()));
 
+    public static final RegistryObject<Item> THE_MIMIC_SPAWN_EGG = ITEMS.register("the_mimic_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.THE_MIMIC, 0x050507, 0xFFAABB, new Item.Properties()));
+
+    public static final RegistryObject<Item> DEMON_FISH_SPAWN_EGG = ITEMS.register("demon_fish_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.DEMON_FISH, 0x07090F, 0xE88FA6, new Item.Properties()));
+
+    public static final RegistryObject<Item> THE_BALL_SPAWN_EGG = ITEMS.register("the_ball_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.THE_BALL, 0x020203, 0x20202A, new Item.Properties()));
+
     // Fun World & Maze block items
     public static final RegistryObject<Item> FUN_GRASS_BLOCK = blockItem("fun_grass_block", ModBlocks.FUN_GRASS_BLOCK);
     public static final RegistryObject<Item> FUN_DIRT = blockItem("fun_dirt", ModBlocks.FUN_DIRT);
@@ -85,6 +94,9 @@ public final class ModItems {
                         output.accept(SMILE_SPAWN_EGG.get());
                         output.accept(THE_TRUTH_SPAWN_EGG.get());
                         output.accept(CLOCK_SPAWN_EGG.get());
+                        output.accept(THE_MIMIC_SPAWN_EGG.get());
+                        output.accept(DEMON_FISH_SPAWN_EGG.get());
+                        output.accept(THE_BALL_SPAWN_EGG.get());
 
                         output.accept(FUN_GRASS_BLOCK.get());
                         output.accept(FUN_DIRT.get());

@@ -28,6 +28,8 @@ public final class UnderWorldForgeConfig {
         public final ForgeConfigSpec.IntValue spawnMaxDistance;
         public final ForgeConfigSpec.BooleanValue debugLogging;
         public final ForgeConfigSpec.BooleanValue antiSpawnKillEnabled;
+        public final ForgeConfigSpec.BooleanValue dynamicStructureEventsEnabled;
+        public final ForgeConfigSpec.IntValue dynamicStructureIntervalTicks;
 
         public final ForgeConfigSpec.BooleanValue friendEnabled;
         public final ForgeConfigSpec.IntValue friendEveningTime;
@@ -69,6 +71,20 @@ public final class UnderWorldForgeConfig {
         public final ForgeConfigSpec.DoubleValue clockSpawnChance;
         public final ForgeConfigSpec.DoubleValue clockTimeSpeed;
 
+        public final ForgeConfigSpec.BooleanValue theMimicEnabled;
+        public final ForgeConfigSpec.DoubleValue theMimicSpawnChance;
+        public final ForgeConfigSpec.DoubleValue theMimicTriggerRange;
+        public final ForgeConfigSpec.IntValue theMimicChaseDurationTicks;
+
+        public final ForgeConfigSpec.BooleanValue demonFishEnabled;
+        public final ForgeConfigSpec.DoubleValue demonFishSpawnChance;
+        public final ForgeConfigSpec.IntValue demonFishChaseDurationTicks;
+        public final ForgeConfigSpec.BooleanValue demonFishBreakBlocks;
+
+        public final ForgeConfigSpec.BooleanValue theBallEnabled;
+        public final ForgeConfigSpec.DoubleValue theBallSpawnChance;
+        public final ForgeConfigSpec.IntValue theBallEffectDurationTicks;
+
         public final ForgeConfigSpec.BooleanValue funWorldEnabled;
         public final ForgeConfigSpec.IntValue funWorldTimeSpeedMultiplier;
         public final ForgeConfigSpec.BooleanValue eyesOfFunEnabled;
@@ -105,6 +121,12 @@ public final class UnderWorldForgeConfig {
                     .comment("Removes Under World entities that kill a player so they cannot spawn-kill on respawn.")
                     .translation("under_world.config.antiSpawnKillEnabled")
                     .define("antiSpawnKillEnabled", true);
+            this.dynamicStructureEventsEnabled = builder
+                    .comment("Spawns oddity and lore structures dynamically as live survival events around players.")
+                    .define("dynamicStructureEventsEnabled", true);
+            this.dynamicStructureIntervalTicks = builder
+                    .comment("Average ticks between dynamic survival structure events (4800 = 4 minutes).")
+                    .defineInRange("dynamicStructureIntervalTicks", 4800, 600, 24000);
             builder.pop();
 
             builder.push("friend");
@@ -256,6 +278,48 @@ public final class UnderWorldForgeConfig {
             this.clockTimeSpeed = builder
                     .comment("Movement speed of the aggressive ticking Clock variant in The Time.")
                     .defineInRange("clockTimeSpeed", 0.42D, 0.20D, 0.70D);
+            builder.pop();
+
+            builder.push("the_mimic");
+            this.theMimicEnabled = builder
+                    .comment("Enables encounters with the mimic disguised as Steve or previous victims.")
+                    .define("theMimicEnabled", true);
+            this.theMimicSpawnChance = builder
+                    .comment("Chance per Overworld surface check for the mimic to appear.")
+                    .defineInRange("theMimicSpawnChance", 0.065D, 0.0D, 1.0D);
+            this.theMimicTriggerRange = builder
+                    .comment("Approach distance in blocks that bursts the disguise into black pixels and unleashes the mimic.")
+                    .defineInRange("theMimicTriggerRange", 9.5D, 3.0D, 20.0D);
+            this.theMimicChaseDurationTicks = builder
+                    .comment("Duration in ticks that the mimic chases before vanishing if it catches no one (600 = 30s).")
+                    .defineInRange("theMimicChaseDurationTicks", 600, 200, 2400);
+            builder.pop();
+
+            builder.push("demon_fish");
+            this.demonFishEnabled = builder
+                    .comment("Enables aquatic Demon Fish hunts when players swim or sail in water.")
+                    .define("demonFishEnabled", true);
+            this.demonFishSpawnChance = builder
+                    .comment("Chance per aquatic check for Demon Fish to emerge in water.")
+                    .defineInRange("demonFishSpawnChance", 0.095D, 0.0D, 1.0D);
+            this.demonFishChaseDurationTicks = builder
+                    .comment("Max chase time in ticks without catching the player before Demon Fish vanishes (1200 = 1 minute).")
+                    .defineInRange("demonFishChaseDurationTicks", 1200, 300, 3600);
+            this.demonFishBreakBlocks = builder
+                    .comment("Allows Demon Fish to shatter underwater dug blocks when pursuing submerged players.")
+                    .define("demonFishBreakBlocks", true);
+            builder.pop();
+
+            builder.push("the_ball");
+            this.theBallEnabled = builder
+                    .comment("Enables floating morphing black spheres (The Ball) around Overworld players.")
+                    .define("theBallEnabled", true);
+            this.theBallSpawnChance = builder
+                    .comment("Chance per Overworld surface check for The Ball to appear.")
+                    .defineInRange("theBallSpawnChance", 0.06D, 0.0D, 1.0D);
+            this.theBallEffectDurationTicks = builder
+                    .comment("Duration in ticks of the Geometric Nightmare effect applied upon touching The Ball (400 = 20s).")
+                    .defineInRange("theBallEffectDurationTicks", 400, 100, 2400);
             builder.pop();
 
             builder.push("dimensions");
