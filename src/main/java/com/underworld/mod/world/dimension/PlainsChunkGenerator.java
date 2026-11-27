@@ -3,9 +3,7 @@ package com.underworld.mod.world.dimension;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.underworld.mod.registry.ModBlocks;
-import com.underworld.mod.world.structure.StructureBuildUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -16,7 +14,6 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -54,14 +51,12 @@ public class PlainsChunkGenerator extends ChunkGenerator {
                 + Math.sin((wx - wz) * 0.008D) * 5.0D
                 + Math.cos(wz * 0.032D) * 2.2D;
 
-        // Smooth gentle hill rise around distant wind-turbine landmarks (x = 416 + 512*k)
         int modX = Math.floorMod(wx, 512);
-        double dxHill = Math.abs(modX - 416);
+        double dxHill = Math.abs(modX - 420);
         double dzHill = Math.abs(wz);
         double hillDist = Math.hypot(dxHill, dzHill);
         double turbineHill = hillDist < 52.0D ? (1.0D - hillDist / 52.0D) * 14.0D : 0.0D;
 
-        // Keep winding footpath smooth
         int pathZ = getPathZ(wx);
         if (Math.abs(wz - pathZ) <= 3) {
             rolling *= 0.45D;
@@ -144,131 +139,129 @@ public class PlainsChunkGenerator extends ChunkGenerator {
         int minZ = chunk.getPos().getMinBlockZ();
         RandomSource rng = RandomSource.create(level.getSeed() ^ (cx * 4812713L + cz * 9123711L));
 
-        // Return beacon near spawn (x=8, z=pathZ(8))
-        if (cx == 0 && Math.abs(minZ - getPathZ(8)) <= 16) {
-            int rz = getPathZ(8) + 4;
-            int ry = getSurfaceY(8, rz);
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dz = -1; dz <= 1; dz++) {
-                    level.setBlock(new BlockPos(8 + dx, ry, rz + dz), ModBlocks.PLAINS_PORTAL_GRASS.get().defaultBlockState(), 2);
-                }
+        // Return beacon pad strictly inside chunk (0, cz containing rz)
+        int rz = getPathZ(8) + 4;
+        int ry = getSurfaceY(8, rz);
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                setInChunk(chunk, minX, minZ, 8 + dx, ry, rz + dz, ModBlocks.PLAINS_PORTAL_GRASS.get().defaultBlockState());
             }
         }
 
         // Sparse wild tall grass along rolling meadow hills
+        BlockPos.MutableBlockPos mpos = new BlockPos.MutableBlockPos();
         for (int i = 0; i < 16; i++) {
-            int wx = minX + rng.nextInt(16);
-            int wz = minZ + rng.nextInt(16);
+            int lx = rng.nextInt(16);
+            int lz = rng.nextInt(16);
+            int wx = minX + lx;
+            int wz = minZ + lz;
             if (Math.abs(wz - getPathZ(wx)) <= 3) continue;
             int y = getSurfaceY(wx, wz);
-            BlockPos top = new BlockPos(wx, y + 1, wz);
-            if (level.getBlockState(top).isAir()) {
-                level.setBlock(top, Blocks.GRASS.defaultBlockState(), 2);
+            if (y + 1 < 320 && chunk.getBlockState(mpos.set(lx, y + 1, lz)).isAir()) {
+                chunk.setBlockState(mpos, Blocks.GRASS.defaultBlockState(), false);
             }
         }
 
-        // Power pylons along the road every 3 chunks (~48 blocks)
+        // Static Power Pylons every 3 chunks strictly inside current chunk!
         if (Math.floorMod(cx, 3) == 1) {
             int px = minX + 8;
             int side = (Math.floorMod(cx / 3, 2) == 0) ? -10 : 10;
             int pz = getPathZ(px) + side;
-            if (pz >= minZ && pz < minZ + 16) {
-                placeStaticPylon(level, new BlockPos(px, getSurfaceY(px, pz), pz));
+            if (pz >= minZ + 3 && pz <= minZ + 12) {
+                placeStaticPylonInChunk(chunk, minX, minZ, new BlockPos(px, getSurfaceY(px, pz), pz));
             }
         }
 
-        // Abandoned houses & apartment blocks (многоэтажки) periodically along the road
+        // Abandoned houses & apartment blocks periodically along the road
         if (Math.floorMod(cx, 5) == 3 && Math.floorMod(cx, 32) != 26) {
-            int bx = minX + 6;
+            int bx = minX + 8;
             int side = (Math.floorMod(cx / 5, 2) == 0) ? 14 : -14;
             int bz = getPathZ(bx) + side;
-            if (bz >= minZ && bz < minZ + 16) {
+            if (bz >= minZ + 5 && bz <= minZ + 10) {
                 int by = getSurfaceY(bx, bz);
                 if (Math.floorMod(cx, 10) == 8) {
-                    placeApartmentBlock(level, new BlockPos(bx, by, bz), rng);
+                    placeApartmentBlockInChunk(chunk, minX, minZ, new BlockPos(bx, by, bz), rng);
                 } else {
-                    placeAbandonedHouse(level, new BlockPos(bx, by, bz), rng);
+                    placeAbandonedHouseInChunk(chunk, minX, minZ, new BlockPos(bx, by, bz), rng);
                 }
             }
         }
 
-        // Distant Wind Turbines atop hills (x = 416 + 512*k) -> Portal to The Wind Ocean!
-        if (Math.floorMod(cx, 32) == 26 && cz == 0) {
-            int hx = minX + 4;
-            placeDistantWindTurbine(level, new BlockPos(hx, getSurfaceY(hx, 0), 0), true);
-            placeDistantWindTurbine(level, new BlockPos(hx + 22, getSurfaceY(hx + 22, -18), -18), false);
-            placeDistantWindTurbine(level, new BlockPos(hx + 26, getSurfaceY(hx + 26, 20), 20), false);
-        }
+        // Distant Wind Turbines atop hills (every 512 blocks along X near z=0) -> clip-safe across chunk edges!
+        int sectorX = Math.floorDiv(minX + 8, 512) * 512;
+        int portalTx = sectorX + 420;
+        placeDistantWindTurbineInChunk(chunk, minX, minZ, new BlockPos(portalTx, getSurfaceY(portalTx, 0), 0), true);
+        placeDistantWindTurbineInChunk(chunk, minX, minZ, new BlockPos(portalTx + 24, getSurfaceY(portalTx + 24, -18), -18), false);
+        placeDistantWindTurbineInChunk(chunk, minX, minZ, new BlockPos(portalTx + 26, getSurfaceY(portalTx + 26, 20), 20), false);
     }
 
-    private static void placeStaticPylon(WorldGenLevel level, BlockPos base) {
+    private static void placeStaticPylonInChunk(ChunkAccess chunk, int minX, int minZ, BlockPos base) {
         BlockState steel = ModBlocks.PYLON_STEEL.get().defaultBlockState();
-        BlockState bar = Blocks.IRON_BARS.defaultBlockState();
-        // 4 splayed legs y=0..6
-        for (int dy = 0; dy <= 5; dy++) {
+        BlockState bars = Blocks.IRON_BARS.defaultBlockState();
+        BlockState chain = Blocks.CHAIN.defaultBlockState();
+
+        for (int dy = 0; dy <= 7; dy++) {
             int r = dy < 3 ? 2 : 1;
-            setSafe(level, base.offset(-r, dy, -r), steel);
-            setSafe(level, base.offset(r, dy, -r), steel);
-            setSafe(level, base.offset(-r, dy, r), steel);
-            setSafe(level, base.offset(r, dy, r), steel);
+            setInChunk(chunk, minX, minZ, base.getX() - r, base.getY() + dy, base.getZ() - r, steel);
+            setInChunk(chunk, minX, minZ, base.getX() + r, base.getY() + dy, base.getZ() - r, steel);
+            setInChunk(chunk, minX, minZ, base.getX() - r, base.getY() + dy, base.getZ() + r, steel);
+            setInChunk(chunk, minX, minZ, base.getX() + r, base.getY() + dy, base.getZ() + r, steel);
         }
-        // Central lattice mast y=6..18
-        for (int dy = 6; dy <= 17; dy++) {
-            setSafe(level, base.offset(0, dy, 0), steel);
+        for (int dy = 8; dy <= 22; dy++) {
+            setInChunk(chunk, minX, minZ, base.getX(), base.getY() + dy, base.getZ(), steel);
             if (dy % 3 == 0) {
-                setSafe(level, base.offset(1, dy, 0), bar);
-                setSafe(level, base.offset(-1, dy, 0), bar);
+                setInChunk(chunk, minX, minZ, base.getX(), base.getY() + dy, base.getZ() - 1, bars);
+                setInChunk(chunk, minX, minZ, base.getX(), base.getY() + dy, base.getZ() + 1, bars);
             }
         }
-        // Two wide cross-arms with drooping torn wires
-        for (int dx = -4; dx <= 4; dx++) {
-            setSafe(level, base.offset(dx, 12, 0), steel);
+        for (int dz = -5; dz <= 5; dz++) {
+            setInChunk(chunk, minX, minZ, base.getX(), base.getY() + 15, base.getZ() + dz, steel);
         }
-        for (int dx = -3; dx <= 3; dx++) {
-            setSafe(level, base.offset(dx, 16, 0), steel);
+        for (int dz = -4; dz <= 4; dz++) {
+            setInChunk(chunk, minX, minZ, base.getX(), base.getY() + 20, base.getZ() + dz, steel);
         }
-        setSafe(level, base.offset(-4, 11, 0), Blocks.CHAIN.defaultBlockState());
-        setSafe(level, base.offset(-4, 10, 0), Blocks.CHAIN.defaultBlockState());
-        setSafe(level, base.offset(4, 11, 0), Blocks.CHAIN.defaultBlockState());
-        setSafe(level, base.offset(4, 10, 0), Blocks.CHAIN.defaultBlockState());
-        setSafe(level, base.offset(0, 18, 0), Blocks.REDSTONE_TORCH.defaultBlockState());
+        setInChunk(chunk, minX, minZ, base.getX(), base.getY() + 14, base.getZ() - 5, chain);
+        setInChunk(chunk, minX, minZ, base.getX(), base.getY() + 13, base.getZ() - 5, chain);
+        setInChunk(chunk, minX, minZ, base.getX(), base.getY() + 14, base.getZ() + 5, chain);
+        setInChunk(chunk, minX, minZ, base.getX(), base.getY() + 13, base.getZ() + 5, chain);
+        setInChunk(chunk, minX, minZ, base.getX(), base.getY() + 23, base.getZ(), Blocks.REDSTONE_TORCH.defaultBlockState());
     }
 
-    private static void placeAbandonedHouse(WorldGenLevel level, BlockPos base, RandomSource rng) {
-        BlockState wall = Blocks.SPRUCE_PLANKS.defaultBlockState();
-        BlockState pillar = Blocks.SPRUCE_LOG.defaultBlockState();
-        BlockState floor = Blocks.COBBLESTONE.defaultBlockState();
+    private static void placeAbandonedHouseInChunk(ChunkAccess chunk, int minX, int minZ, BlockPos base, RandomSource rng) {
+        BlockState wall = Blocks.COBBLESTONE.defaultBlockState();
+        BlockState pillar = Blocks.OAK_LOG.defaultBlockState();
+        BlockState floor = Blocks.SPRUCE_PLANKS.defaultBlockState();
         for (int dx = -4; dx <= 4; dx++) {
             for (int dz = -4; dz <= 4; dz++) {
-                setSafe(level, base.offset(dx, -1, dz), Blocks.DIRT.defaultBlockState());
-                setSafe(level, base.offset(dx, 0, dz), floor);
+                setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY(), base.getZ() + dz, floor);
+                setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() - 1, base.getZ() + dz, Blocks.DIRT.defaultBlockState());
                 for (int dy = 1; dy <= 5; dy++) {
                     boolean isEdge = Math.abs(dx) == 4 || Math.abs(dz) == 4;
                     if (dy == 5) {
-                        setSafe(level, base.offset(dx, dy, dz), wall);
+                        setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + dy, base.getZ() + dz, wall);
                     } else if (isEdge) {
                         boolean isCorner = Math.abs(dx) == 4 && Math.abs(dz) == 4;
                         boolean isDoor = dx == 0 && dz == -4 && (dy == 1 || dy == 2);
                         boolean isWindow = (Math.abs(dx) == 2 || Math.abs(dz) == 2) && dy == 2;
                         if (isDoor) {
-                            setSafe(level, base.offset(dx, dy, dz), Blocks.AIR.defaultBlockState());
+                            setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + dy, base.getZ() + dz, Blocks.AIR.defaultBlockState());
                         } else if (isWindow) {
-                            setSafe(level, base.offset(dx, dy, dz), rng.nextBoolean() ? Blocks.GLASS_PANE.defaultBlockState() : Blocks.AIR.defaultBlockState());
+                            setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + dy, base.getZ() + dz,
+                                    rng.nextBoolean() ? Blocks.GLASS_PANE.defaultBlockState() : Blocks.AIR.defaultBlockState());
                         } else {
-                            setSafe(level, base.offset(dx, dy, dz), isCorner ? pillar : wall);
+                            setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + dy, base.getZ() + dz, isCorner ? pillar : wall);
                         }
                     } else {
-                        setSafe(level, base.offset(dx, dy, dz), Blocks.AIR.defaultBlockState());
+                        setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + dy, base.getZ() + dz, Blocks.AIR.defaultBlockState());
                     }
                 }
             }
         }
-        setSafe(level, base.offset(2, 1, 2), Blocks.COBWEB.defaultBlockState());
-        setSafe(level, base.offset(-2, 1, 2), Blocks.CRAFTING_TABLE.defaultBlockState());
+        setInChunk(chunk, minX, minZ, base.getX() + 2, base.getY() + 1, base.getZ() + 2, Blocks.COBWEB.defaultBlockState());
+        setInChunk(chunk, minX, minZ, base.getX() - 2, base.getY() + 1, base.getZ() + 2, Blocks.CRAFTING_TABLE.defaultBlockState());
     }
 
-    private static void placeApartmentBlock(WorldGenLevel level, BlockPos base, RandomSource rng) {
-        // Multi-story weathered panel building (многоэтажка, 11x9x19 high)
+    private static void placeApartmentBlockInChunk(ChunkAccess chunk, int minX, int minZ, BlockPos base, RandomSource rng) {
         BlockState concrete = Blocks.LIGHT_GRAY_CONCRETE.defaultBlockState();
         BlockState trim = Blocks.GRAY_CONCRETE.defaultBlockState();
         BlockState floor = Blocks.STONE_BRICKS.defaultBlockState();
@@ -277,101 +270,99 @@ public class PlainsChunkGenerator extends ChunkGenerator {
             int y0 = fl * 4;
             for (int dx = -5; dx <= 5; dx++) {
                 for (int dz = -4; dz <= 4; dz++) {
-                    setSafe(level, base.offset(dx, y0, dz), floor);
+                    setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + y0, base.getZ() + dz, floor);
                     for (int dy = 1; dy <= 3; dy++) {
                         boolean wall = Math.abs(dx) == 5 || Math.abs(dz) == 4;
                         boolean doorway = fl == 0 && dx == 0 && dz == -4 && dy <= 2;
                         boolean window = wall && dy == 2 && (Math.abs(dx) == 2 || Math.abs(dz) == 2);
                         if (doorway) {
-                            setSafe(level, base.offset(dx, y0 + dy, dz), Blocks.AIR.defaultBlockState());
+                            setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + y0 + dy, base.getZ() + dz, Blocks.AIR.defaultBlockState());
                         } else if (window) {
-                            setSafe(level, base.offset(dx, y0 + dy, dz), rng.nextFloat() < 0.45F ? Blocks.GLASS_PANE.defaultBlockState() : Blocks.AIR.defaultBlockState());
+                            setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + y0 + dy, base.getZ() + dz,
+                                    rng.nextFloat() < 0.45F ? Blocks.GLASS_PANE.defaultBlockState() : Blocks.AIR.defaultBlockState());
                         } else if (wall) {
                             boolean corner = Math.abs(dx) == 5 && Math.abs(dz) == 4;
-                            setSafe(level, base.offset(dx, y0 + dy, dz), corner ? trim : concrete);
+                            setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + y0 + dy, base.getZ() + dz, corner ? trim : concrete);
                         } else {
-                            // Open stairwell column in back right corner
                             boolean stairWell = dx >= 2 && dz >= 1;
                             if (!stairWell || dy < 3) {
-                                setSafe(level, base.offset(dx, y0 + dy, dz), Blocks.AIR.defaultBlockState());
+                                setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + y0 + dy, base.getZ() + dz, Blocks.AIR.defaultBlockState());
                             }
                         }
                     }
                 }
             }
-            // Staircase step up
-            setSafe(level, base.offset(3, y0 + 1, 2), Blocks.STONE_SLAB.defaultBlockState());
-            setSafe(level, base.offset(3, y0 + 2, 1), Blocks.STONE_BRICKS.defaultBlockState());
-            setSafe(level, base.offset(2, y0 + 3, 1), Blocks.STONE_SLAB.defaultBlockState());
+            setInChunk(chunk, minX, minZ, base.getX() + 3, base.getY() + y0 + 1, base.getZ() + 2, Blocks.STONE_SLAB.defaultBlockState());
+            setInChunk(chunk, minX, minZ, base.getX() + 3, base.getY() + y0 + 2, base.getZ() + 1, Blocks.STONE_BRICKS.defaultBlockState());
+            setInChunk(chunk, minX, minZ, base.getX() + 2, base.getY() + y0 + 3, base.getZ() + 1, Blocks.STONE_SLAB.defaultBlockState());
         }
-        // Rooftop rim + red antenna mast
         int roofY = floors * 4;
         for (int dx = -5; dx <= 5; dx++) {
             for (int dz = -4; dz <= 4; dz++) {
-                setSafe(level, base.offset(dx, roofY, dz), trim);
+                setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + roofY, base.getZ() + dz, trim);
                 if (Math.abs(dx) == 5 || Math.abs(dz) == 4) {
-                    setSafe(level, base.offset(dx, roofY + 1, dz), concrete);
+                    setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + roofY + 1, base.getZ() + dz, concrete);
                 }
             }
         }
         for (int dy = 1; dy <= 5; dy++) {
-            setSafe(level, base.offset(0, roofY + dy, 0), Blocks.IRON_BARS.defaultBlockState());
+            setInChunk(chunk, minX, minZ, base.getX(), base.getY() + roofY + dy, base.getZ(), Blocks.IRON_BARS.defaultBlockState());
         }
-        setSafe(level, base.offset(0, roofY + 6, 0), Blocks.REDSTONE_TORCH.defaultBlockState());
+        setInChunk(chunk, minX, minZ, base.getX(), base.getY() + roofY + 6, base.getZ(), Blocks.REDSTONE_TORCH.defaultBlockState());
     }
 
-    private static void placeDistantWindTurbine(WorldGenLevel level, BlockPos base, boolean withPortal) {
+    private static void placeDistantWindTurbineInChunk(ChunkAccess chunk, int minX, int minZ, BlockPos base, boolean withPortal) {
+        // Quick AABB chunk rejection so zero overhead outside nearby chunks
+        if (base.getX() + 4 < minX || base.getX() - 4 >= minX + 16
+                || base.getZ() + 12 < minZ || base.getZ() - 12 >= minZ + 16) {
+            return;
+        }
         BlockState pillar = ModBlocks.TURBINE_PILLAR.get().defaultBlockState();
         BlockState blade = ModBlocks.TURBINE_BLADE.get().defaultBlockState();
-        // Foundation plinth
         for (int dx = -2; dx <= 2; dx++) {
             for (int dz = -2; dz <= 2; dz++) {
-                setSafe(level, base.offset(dx, 0, dz), Blocks.SMOOTH_STONE.defaultBlockState());
-                setSafe(level, base.offset(dx, -1, dz), Blocks.STONE.defaultBlockState());
+                setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY(), base.getZ() + dz, Blocks.SMOOTH_STONE.defaultBlockState());
+                setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() - 1, base.getZ() + dz, Blocks.STONE.defaultBlockState());
             }
         }
-        // Tall white turbine shaft y=1..22
         for (int dy = 1; dy <= 22; dy++) {
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dz = -1; dz <= 1; dz++) {
                     if (Math.abs(dx) == 1 && Math.abs(dz) == 1) continue;
-                    setSafe(level, base.offset(dx, dy, dz), pillar);
+                    setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + dy, base.getZ() + dz, pillar);
                 }
             }
         }
-        // Nacelle + 3 rotor blades pointing west (-X) toward the incoming road
         for (int dx = -3; dx <= 2; dx++) {
             for (int dy = 21; dy <= 23; dy++) {
                 for (int dz = -1; dz <= 1; dz++) {
-                    setSafe(level, base.offset(dx, dy, dz), pillar);
+                    setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + dy, base.getZ() + dz, pillar);
                 }
             }
         }
-        // 3 sweeping blades
         for (int i = 1; i <= 11; i++) {
-            setSafe(level, base.offset(-3, 22 + i, 0), blade);
-            setSafe(level, base.offset(-3, 22 - i / 2, i), blade);
-            setSafe(level, base.offset(-3, 22 - i / 2, -i), blade);
+            setInChunk(chunk, minX, minZ, base.getX() - 3, base.getY() + 22 + i, base.getZ(), blade);
+            setInChunk(chunk, minX, minZ, base.getX() - 3, base.getY() + 22 - i / 2, base.getZ() + i, blade);
+            setInChunk(chunk, minX, minZ, base.getX() - 3, base.getY() + 22 - i / 2, base.getZ() - i, blade);
         }
-        setSafe(level, base.offset(2, 24, 0), Blocks.REDSTONE_TORCH.defaultBlockState());
+        setInChunk(chunk, minX, minZ, base.getX() + 2, base.getY() + 24, base.getZ(), Blocks.REDSTONE_TORCH.defaultBlockState());
 
         if (withPortal) {
-            // Access entrance door & Wind Ocean portal core!
             for (int dy = 1; dy <= 3; dy++) {
-                setSafe(level, base.offset(-1, dy, 0), Blocks.AIR.defaultBlockState());
-                setSafe(level, base.offset(0, dy, 0), ModBlocks.WIND_TURBINE_PORTAL.get().defaultBlockState());
+                setInChunk(chunk, minX, minZ, base.getX() - 1, base.getY() + dy, base.getZ(), Blocks.AIR.defaultBlockState());
+                setInChunk(chunk, minX, minZ, base.getX(), base.getY() + dy, base.getZ(), ModBlocks.WIND_TURBINE_PORTAL.get().defaultBlockState());
             }
-            setSafe(level, base.offset(-2, 1, 0), Blocks.AIR.defaultBlockState());
-            setSafe(level, base.offset(-2, 2, 0), Blocks.AIR.defaultBlockState());
-            setSafe(level, base.offset(-3, 1, 0), Blocks.LANTERN.defaultBlockState());
-            StructureBuildUtil.placeWallOrStandingSign(level, base.offset(-3, 1, -1), Direction.WEST, false,
-                    "sign.under_world.wind_turbine_gate.1", "sign.under_world.wind_turbine_gate.2", "", "");
+            setInChunk(chunk, minX, minZ, base.getX() - 2, base.getY() + 1, base.getZ(), Blocks.AIR.defaultBlockState());
+            setInChunk(chunk, minX, minZ, base.getX() - 2, base.getY() + 2, base.getZ(), Blocks.AIR.defaultBlockState());
+            setInChunk(chunk, minX, minZ, base.getX() - 3, base.getY() + 1, base.getZ(), Blocks.LANTERN.defaultBlockState());
         }
     }
 
-    private static void setSafe(WorldGenLevel level, BlockPos pos, BlockState state) {
-        if (pos.getY() >= level.getMinBuildHeight() && pos.getY() < level.getMaxBuildHeight()) {
-            level.setBlock(pos, state, 2);
+    private static void setInChunk(ChunkAccess chunk, int minX, int minZ, int wx, int wy, int wz, BlockState state) {
+        int lx = wx - minX;
+        int lz = wz - minZ;
+        if (lx >= 0 && lx < 16 && lz >= 0 && lz < 16 && wy >= -64 && wy < 320) {
+            chunk.setBlockState(new BlockPos(lx, wy, lz), state, false);
         }
     }
 

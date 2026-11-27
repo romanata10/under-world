@@ -2,6 +2,7 @@ package com.underworld.mod.registry;
 
 import com.underworld.mod.UnderWorldMod;
 import com.underworld.mod.config.UnderWorldConfigHolder;
+import com.underworld.mod.event.UnderWorldEventDirector;
 import com.underworld.mod.world.UnderWorldSavedData;
 import com.underworld.mod.world.dimension.BrowserChunkGenerator;
 import com.underworld.mod.world.dimension.ErrorChunkGenerator;
@@ -104,11 +105,11 @@ public final class ModDimensions {
 
     public static boolean sendToFunWorld(ServerPlayer player) {
         MinecraftServer server = player.getServer();
-        if (server == null) {
+        if (server == null || player.isRemoved() || !player.isAlive()) {
             return false;
         }
         ServerLevel dest = server.getLevel(THE_FUN_WORLD);
-        if (dest == null) {
+        if (dest == null || player.level() == dest) {
             return false;
         }
         if (player.level().dimension().equals(Level.OVERWORLD)) {
@@ -119,9 +120,10 @@ public final class ModDimensions {
         int surfaceY = FunWorldChunkGenerator.getSurfaceY(spawnX, spawnZ);
         BlockPos landPos = new BlockPos(spawnX, surfaceY + 1, spawnZ);
 
-        dest.getChunk(landPos);
+        dest.getChunkAt(landPos);
         ensureClearStandArea(dest, landPos, ModBlocks.FUN_GRASS_BLOCK.get().defaultBlockState());
 
+        player.stopRiding();
         player.fallDistance = 0.0F;
         player.changeDimension(dest, fixedTeleporter(new Vec3(landPos.getX() + 0.5D, landPos.getY(), landPos.getZ() + 0.5D), player.getYRot(), player.getXRot()));
         dest.playSound(null, landPos, ModSounds.FUN_WORLD_WARP.get(), SoundSource.AMBIENT, 1.4F, 1.0F);
@@ -131,19 +133,20 @@ public final class ModDimensions {
 
     public static boolean sendToMaze(ServerPlayer player) {
         MinecraftServer server = player.getServer();
-        if (server == null) {
+        if (server == null || player.isRemoved() || !player.isAlive()) {
             return false;
         }
         ServerLevel dest = server.getLevel(MAZE);
-        if (dest == null) {
+        if (dest == null || player.level() == dest) {
             return false;
         }
         if (player.level().dimension().equals(Level.OVERWORLD)) {
             UnderWorldSavedData.get(server).saveReturnPos(player.getUUID(), player.blockPosition());
         }
         BlockPos landPos = new BlockPos(10, MazeChunkGenerator.FLOOR_Y + 1, 10);
-        dest.getChunk(landPos);
+        dest.getChunkAt(landPos);
 
+        player.stopRiding();
         player.fallDistance = 0.0F;
         player.changeDimension(dest, fixedTeleporter(new Vec3(landPos.getX() + 0.5D, landPos.getY(), landPos.getZ() + 0.5D), player.getYRot(), 0.0F));
         dest.playSound(null, landPos, ModSounds.MAZE_PORTAL.get(), SoundSource.AMBIENT, 1.4F, 0.9F);
@@ -152,11 +155,11 @@ public final class ModDimensions {
 
     public static boolean sendToError(ServerPlayer player) {
         MinecraftServer server = player.getServer();
-        if (server == null) {
+        if (server == null || player.isRemoved() || !player.isAlive()) {
             return false;
         }
         ServerLevel dest = server.getLevel(THE_ERROR);
-        if (dest == null) {
+        if (dest == null || player.level() == dest) {
             return false;
         }
         UnderWorldSavedData data = UnderWorldSavedData.get(server);
@@ -173,9 +176,10 @@ public final class ModDimensions {
             surfaceY = ErrorChunkGenerator.getBaseSurfaceY(spawnX, spawnZ);
         }
         BlockPos landPos = new BlockPos(spawnX, surfaceY + 1, spawnZ);
-        dest.getChunk(landPos);
+        dest.getChunkAt(landPos);
         ensureClearStandArea(dest, landPos, ModBlocks.ERROR_GROUND.get().defaultBlockState());
 
+        player.stopRiding();
         player.fallDistance = 0.0F;
         player.changeDimension(dest, fixedTeleporter(new Vec3(landPos.getX() + 0.5D, landPos.getY(), landPos.getZ() + 0.5D), player.getYRot(), player.getXRot()));
         dest.playSound(null, landPos, ModSounds.ERROR_WARP.get(), SoundSource.AMBIENT, 1.35F, 1.0F);
@@ -185,20 +189,21 @@ public final class ModDimensions {
 
     public static boolean sendToTime(ServerPlayer player) {
         MinecraftServer server = player.getServer();
-        if (server == null) {
+        if (server == null || player.isRemoved() || !player.isAlive()) {
             return false;
         }
         ServerLevel dest = server.getLevel(THE_TIME);
-        if (dest == null) {
+        if (dest == null || player.level() == dest) {
             return false;
         }
         if (player.level().dimension().equals(Level.OVERWORLD)) {
             UnderWorldSavedData.get(server).saveReturnPos(player.getUUID(), player.blockPosition());
         }
         BlockPos landPos = new BlockPos(8, TimeChunkGenerator.BASE_DISC_Y + 1, 8);
-        dest.getChunk(landPos);
+        dest.getChunkAt(landPos);
         ensureClearStandArea(dest, landPos, ModBlocks.CLOCK_FACE_BLOCK.get().defaultBlockState());
 
+        player.stopRiding();
         player.fallDistance = 0.0F;
         player.changeDimension(dest, fixedTeleporter(new Vec3(landPos.getX() + 0.5D, landPos.getY(), landPos.getZ() + 0.5D), player.getYRot(), 0.0F));
         dest.playSound(null, landPos, ModSounds.TIME_WARP.get(), SoundSource.AMBIENT, 1.35F, 0.95F);
@@ -227,9 +232,9 @@ public final class ModDimensions {
 
     public static boolean sendToPlains(ServerPlayer player) {
         MinecraftServer server = player.getServer();
-        if (server == null) return false;
+        if (server == null || player.isRemoved() || !player.isAlive()) return false;
         ServerLevel dest = server.getLevel(THE_PLAINS);
-        if (dest == null) return false;
+        if (dest == null || player.level() == dest) return false;
         if (player.level().dimension().equals(Level.OVERWORLD)) {
             UnderWorldSavedData.get(server).saveReturnPos(player.getUUID(), player.blockPosition());
         }
@@ -237,9 +242,10 @@ public final class ModDimensions {
         int spawnZ = PlainsChunkGenerator.getPathZ(spawnX);
         int surfaceY = PlainsChunkGenerator.getSurfaceY(spawnX, spawnZ);
         BlockPos landPos = new BlockPos(spawnX, surfaceY + 1, spawnZ);
-        dest.getChunk(landPos);
+        dest.getChunkAt(landPos);
         ensureClearStandArea(dest, landPos, ModBlocks.PLAINS_PATH_BLOCK.get().defaultBlockState());
 
+        player.stopRiding();
         player.fallDistance = 0.0F;
         player.changeDimension(dest, fixedTeleporter(new Vec3(landPos.getX() + 0.5D, landPos.getY(), landPos.getZ() + 0.5D), -90.0F, 0.0F));
         dest.playSound(null, landPos, ModSounds.PYLON_HUM.get(), SoundSource.AMBIENT, 1.35F, 0.9F);
@@ -249,43 +255,52 @@ public final class ModDimensions {
 
     public static boolean sendToWindOcean(ServerPlayer player) {
         MinecraftServer server = player.getServer();
-        if (server == null) return false;
+        if (server == null || player.isRemoved() || !player.isAlive()) return false;
         ServerLevel dest = server.getLevel(THE_WIND_OCEAN);
-        if (dest == null) return false;
+        if (dest == null || player.level() == dest) return false;
         if (player.level().dimension().equals(Level.OVERWORLD)) {
             UnderWorldSavedData.get(server).saveReturnPos(player.getUUID(), player.blockPosition());
         }
         BlockPos boatPos = new BlockPos(8, WindOceanChunkGenerator.SEA_LEVEL, 8);
-        dest.getChunk(boatPos);
+        dest.getChunkAt(boatPos);
 
+        player.stopRiding();
         player.fallDistance = 0.0F;
-        Entity moved = player.changeDimension(dest, fixedTeleporter(new Vec3(boatPos.getX() + 0.5D, WindOceanChunkGenerator.SEA_LEVEL + 0.45D, boatPos.getZ() + 0.5D), -90.0F, 0.0F));
+        Entity moved = player.changeDimension(dest, fixedTeleporter(
+                new Vec3(boatPos.getX() + 0.5D, WindOceanChunkGenerator.SEA_LEVEL + 0.85D, boatPos.getZ() + 0.5D), -90.0F, 0.0F));
         if (moved instanceof ServerPlayer destPlayer) {
-            Boat boat = EntityType.BOAT.create(dest);
-            if (boat != null) {
-                boat.setVariant(Boat.Type.OAK);
-                boat.moveTo(boatPos.getX() + 0.5D, WindOceanChunkGenerator.SEA_LEVEL + 0.25D, boatPos.getZ() + 0.5D, -90.0F, 0.0F);
-                dest.addFreshEntity(boat);
-                destPlayer.startRiding(boat, true);
-            }
-            dest.playSound(null, boatPos, ModSounds.TURBINE_WHOOSH.get(), SoundSource.AMBIENT, 1.4F, 0.85F);
-            destPlayer.displayClientMessage(Component.translatable("message.under_world.wind_ocean_entered"), true);
+            java.util.UUID pid = destPlayer.getUUID();
+            UnderWorldEventDirector.schedule(2, () -> {
+                ServerPlayer p = server.getPlayerList().getPlayer(pid);
+                if (p != null && p.isAlive() && p.level() == dest) {
+                    Boat boat = EntityType.BOAT.create(dest);
+                    if (boat != null) {
+                        boat.setVariant(Boat.Type.OAK);
+                        boat.moveTo(p.getX(), WindOceanChunkGenerator.SEA_LEVEL + 0.25D, p.getZ(), p.getYRot(), 0.0F);
+                        dest.addFreshEntity(boat);
+                        p.startRiding(boat, true);
+                    }
+                    dest.playSound(null, p.blockPosition(), ModSounds.TURBINE_WHOOSH.get(), SoundSource.AMBIENT, 1.4F, 0.85F);
+                    p.displayClientMessage(Component.translatable("message.under_world.wind_ocean_entered"), true);
+                }
+            });
         }
         return true;
     }
 
     public static boolean sendToXp(ServerPlayer player) {
         MinecraftServer server = player.getServer();
-        if (server == null) return false;
+        if (server == null || player.isRemoved() || !player.isAlive()) return false;
         ServerLevel dest = server.getLevel(THE_XP);
-        if (dest == null) return false;
+        if (dest == null || player.level() == dest) return false;
         if (player.level().dimension().equals(Level.OVERWORLD)) {
             UnderWorldSavedData.get(server).saveReturnPos(player.getUUID(), player.blockPosition());
         }
         BlockPos landPos = new BlockPos(0, XpDesktopChunkGenerator.DESKTOP_Y + 1, 6);
-        dest.getChunk(landPos);
+        dest.getChunkAt(landPos);
         ensureClearStandArea(dest, landPos, Blocks.LIGHT_BLUE_CONCRETE.defaultBlockState());
 
+        player.stopRiding();
         player.fallDistance = 0.0F;
         player.changeDimension(dest, fixedTeleporter(new Vec3(landPos.getX() + 0.5D, landPos.getY(), landPos.getZ() + 0.5D), 180.0F, 0.0F));
         dest.playSound(null, landPos, ModSounds.XP_STARTUP.get(), SoundSource.AMBIENT, 1.4F, 1.0F);
@@ -295,16 +310,17 @@ public final class ModDimensions {
 
     public static boolean sendToBrowser(ServerPlayer player) {
         MinecraftServer server = player.getServer();
-        if (server == null) return false;
+        if (server == null || player.isRemoved() || !player.isAlive()) return false;
         ServerLevel dest = server.getLevel(THE_BROWSER);
-        if (dest == null) return false;
+        if (dest == null || player.level() == dest) return false;
         if (player.level().dimension().equals(Level.OVERWORLD)) {
             UnderWorldSavedData.get(server).saveReturnPos(player.getUUID(), player.blockPosition());
         }
         BlockPos landPos = new BlockPos(6, BrowserChunkGenerator.FLOOR_Y + 1, 8);
-        dest.getChunk(landPos);
+        dest.getChunkAt(landPos);
         ensureClearStandArea(dest, landPos, ModBlocks.BROWSER_TILE.get().defaultBlockState());
 
+        player.stopRiding();
         player.fallDistance = 0.0F;
         player.changeDimension(dest, fixedTeleporter(new Vec3(landPos.getX() + 0.5D, landPos.getY(), landPos.getZ() + 0.5D), 180.0F, 0.0F));
         dest.playSound(null, landPos, ModSounds.XP_STARTUP.get(), SoundSource.AMBIENT, 1.25F, 1.15F);
@@ -320,25 +336,26 @@ public final class ModDimensions {
     private static boolean returnToOverworldWithEffect(ServerPlayer player, Component message,
                                                        SoundEvent sound, float volume, float pitch) {
         MinecraftServer server = player.getServer();
-        if (server == null) {
+        if (server == null || player.isRemoved() || !player.isAlive()) {
             return false;
         }
         ServerLevel overworld = server.getLevel(Level.OVERWORLD);
-        if (overworld == null) {
+        if (overworld == null || player.level() == overworld) {
             return false;
         }
         UnderWorldSavedData data = UnderWorldSavedData.get(server);
         data.clearErrorReturnTimer(player.getUUID());
         BlockPos saved = data.getReturnPos(player.getUUID());
         BlockPos target = saved != null ? saved : overworld.getSharedSpawnPos();
-        overworld.getChunk(target);
+        overworld.getChunkAt(target);
 
         BlockPos safeTarget = target;
         if (!overworld.getBlockState(safeTarget).isAir() || !overworld.getBlockState(safeTarget.above()).isAir()) {
-            safeTarget = new BlockPos(target.getX(), Math.max(overworld.getMinBuildHeight() + 4,
-                    overworld.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, target).getY()), target.getZ());
+            int hy = overworld.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, target).getY();
+            safeTarget = new BlockPos(target.getX(), Math.max(overworld.getMinBuildHeight() + 4, Math.min(overworld.getMaxBuildHeight() - 4, hy)), target.getZ());
         }
 
+        player.stopRiding();
         player.fallDistance = 0.0F;
         player.changeDimension(overworld, fixedTeleporter(new Vec3(safeTarget.getX() + 0.5D, safeTarget.getY(), safeTarget.getZ() + 0.5D), player.getYRot(), player.getXRot()));
         overworld.playSound(null, safeTarget, sound, SoundSource.AMBIENT, volume, pitch);

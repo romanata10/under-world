@@ -637,7 +637,7 @@ public final class UnderWorldEventDirector {
             return;
         }
 
-        for (ServerPlayer player : funLevel.players()) {
+        for (ServerPlayer player : List.copyOf(funLevel.players())) {
             if (player.isCreative() || player.isSpectator() || !player.isAlive() || isSpawnProtected(player)) {
                 continue;
             }
@@ -658,7 +658,7 @@ public final class UnderWorldEventDirector {
             return;
         }
 
-        for (ServerPlayer player : mazeLevel.players()) {
+        for (ServerPlayer player : List.copyOf(mazeLevel.players())) {
             if (player.isCreative() || player.isSpectator() || !player.isAlive() || isSpawnProtected(player)) {
                 continue;
             }
@@ -675,7 +675,7 @@ public final class UnderWorldEventDirector {
         if (plains == null || plains.players().isEmpty() || !plains.isNight()) {
             return;
         }
-        for (ServerPlayer player : plains.players()) {
+        for (ServerPlayer player : List.copyOf(plains.players())) {
             if (player.isCreative() || player.isSpectator() || !player.isAlive() || isSpawnProtected(player)) {
                 continue;
             }
@@ -692,7 +692,7 @@ public final class UnderWorldEventDirector {
         if (ocean == null || ocean.players().isEmpty()) {
             return;
         }
-        for (ServerPlayer player : ocean.players()) {
+        for (ServerPlayer player : List.copyOf(ocean.players())) {
             if (player.isCreative() || player.isSpectator() || !player.isAlive() || isSpawnProtected(player)) {
                 continue;
             }
@@ -712,7 +712,7 @@ public final class UnderWorldEventDirector {
         if (xpLevel == null || xpLevel.players().isEmpty()) {
             return;
         }
-        for (ServerPlayer player : xpLevel.players()) {
+        for (ServerPlayer player : List.copyOf(xpLevel.players())) {
             BlockPos pPos = player.blockPosition();
             boolean corruptedAny = false;
             for (int dx = -4; dx <= 4; dx++) {
@@ -740,7 +740,7 @@ public final class UnderWorldEventDirector {
         if (browser == null || browser.players().isEmpty()) {
             return;
         }
-        for (ServerPlayer player : browser.players()) {
+        for (ServerPlayer player : List.copyOf(browser.players())) {
             String url = BrowserChunkGenerator.getSiteUrl(player.getBlockX(), player.getBlockZ());
             player.displayClientMessage(Component.literal("[Chrome] " + url).withStyle(
                     "http://the-MinECRaT-fREe-downladn.com/".equals(url) ? ChatFormatting.RED : ChatFormatting.AQUA), true);

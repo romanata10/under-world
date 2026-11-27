@@ -103,10 +103,11 @@ public class WindOceanChunkGenerator extends ChunkGenerator {
         int minX = chunk.getPos().getMinBlockX();
         int minZ = chunk.getPos().getMinBlockZ();
 
-        // Oil Rig landmark at (144, 0) plus repeating offshore rigs every 32 chunks
-        if (Math.floorMod(cx, 32) == 9 && Math.floorMod(cz, 32) == 0) {
-            placeOilRig(level, new BlockPos(minX + 8, SEA_LEVEL, minZ + 8));
-            return;
+        // Oil Rig landmark strictly checked per chunk around (144, 0) + every 32 chunks
+        int rigSectorX = Math.floorDiv(cx, 32) * 32 + 9;
+        int rigSectorZ = Math.floorDiv(cz, 32) * 32;
+        if (Math.abs(cx - rigSectorX) <= 1 && Math.abs(cz - rigSectorZ) <= 1) {
+            placeOilRigInChunk(chunk, minX, minZ, new BlockPos(rigSectorX * 16 + 8, SEA_LEVEL, rigSectorZ * 16 + 8));
         }
 
         // Do not obstruct spawn boat landing (chunk 0, 0)
@@ -114,117 +115,121 @@ public class WindOceanChunkGenerator extends ChunkGenerator {
             return;
         }
 
-        // Regular grid of towering offshore wind turbines matching image-16.png
-        if (Math.floorMod(cx, 3) == 1 && Math.floorMod(cz, 3) == 1) {
-            placeOffshoreTurbine(level, new BlockPos(minX + 8, SEA_LEVEL, minZ + 8), cx, cz);
-        }
-    }
-
-    private static void placeOffshoreTurbine(WorldGenLevel level, BlockPos waterCenter, int cx, int cz) {
-        BlockState pillar = ModBlocks.TURBINE_PILLAR.get().defaultBlockState();
-        BlockState blade = ModBlocks.TURBINE_BLADE.get().defaultBlockState();
-        // Underwater concrete piling y=50..64
-        for (int dy = -12; dy <= 1; dy++) {
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dz = -1; dz <= 1; dz++) {
-                    setSafe(level, waterCenter.offset(dx, dy, dz), dy <= 0 ? Blocks.GRAY_CONCRETE.defaultBlockState() : pillar);
+        // Regular grid of offshore wind turbines (check nearby turbine grid cell so blades clip cleanly at chunk edges!)
+        for (int tcx = cx - 1; tcx <= cx + 1; tcx++) {
+            for (int tcz = cz - 1; tcz <= cz + 1; tcz++) {
+                if (Math.floorMod(tcx, 3) == 1 && Math.floorMod(tcz, 3) == 1
+                        && !(Math.abs(tcx - rigSectorX) <= 1 && Math.abs(tcz - rigSectorZ) <= 1)) {
+                    placeOffshoreTurbineInChunk(chunk, minX, minZ,
+                            new BlockPos(tcx * 16 + 8, SEA_LEVEL, tcz * 16 + 8), tcx, tcz);
                 }
             }
         }
-        // Main shaft rising high above ocean surface y=65..92
-        for (int dy = 2; dy <= 28; dy++) {
-            setSafe(level, waterCenter.offset(0, dy, 0), pillar);
-            if (dy < 16) {
-                setSafe(level, waterCenter.offset(1, dy, 0), pillar);
-                setSafe(level, waterCenter.offset(-1, dy, 0), pillar);
-                setSafe(level, waterCenter.offset(0, dy, 1), pillar);
-                setSafe(level, waterCenter.offset(0, dy, -1), pillar);
-            }
-        }
-        // Nacelle + rotating angle silhouette depending on chunk
-        for (int dz = -2; dz <= 3; dz++) {
-            setSafe(level, waterCenter.offset(0, 29, dz), pillar);
-            setSafe(level, waterCenter.offset(0, 30, dz), pillar);
-        }
-        boolean tilt = ((cx + cz) & 1) == 0;
-        for (int i = 1; i <= 14; i++) {
-            if (tilt) {
-                setSafe(level, waterCenter.offset(0, 30 + i, -3), blade);
-                setSafe(level, waterCenter.offset(i, 30 - i / 2, -3), blade);
-                setSafe(level, waterCenter.offset(-i, 30 - i / 2, -3), blade);
-            } else {
-                setSafe(level, waterCenter.offset(i, 30 + i / 2, -3), blade);
-                setSafe(level, waterCenter.offset(-i, 30 + i / 2, -3), blade);
-                setSafe(level, waterCenter.offset(0, 30 - i, -3), blade);
-            }
-        }
-        setSafe(level, waterCenter.offset(0, 31, 3), Blocks.REDSTONE_TORCH.defaultBlockState());
     }
 
-    private static void placeOilRig(WorldGenLevel level, BlockPos base) {
+    private static void placeOffshoreTurbineInChunk(ChunkAccess chunk, int minX, int minZ, BlockPos waterCenter, int tcx, int tcz) {
+        BlockState pillar = ModBlocks.TURBINE_PILLAR.get().defaultBlockState();
+        BlockState blade = ModBlocks.TURBINE_BLADE.get().defaultBlockState();
+
+        for (int dy = -12; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    setInChunk(chunk, minX, minZ, waterCenter.getX() + dx, waterCenter.getY() + dy, waterCenter.getZ() + dz,
+                            dy <= 0 ? Blocks.GRAY_CONCRETE.defaultBlockState() : pillar);
+                }
+            }
+        }
+        for (int dy = 2; dy <= 28; dy++) {
+            setInChunk(chunk, minX, minZ, waterCenter.getX(), waterCenter.getY() + dy, waterCenter.getZ(), pillar);
+            if (dy < 16) {
+                setInChunk(chunk, minX, minZ, waterCenter.getX() + 1, waterCenter.getY() + dy, waterCenter.getZ(), pillar);
+                setInChunk(chunk, minX, minZ, waterCenter.getX() - 1, waterCenter.getY() + dy, waterCenter.getZ(), pillar);
+                setInChunk(chunk, minX, minZ, waterCenter.getX(), waterCenter.getY() + dy, waterCenter.getZ() + 1, pillar);
+                setInChunk(chunk, minX, minZ, waterCenter.getX(), waterCenter.getY() + dy, waterCenter.getZ() - 1, pillar);
+            }
+        }
+        for (int dz = -2; dz <= 3; dz++) {
+            setInChunk(chunk, minX, minZ, waterCenter.getX(), waterCenter.getY() + 29, waterCenter.getZ() + dz, pillar);
+            setInChunk(chunk, minX, minZ, waterCenter.getX(), waterCenter.getY() + 30, waterCenter.getZ() + dz, pillar);
+        }
+        boolean tilt = ((tcx + tcz) & 1) == 0;
+        for (int i = 1; i <= 14; i++) {
+            if (tilt) {
+                setInChunk(chunk, minX, minZ, waterCenter.getX(), waterCenter.getY() + 30 + i, waterCenter.getZ() - 3, blade);
+                setInChunk(chunk, minX, minZ, waterCenter.getX() + i, waterCenter.getY() + 30 - i / 2, waterCenter.getZ() - 3, blade);
+                setInChunk(chunk, minX, minZ, waterCenter.getX() - i, waterCenter.getY() + 30 - i / 2, waterCenter.getZ() - 3, blade);
+            } else {
+                setInChunk(chunk, minX, minZ, waterCenter.getX() + i, waterCenter.getY() + 30 + i / 2, waterCenter.getZ() - 3, blade);
+                setInChunk(chunk, minX, minZ, waterCenter.getX() - i, waterCenter.getY() + 30 + i / 2, waterCenter.getZ() - 3, blade);
+                setInChunk(chunk, minX, minZ, waterCenter.getX(), waterCenter.getY() + 30 - i, waterCenter.getZ() - 3, blade);
+            }
+        }
+        setInChunk(chunk, minX, minZ, waterCenter.getX(), waterCenter.getY() + 31, waterCenter.getZ() + 3, Blocks.REDSTONE_TORCH.defaultBlockState());
+    }
+
+    private static void placeOilRigInChunk(ChunkAccess chunk, int minX, int minZ, BlockPos base) {
         BlockState steel = ModBlocks.OIL_RIG_STEEL.get().defaultBlockState();
         BlockState dark = Blocks.DEEPSLATE_TILES.defaultBlockState();
 
-        // 4 massive rig legs reaching deep underwater y=38..71
         int[][] legs = {{-6, -6}, {6, -6}, {-6, 6}, {6, 6}};
         for (int[] leg : legs) {
             for (int dy = -24; dy <= 8; dy++) {
                 for (int ox = 0; ox <= 1; ox++) {
                     for (int oz = 0; oz <= 1; oz++) {
-                        setSafe(level, base.offset(leg[0] + ox, dy, leg[1] + oz), steel);
+                        setInChunk(chunk, minX, minZ, base.getX() + leg[0] + ox, base.getY() + dy, base.getZ() + leg[1] + oz, steel);
                     }
                 }
             }
         }
-        // Boarding ladder pier on West (-X) face at water level
         for (int dy = 0; dy <= 8; dy++) {
-            setSafe(level, base.offset(-7, dy, 0), Blocks.LADDER.defaultBlockState());
-            setSafe(level, base.offset(-8, 1, 0), steel);
+            setInChunk(chunk, minX, minZ, base.getX() - 7, base.getY() + dy, base.getZ(), Blocks.LADDER.defaultBlockState());
+            setInChunk(chunk, minX, minZ, base.getX() - 8, base.getY() + 1, base.getZ(), steel);
         }
 
-        // Main steel deck platform at y=71 (base+8)
         for (int dx = -8; dx <= 8; dx++) {
             for (int dz = -8; dz <= 8; dz++) {
-                setSafe(level, base.offset(dx, 8, dz), (Math.abs(dx) <= 2 && Math.abs(dz) <= 2) ? dark : steel);
+                setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + 8, base.getZ() + dz,
+                        (Math.abs(dx) <= 2 && Math.abs(dz) <= 2) ? dark : steel);
                 if (Math.abs(dx) == 8 || Math.abs(dz) == 8) {
-                    setSafe(level, base.offset(dx, 9, dz), Blocks.IRON_BARS.defaultBlockState());
+                    setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + 9, base.getZ() + dz, Blocks.IRON_BARS.defaultBlockState());
                 }
             }
         }
 
-        // Control cabin & helipad portal
         for (int dx = 3; dx <= 7; dx++) {
             for (int dz = -5; dz <= -1; dz++) {
                 for (int dy = 9; dy <= 13; dy++) {
                     boolean wall = dx == 3 || dx == 7 || dz == -5 || dz == -1 || dy == 13;
-                    setSafe(level, base.offset(dx, dy, dz), wall ? steel : Blocks.AIR.defaultBlockState());
+                    setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + dy, base.getZ() + dz,
+                            wall ? steel : Blocks.AIR.defaultBlockState());
                 }
             }
         }
-        setSafe(level, base.offset(3, 10, -3), Blocks.AIR.defaultBlockState());
-        setSafe(level, base.offset(3, 11, -3), Blocks.AIR.defaultBlockState());
-        setSafe(level, base.offset(2, 11, -3), Blocks.LANTERN.defaultBlockState());
+        setInChunk(chunk, minX, minZ, base.getX() + 3, base.getY() + 10, base.getZ() - 3, Blocks.AIR.defaultBlockState());
+        setInChunk(chunk, minX, minZ, base.getX() + 3, base.getY() + 11, base.getZ() - 3, Blocks.AIR.defaultBlockState());
+        setInChunk(chunk, minX, minZ, base.getX() + 2, base.getY() + 11, base.getZ() - 3, Blocks.LANTERN.defaultBlockState());
 
-        // Tall derrick mast & visible burning flare beacon
         for (int dy = 9; dy <= 28; dy++) {
-            setSafe(level, base.offset(-5, dy, 5), steel);
-            setSafe(level, base.offset(-4, dy, 5), steel);
+            setInChunk(chunk, minX, minZ, base.getX() - 5, base.getY() + dy, base.getZ() + 5, steel);
+            setInChunk(chunk, minX, minZ, base.getX() - 4, base.getY() + dy, base.getZ() + 5, steel);
         }
-        setSafe(level, base.offset(-5, 29, 5), Blocks.NETHERRACK.defaultBlockState());
-        setSafe(level, base.offset(-5, 30, 5), Blocks.FIRE.defaultBlockState());
-        setSafe(level, base.offset(-4, 29, 5), Blocks.LANTERN.defaultBlockState());
+        setInChunk(chunk, minX, minZ, base.getX() - 5, base.getY() + 29, base.getZ() + 5, Blocks.NETHERRACK.defaultBlockState());
+        setInChunk(chunk, minX, minZ, base.getX() - 5, base.getY() + 30, base.getZ() + 5, Blocks.FIRE.defaultBlockState());
+        setInChunk(chunk, minX, minZ, base.getX() - 4, base.getY() + 29, base.getZ() + 5, Blocks.LANTERN.defaultBlockState());
 
-        // Glowing Oil Rig return portal at center of main deck!
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
-                setSafe(level, base.offset(dx, 9, dz), ModBlocks.OIL_RIG_PORTAL.get().defaultBlockState());
+                setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + 9, base.getZ() + dz,
+                        ModBlocks.OIL_RIG_PORTAL.get().defaultBlockState());
             }
         }
     }
 
-    private static void setSafe(WorldGenLevel level, BlockPos pos, BlockState state) {
-        if (pos.getY() >= level.getMinBuildHeight() && pos.getY() < level.getMaxBuildHeight()) {
-            level.setBlock(pos, state, 2);
+    private static void setInChunk(ChunkAccess chunk, int minX, int minZ, int wx, int wy, int wz, BlockState state) {
+        int lx = wx - minX;
+        int lz = wz - minZ;
+        if (lx >= 0 && lx < 16 && lz >= 0 && lz < 16 && wy >= -64 && wy < 320) {
+            chunk.setBlockState(new BlockPos(lx, wy, lz), state, false);
         }
     }
 
