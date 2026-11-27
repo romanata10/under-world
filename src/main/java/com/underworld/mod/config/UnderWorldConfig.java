@@ -22,6 +22,9 @@ public class UnderWorldConfig extends Config {
     public TheSkySection theSky = new TheSkySection();
     public TheTruthSection theTruth = new TheTruthSection();
     public ClockSection clock = new ClockSection();
+    public TheMimicSection theMimic = new TheMimicSection();
+    public DemonFishSection demonFish = new DemonFishSection();
+    public TheBallSection theBall = new TheBallSection();
     public DimensionsSection dimensions = new DimensionsSection();
 
     public UnderWorldConfig() {
@@ -49,6 +52,12 @@ public class UnderWorldConfig extends Config {
 
         @Comment("Removes any Under World entity that kills a player (and nearby aggro entities) so it cannot spawn-kill on respawn.")
         public ValidatedBoolean antiSpawnKillEnabled = new ValidatedBoolean(true);
+
+        @Comment("Spawns oddity and server-lore structures dynamically as survival events around players.")
+        public ValidatedBoolean dynamicStructureEventsEnabled = new ValidatedBoolean(true);
+
+        @Comment("Average ticks between dynamic survival structure events (4800 = 4 minutes).")
+        public ValidatedInt dynamicStructureIntervalTicks = new ValidatedInt(4800, 24000, 600);
     }
 
     public static class FriendSection extends ConfigSection {
@@ -163,6 +172,45 @@ public class UnderWorldConfig extends Config {
 
         @Comment("Movement speed of the aggressive ticking Clock variant inside The Time.")
         public ValidatedDouble clockTimeSpeed = new ValidatedDouble(0.42D, 0.70D, 0.20D);
+    }
+
+    public static class TheMimicSection extends ConfigSection {
+        @Comment("Enables encounters with the mimic disguised as Steve or previous victims.")
+        public ValidatedBoolean theMimicEnabled = new ValidatedBoolean(true);
+
+        @Comment("Chance per Overworld surface check for the mimic to appear.")
+        public ValidatedDouble theMimicSpawnChance = new ValidatedDouble(0.065D, 1.0D, 0.0D);
+
+        @Comment("Approach distance in blocks that bursts the disguise into black pixels and unleashes the mimic.")
+        public ValidatedDouble theMimicTriggerRange = new ValidatedDouble(9.5D, 20.0D, 3.0D);
+
+        @Comment("Duration in ticks that the mimic chases before vanishing if it catches no one (600 = 30s).")
+        public ValidatedInt theMimicChaseDurationTicks = new ValidatedInt(600, 2400, 200);
+    }
+
+    public static class DemonFishSection extends ConfigSection {
+        @Comment("Enables aquatic Demon Fish hunts when players swim or sail in water.")
+        public ValidatedBoolean demonFishEnabled = new ValidatedBoolean(true);
+
+        @Comment("Chance per aquatic check for Demon Fish to emerge in water.")
+        public ValidatedDouble demonFishSpawnChance = new ValidatedDouble(0.095D, 1.0D, 0.0D);
+
+        @Comment("Max chase time in ticks without catching the player before Demon Fish vanishes (1200 = 1 minute).")
+        public ValidatedInt demonFishChaseDurationTicks = new ValidatedInt(1200, 3600, 300);
+
+        @Comment("Allows Demon Fish to shatter underwater dug blocks when pursuing submerged players.")
+        public ValidatedBoolean demonFishBreakBlocks = new ValidatedBoolean(true);
+    }
+
+    public static class TheBallSection extends ConfigSection {
+        @Comment("Enables floating morphing black spheres (The Ball) around Overworld players.")
+        public ValidatedBoolean theBallEnabled = new ValidatedBoolean(true);
+
+        @Comment("Chance per Overworld surface check for The Ball to appear.")
+        public ValidatedDouble theBallSpawnChance = new ValidatedDouble(0.06D, 1.0D, 0.0D);
+
+        @Comment("Duration in ticks of the Geometric Nightmare effect applied upon touching The Ball (400 = 20s).")
+        public ValidatedInt theBallEffectDurationTicks = new ValidatedInt(400, 2400, 100);
     }
 
     public static class DimensionsSection extends ConfigSection {

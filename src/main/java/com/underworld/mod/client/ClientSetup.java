@@ -1,20 +1,25 @@
 package com.underworld.mod.client;
 
 import com.underworld.mod.UnderWorldMod;
+import com.underworld.mod.client.dimension.ClientHorrorEffectsHandler;
 import com.underworld.mod.client.dimension.DimensionAtmosphereHandler;
 import com.underworld.mod.client.dimension.DimensionMusicHandler;
 import com.underworld.mod.client.dimension.ErrorDimensionEffects;
 import com.underworld.mod.client.dimension.FunWorldDimensionEffects;
 import com.underworld.mod.client.dimension.MazeDimensionEffects;
 import com.underworld.mod.client.dimension.TimeDimensionEffects;
+import com.underworld.mod.client.hud.GeometricNightmareOverlay;
 import com.underworld.mod.client.hud.TheTruthHudOverlay;
 import com.underworld.mod.client.renderer.ClockRenderer;
+import com.underworld.mod.client.renderer.DemonFishRenderer;
 import com.underworld.mod.client.renderer.EyesOfFunRenderer;
 import com.underworld.mod.client.renderer.FriendRenderer;
 import com.underworld.mod.client.renderer.FunFlowerBlockRenderer;
 import com.underworld.mod.client.renderer.GlitchBlockRenderer;
 import com.underworld.mod.client.renderer.HandsRenderer;
 import com.underworld.mod.client.renderer.SmileRenderer;
+import com.underworld.mod.client.renderer.TheBallRenderer;
+import com.underworld.mod.client.renderer.TheMimicRenderer;
 import com.underworld.mod.client.renderer.TheSkyRenderer;
 import com.underworld.mod.client.renderer.TheTruthRenderer;
 import com.underworld.mod.client.renderer.TreeMimicRenderer;
@@ -36,6 +41,7 @@ public final class ClientSetup {
         MinecraftForge.EVENT_BUS.register(DimensionAtmosphereHandler.class);
         MinecraftForge.EVENT_BUS.register(DimensionMusicHandler.class);
         MinecraftForge.EVENT_BUS.register(ClientConnectionHandler.class);
+        MinecraftForge.EVENT_BUS.register(ClientHorrorEffectsHandler.class);
     }
 
     private static void onRegisterRenderers(final EntityRenderersEvent.RegisterRenderers event) {
@@ -47,6 +53,9 @@ public final class ClientSetup {
         event.registerEntityRenderer(ModEntities.SMILE.get(), SmileRenderer::new);
         event.registerEntityRenderer(ModEntities.THE_TRUTH.get(), TheTruthRenderer::new);
         event.registerEntityRenderer(ModEntities.CLOCK.get(), ClockRenderer::new);
+        event.registerEntityRenderer(ModEntities.THE_MIMIC.get(), TheMimicRenderer::new);
+        event.registerEntityRenderer(ModEntities.DEMON_FISH.get(), DemonFishRenderer::new);
+        event.registerEntityRenderer(ModEntities.THE_BALL.get(), TheBallRenderer::new);
 
         event.registerBlockEntityRenderer(ModBlockEntities.FUN_FLOWER.get(), context -> new FunFlowerBlockRenderer());
         event.registerBlockEntityRenderer(ModBlockEntities.GLITCH_BLOCK.get(), GlitchBlockRenderer::new);
@@ -61,5 +70,6 @@ public final class ClientSetup {
 
     private static void onRegisterGuiOverlays(final RegisterGuiOverlaysEvent event) {
         event.registerAboveAll("the_truth_overlay", TheTruthHudOverlay::render);
+        event.registerAboveAll("geometric_nightmare_overlay", GeometricNightmareOverlay::render);
     }
 }

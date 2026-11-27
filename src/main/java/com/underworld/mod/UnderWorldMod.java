@@ -10,6 +10,7 @@ import com.underworld.mod.network.NetworkHandler;
 import com.underworld.mod.registry.ModBlockEntities;
 import com.underworld.mod.registry.ModBlocks;
 import com.underworld.mod.registry.ModChunkGenerators;
+import com.underworld.mod.registry.ModEffects;
 import com.underworld.mod.registry.ModEntities;
 import com.underworld.mod.registry.ModItems;
 import com.underworld.mod.registry.ModSounds;
@@ -38,6 +39,7 @@ public final class UnderWorldMod {
         ModBlocks.BLOCKS.register(modEventBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
         ModEntities.ENTITIES.register(modEventBus);
+        ModEffects.MOB_EFFECTS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
         ModItems.CREATIVE_TABS.register(modEventBus);
         ModSounds.SOUND_EVENTS.register(modEventBus);

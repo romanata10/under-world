@@ -5,10 +5,13 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.underworld.mod.config.UnderWorldConfigHolder;
 import com.underworld.mod.entity.ClockEntity;
+import com.underworld.mod.entity.DemonFishEntity;
 import com.underworld.mod.entity.EyesOfFunEntity;
 import com.underworld.mod.entity.FriendEntity;
 import com.underworld.mod.entity.HandsEntity;
 import com.underworld.mod.entity.SmileEntity;
+import com.underworld.mod.entity.TheBallEntity;
+import com.underworld.mod.entity.TheMimicEntity;
 import com.underworld.mod.entity.TheSkyEntity;
 import com.underworld.mod.entity.TheTruthEntity;
 import com.underworld.mod.entity.TreeMimicEntity;
@@ -17,15 +20,7 @@ import com.underworld.mod.network.NetworkHandler;
 import com.underworld.mod.registry.ModDimensions;
 import com.underworld.mod.registry.ModEntities;
 import com.underworld.mod.world.UnderWorldSavedData;
-import com.underworld.mod.world.structure.BrokenShaftPiece;
-import com.underworld.mod.world.structure.ClockStatuePiece;
-import com.underworld.mod.world.structure.ElongatedTreePiece;
-import com.underworld.mod.world.structure.FountainPiece;
-import com.underworld.mod.world.structure.GlitchClusterPiece;
-import com.underworld.mod.world.structure.LeafMazePiece;
-import com.underworld.mod.world.structure.OldVillageHousePiece;
-import com.underworld.mod.world.structure.VoidShrinePiece;
-import com.underworld.mod.world.structure.WheatFarmPiece;
+import com.underworld.mod.world.structure.lore.LoreStructureSpawner;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -63,7 +58,10 @@ public final class UnderWorldCommands {
                 .then(buildSpawnNode("eyes_of_fun", ModEntities.EYES_OF_FUN, false))
                 .then(buildSpawnNode("smile", ModEntities.SMILE, true))
                 .then(buildSpawnNode("the_truth", ModEntities.THE_TRUTH, true))
-                .then(buildSpawnNode("clock", ModEntities.CLOCK, false));
+                .then(buildSpawnNode("clock", ModEntities.CLOCK, false))
+                .then(buildSpawnNode("the_mimic", ModEntities.THE_MIMIC, false))
+                .then(buildSpawnNode("demon_fish", ModEntities.DEMON_FISH, false))
+                .then(buildSpawnNode("the_ball", ModEntities.THE_BALL, false));
 
         // /underworld trigger <event> [<player>]
         LiteralArgumentBuilder<CommandSourceStack> triggerCmd = Commands.literal("trigger")
@@ -100,7 +98,19 @@ public final class UnderWorldCommands {
                 .then(Commands.literal("clock")
                         .executes(ctx -> executeTriggerClock(ctx.getSource(), ctx.getSource().getPlayerOrException()))
                         .then(Commands.argument("player", EntityArgument.player())
-                                .executes(ctx -> executeTriggerClock(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))));
+                                .executes(ctx -> executeTriggerClock(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+                .then(Commands.literal("the_mimic")
+                        .executes(ctx -> executeTriggerTheMimic(ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeTriggerTheMimic(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+                .then(Commands.literal("demon_fish")
+                        .executes(ctx -> executeTriggerDemonFish(ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeTriggerDemonFish(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+                .then(Commands.literal("the_ball")
+                        .executes(ctx -> executeTriggerTheBall(ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeTriggerTheBall(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))));
 
         // /underworld tp <overworld|fun_world|maze|the_error|the_time> [<player>]
         LiteralArgumentBuilder<CommandSourceStack> tpCmd = Commands.literal("tp")
@@ -125,7 +135,7 @@ public final class UnderWorldCommands {
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> executeDimensionTp(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"), "the_time"))));
 
-        // /underworld structure <name> [<player>]
+        // /underworld structure <name> [<player>] (all classic + lore structures)
         LiteralArgumentBuilder<CommandSourceStack> structureCmd = Commands.literal("structure")
                 .then(buildStructureNode("void_shrine"))
                 .then(buildStructureNode("broken_shaft"))
@@ -135,7 +145,30 @@ public final class UnderWorldCommands {
                 .then(buildStructureNode("wheat_farm"))
                 .then(buildStructureNode("old_village_house"))
                 .then(buildStructureNode("clock_statue"))
-                .then(buildStructureNode("leaf_maze"));
+                .then(buildStructureNode("leaf_maze"))
+                .then(buildStructureNode("hillside_house"))
+                .then(buildStructureNode("clan_base"))
+                .then(buildStructureNode("mario_pixel_art"))
+                .then(buildStructureNode("server_monument"))
+                .then(buildStructureNode("abandoned_treehouse"))
+                .then(buildStructureNode("secret_dugout"))
+                .then(buildStructureNode("old_spawn_hub"))
+                .then(buildStructureNode("villager_trading_hall"));
+
+        // /underworld lore <name> [<player>] (server-lore structures + random)
+        LiteralArgumentBuilder<CommandSourceStack> loreCmd = Commands.literal("lore")
+                .then(buildStructureNode("hillside_house"))
+                .then(buildStructureNode("clan_base"))
+                .then(buildStructureNode("mario_pixel_art"))
+                .then(buildStructureNode("server_monument"))
+                .then(buildStructureNode("abandoned_treehouse"))
+                .then(buildStructureNode("secret_dugout"))
+                .then(buildStructureNode("old_spawn_hub"))
+                .then(buildStructureNode("villager_trading_hall"))
+                .then(Commands.literal("random")
+                        .executes(ctx -> executeRandomLoreStructure(ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> executeRandomLoreStructure(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))));
 
         // /underworld events <enable|disable|status>
         LiteralArgumentBuilder<CommandSourceStack> eventsCmd = Commands.literal("events")
@@ -155,6 +188,7 @@ public final class UnderWorldCommands {
                 .then(triggerCmd)
                 .then(tpCmd)
                 .then(structureCmd)
+                .then(loreCmd)
                 .then(eventsCmd)
                 .then(resetCmd);
 
@@ -174,7 +208,15 @@ public final class UnderWorldCommands {
         ServerLevel level = target.serverLevel();
         int minDist = UnderWorldConfigHolder.getSpawnMinDistance();
         int maxDist = UnderWorldConfigHolder.getSpawnMaxDistance();
-        BlockPos pos = UnderWorldEventDirector.findSpawnPosAroundPlayer(level, target, minDist, maxDist, allowCave);
+        BlockPos pos;
+        if (type == ModEntities.DEMON_FISH.get()) {
+            pos = UnderWorldEventDirector.findWaterSpawnPosAroundPlayer(level, target, 8, Math.max(12, maxDist));
+            if (pos == null) {
+                pos = UnderWorldEventDirector.findSpawnPosAroundPlayer(level, target, minDist, maxDist, false);
+            }
+        } else {
+            pos = UnderWorldEventDirector.findSpawnPosAroundPlayer(level, target, minDist, maxDist, allowCave);
+        }
         if (pos == null) {
             source.sendFailure(Component.translatable("command.under_world.spawn.failed", target.getName()));
             return 0;
@@ -186,7 +228,8 @@ public final class UnderWorldCommands {
             return 0;
         }
 
-        entity.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, level.getRandom().nextFloat() * 360.0F, 0.0F);
+        double spawnY = (entity instanceof TheBallEntity) ? pos.getY() + 1.8D : pos.getY();
+        entity.moveTo(pos.getX() + 0.5D, spawnY, pos.getZ() + 0.5D, level.getRandom().nextFloat() * 360.0F, 0.0F);
         entity.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.COMMAND, null, null);
         if (entity instanceof TheTruthEntity truth) {
             truth.setChasedPlayer(target);
@@ -299,6 +342,43 @@ public final class UnderWorldCommands {
         return 1;
     }
 
+    private static int executeTriggerTheMimic(CommandSourceStack source, ServerPlayer target) {
+        TheMimicEntity entity = UnderWorldEventDirector.triggerTheMimicEncounter(target.serverLevel(), target);
+        if (entity == null) {
+            source.sendFailure(Component.translatable("command.under_world.spawn.failed", target.getName()));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable("command.under_world.trigger.the_mimic", target.getName()), true);
+        return 1;
+    }
+
+    private static int executeTriggerDemonFish(CommandSourceStack source, ServerPlayer target) {
+        DemonFishEntity entity = UnderWorldEventDirector.triggerDemonFishEncounter(target.serverLevel(), target);
+        if (entity == null) {
+            source.sendFailure(Component.translatable("command.under_world.spawn.failed", target.getName()));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable("command.under_world.trigger.demon_fish", target.getName()), true);
+        return 1;
+    }
+
+    private static int executeTriggerTheBall(CommandSourceStack source, ServerPlayer target) {
+        TheBallEntity entity = UnderWorldEventDirector.triggerTheBallEncounter(target.serverLevel(), target);
+        if (entity == null) {
+            source.sendFailure(Component.translatable("command.under_world.spawn.failed", target.getName()));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable("command.under_world.trigger.the_ball", target.getName()), true);
+        return 1;
+    }
+
+    private static int executeRandomLoreStructure(CommandSourceStack source, ServerPlayer target) {
+        String id = LoreStructureSpawner.LORE_STRUCTURE_IDS[
+                target.serverLevel().getRandom().nextInt(LoreStructureSpawner.LORE_STRUCTURE_IDS.length)
+        ];
+        return executeStructure(source, target, id);
+    }
+
     private static int executeDimensionTp(CommandSourceStack source, ServerPlayer target, String dim) {
         boolean ok = switch (dim) {
             case "fun_world" -> ModDimensions.sendToFunWorld(target);
@@ -315,32 +395,18 @@ public final class UnderWorldCommands {
         return 1;
     }
 
-    private static int executeStructure(CommandSourceStack source, ServerPlayer target, String type) throws CommandSyntaxException {
+    private static int executeStructure(CommandSourceStack source, ServerPlayer target, String type) {
         ServerLevel level = target.serverLevel();
         boolean underground = "broken_shaft".equals(type);
         int minDist = UnderWorldConfigHolder.getSpawnMinDistance();
         int maxDist = UnderWorldConfigHolder.getSpawnMaxDistance();
         BlockPos pos = UnderWorldEventDirector.findSpawnPosAroundPlayer(level, target, minDist, maxDist, underground);
         if (pos == null) {
-            pos = target.blockPosition().offset(16, underground ? -12 : 0, 0);
+            pos = target.blockPosition().offset(18, underground ? -12 : 0, 0);
         }
-        switch (type) {
-            case "void_shrine" -> VoidShrinePiece.placeAt(level, pos);
-            case "broken_shaft" -> {
-                pos = pos.getY() > 24 ? new BlockPos(pos.getX(), Math.max(level.getMinBuildHeight() + 8, pos.getY() - 18), pos.getZ()) : pos;
-                BrokenShaftPiece.placeAt(level, pos);
-            }
-            case "fountain" -> FountainPiece.placeAt(level, pos.below());
-            case "glitch_cluster" -> GlitchClusterPiece.placeAt(level, pos.below());
-            case "elongated_tree" -> ElongatedTreePiece.placeAt(level, pos.below());
-            case "wheat_farm" -> WheatFarmPiece.placeAt(level, pos.below());
-            case "old_village_house" -> OldVillageHousePiece.placeAt(level, pos.below());
-            case "clock_statue" -> ClockStatuePiece.placeAt(level, pos.below());
-            case "leaf_maze" -> LeafMazePiece.placeAt(level, pos.below());
-            default -> {
-                source.sendFailure(Component.translatable("command.under_world.spawn.failed", target.getName()));
-                return 0;
-            }
+        if (!LoreStructureSpawner.placeById(level, type, pos)) {
+            source.sendFailure(Component.translatable("command.under_world.spawn.failed", target.getName()));
+            return 0;
         }
         BlockPos finalPos = pos;
         source.sendSuccess(() -> Component.translatable(

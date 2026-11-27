@@ -29,10 +29,12 @@ public class UnderWorldSavedData extends SavedData {
     private int ambientChatTimerTicks = 1200;
     private int friendStalkCooldownTicks = 900;
     private int truthCooldownTicks = 12000;
+    private int structureEventCooldownTicks = 1200;
     private long funWorldDayTime = 1000L;
     private final Map<UUID, BlockPos> returnPositions = new HashMap<>();
     private final Map<UUID, Integer> errorReturnTimers = new HashMap<>();
     private final Set<UUID> pendingTruthPillars = new HashSet<>();
+    private final Set<String> spawnedLoreStructures = new HashSet<>();
 
     public UnderWorldSavedData() {}
 
@@ -64,6 +66,7 @@ public class UnderWorldSavedData extends SavedData {
         data.ambientChatTimerTicks = tag.contains("AmbientChatTimerTicks") ? tag.getInt("AmbientChatTimerTicks") : 1200;
         data.friendStalkCooldownTicks = tag.contains("FriendStalkCooldownTicks") ? tag.getInt("FriendStalkCooldownTicks") : 900;
         data.truthCooldownTicks = tag.contains("TruthCooldownTicks") ? tag.getInt("TruthCooldownTicks") : 12000;
+        data.structureEventCooldownTicks = tag.contains("StructureEventCooldownTicks") ? tag.getInt("StructureEventCooldownTicks") : 1200;
         data.funWorldDayTime = tag.contains("FunWorldDayTime") ? tag.getLong("FunWorldDayTime") : 1000L;
 
         if (tag.contains("ReturnPositions", 10)) {
@@ -99,6 +102,12 @@ public class UnderWorldSavedData extends SavedData {
                 }
             }
         }
+        if (tag.contains("SpawnedLoreStructures", Tag.TAG_LIST)) {
+            ListTag loreList = tag.getList("SpawnedLoreStructures", Tag.TAG_STRING);
+            for (int i = 0; i < loreList.size(); i++) {
+                data.spawnedLoreStructures.add(loreList.getString(i));
+            }
+        }
         return data;
     }
 
@@ -114,6 +123,7 @@ public class UnderWorldSavedData extends SavedData {
         tag.putInt("AmbientChatTimerTicks", this.ambientChatTimerTicks);
         tag.putInt("FriendStalkCooldownTicks", this.friendStalkCooldownTicks);
         tag.putInt("TruthCooldownTicks", this.truthCooldownTicks);
+        tag.putInt("StructureEventCooldownTicks", this.structureEventCooldownTicks);
         tag.putLong("FunWorldDayTime", this.funWorldDayTime);
 
         CompoundTag returns = new CompoundTag();
@@ -139,6 +149,12 @@ public class UnderWorldSavedData extends SavedData {
             pendingPillars.add(StringTag.valueOf(uuid.toString()));
         }
         tag.put("PendingTruthPillars", pendingPillars);
+
+        ListTag loreList = new ListTag();
+        for (String loreKey : this.spawnedLoreStructures) {
+            loreList.add(StringTag.valueOf(loreKey));
+        }
+        tag.put("SpawnedLoreStructures", loreList);
         return tag;
     }
 
@@ -266,6 +282,25 @@ public class UnderWorldSavedData extends SavedData {
 
     public void clearErrorReturnTimer(UUID playerId) {
         if (this.errorReturnTimers.remove(playerId) != null) {
+            setDirty();
+        }
+    }
+
+    public int getStructureEventCooldownTicks() {
+        return this.structureEventCooldownTicks;
+    }
+
+    public void setStructureEventCooldownTicks(int ticks) {
+        this.structureEventCooldownTicks = Math.max(0, ticks);
+        setDirty();
+    }
+
+    public boolean hasLoreStructureSpawned(String key) {
+        return this.spawnedLoreStructures.contains(key);
+    }
+
+    public void markLoreStructureSpawned(String key) {
+        if (this.spawnedLoreStructures.add(key)) {
             setDirty();
         }
     }

@@ -35,6 +35,13 @@ public final class ModSounds {
     public static final RegistryObject<SoundEvent> ERROR_WARP = register("error_warp");
     public static final RegistryObject<SoundEvent> TIME_WARP = register("time_warp");
 
+    public static final RegistryObject<SoundEvent> MIMIC_BURST = register("mimic_burst");
+    public static final RegistryObject<SoundEvent> MIMIC_CHASE = register("mimic_chase");
+    public static final RegistryObject<SoundEvent> DEMON_FISH_AMBUSH = register("demon_fish_ambush");
+    public static final RegistryObject<SoundEvent> DEMON_FISH_TONGUE = register("demon_fish_tongue");
+    public static final RegistryObject<SoundEvent> THE_BALL_HUM = register("the_ball_hum");
+    public static final RegistryObject<SoundEvent> GEOMETRIC_NIGHTMARE = register("geometric_nightmare");
+
     public static final RegistryObject<SoundEvent> MUSIC_FUN_WORLD = register("music_fun_world");
     public static final RegistryObject<SoundEvent> MUSIC_MAZE = register("music_maze");
     public static final RegistryObject<SoundEvent> MUSIC_THE_ERROR = register("music_the_error");

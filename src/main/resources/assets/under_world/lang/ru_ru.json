@@ -9,6 +9,9 @@
   "entity.under_world.smile": "Улыбка (Smile)",
   "entity.under_world.the_truth": "the truth (Истина)",
   "entity.under_world.clock": "clock (Часы)",
+  "entity.under_world.the_mimic": "the_mimic (Мимик)",
+  "entity.under_world.demon_fish": "Рыба-демон (Demon Fish)",
+  "entity.under_world.the_ball": "Шар (The Ball)",
 
   "item.under_world.friend_spawn_egg": "Яйцо призыва friend",
   "item.under_world.hands_spawn_egg": "Яйцо призыва Hands",
@@ -18,6 +21,11 @@
   "item.under_world.smile_spawn_egg": "Яйцо призыва Smile",
   "item.under_world.the_truth_spawn_egg": "Яйцо призыва the truth",
   "item.under_world.clock_spawn_egg": "Яйцо призыва clock",
+  "item.under_world.the_mimic_spawn_egg": "Яйцо призыва the_mimic",
+  "item.under_world.demon_fish_spawn_egg": "Яйцо призыва Рыбы-демона",
+  "item.under_world.the_ball_spawn_egg": "Яйцо призыва Шара",
+
+  "effect.under_world.geometric_nightmare": "Геометрический кошмар",
 
   "block.under_world.fun_grass_block": "Дёрн Весёлого мира",
   "block.under_world.fun_dirt": "Земля Весёлого мира",
@@ -68,6 +76,12 @@
   "subtitles.under_world.clock_chime": "Бой старинных часов",
   "subtitles.under_world.error_warp": "Реальность зависает и сбоит",
   "subtitles.under_world.time_warp": "Время искажается",
+  "subtitles.under_world.mimic_burst": "Маскировка рассыпается на чёрные пиксели",
+  "subtitles.under_world.mimic_chase": "Искажённый крик мимика",
+  "subtitles.under_world.demon_fish_ambush": "Пасть щёлкает под водой",
+  "subtitles.under_world.demon_fish_tongue": "Язык хватает лодку",
+  "subtitles.under_world.the_ball_hum": "Глубокий гул чёрного шара",
+  "subtitles.under_world.geometric_nightmare": "Фигуры искажают зрение",
 
   "hud.under_world.the_truth.timer": "ВЫЖИВИ: %1$sс",
   "disconnect.under_world.hands": "Соединение потеряно: нечто утащило вас в глубину.",
@@ -99,6 +113,9 @@
   "command.under_world.trigger.smile": "Запущена погоня Smile рядом с %1$s.",
   "command.under_world.trigger.the_truth": "Запущено появление the truth перед игроком %1$s.",
   "command.under_world.trigger.clock": "Запущено появление clock рядом с %1$s.",
+  "command.under_world.trigger.the_mimic": "Запущена засада the_mimic рядом с %1$s.",
+  "command.under_world.trigger.demon_fish": "Запущена водная охота Рыбы-демона рядом с %1$s.",
+  "command.under_world.trigger.the_ball": "Призван Шар (The Ball) рядом с %1$s.",
   "command.under_world.dimension.sent": "%1$s перенесён в измерение %2$s.",
   "command.under_world.structure.success": "Сгенерирована структура %1$s рядом с (%2$d, %3$d, %4$d).",
   "command.under_world.events.enabled": "Автоматические хоррор-события Under World ВКЛЮЧЕНЫ в этом мире.",
@@ -117,5 +134,105 @@
   "under_world.settings.theTruth.desc": "Супер-мега редкая сущность 50x30, 30с таймер и столб булыжника",
   "under_world.settings.clock": "clock",
   "under_world.settings.clock.desc": "Сущность с головой-часами, затягивающая в The Time и двигающаяся под тиканье",
-  "under_world.settings.dimensions": "Измерения и музыка"
+  "under_world.settings.theMimic": "the_mimic",
+  "under_world.settings.theMimic.desc": "Маскируется под Стива или игроков, распадаясь на пиксели при сближении",
+  "under_world.settings.demonFish": "Рыба-демон",
+  "under_world.settings.demonFish.desc": "Водный хищник, ломающий лодки языком и пробивающий укрытия под водой",
+  "under_world.settings.theBall": "Шар (The Ball)",
+  "under_world.settings.theBall.desc": "Чёрный меняющий форму шар, накладывающий Геометрический кошмар",
+  "under_world.settings.dimensions": "Измерения и музыка",
+
+  "sign.under_world.hillside.1": "Дом Kira_99",
+  "sign.under_world.hillside.2": "Не копайте у",
+  "sign.under_world.hillside.3": "задней стены",
+  "sign.under_world.hillside.4": "после полуночи",
+
+  "sign.under_world.clan.1": "[БАЗА КЛАНА]",
+  "sign.under_world.clan.2": "Бассейн и двор",
+  "sign.under_world.clan.3": "Подвал закрыт",
+  "sign.under_world.clan.4": "админом сервера",
+
+  "sign.under_world.clan_secret.1": "ПРОЧТИ ЗАПИСЬ.",
+  "sign.under_world.clan_secret.2": "ОНО НОСИТ ЕГО",
+  "sign.under_world.clan_secret.3": "СКИН ТЕПЕРЬ.",
+  "sign.under_world.clan_secret.4": "ЗАКРОЙ СЕРВЕР.",
+
+  "sign.under_world.mario.1": "Строил Dima",
+  "sign.under_world.mario.2": "Почему небо",
+  "sign.under_world.mario.3": "почернело?",
+  "sign.under_world.mario.4": "Не оборачивайся",
+
+  "sign.under_world.monument.1": "В ПАМЯТЬ О",
+  "sign.under_world.monument.2": "ПЕРВОЙ КАРТЕ",
+  "sign.under_world.monument.3": "2013 - [СБОЙ]",
+  "sign.under_world.monument.4": "ОНО СМОТРИТ",
+
+  "sign.under_world.treehouse.1": "НЕ ЛЕЗЬ НАВЕРХ",
+  "sign.under_world.treehouse.2": "НОЧЬЮ. ОНО",
+  "sign.under_world.treehouse.3": "ПРИШЛО СЮДА",
+  "sign.under_world.treehouse.4": "В СКИНЕ СТИВА.",
+
+  "sign.under_world.dugout.1": "НЕ ШУМИ.",
+  "sign.under_world.dugout.2": "ОСТАВАЙСЯ",
+  "sign.under_world.dugout.3": "ПОД ЗЕМЛЁЙ.",
+  "sign.under_world.dugout.4": "ОНО НАВЕРХУ.",
+
+  "sign.under_world.dugout_top.1": "Люк склада",
+  "sign.under_world.dugout_top.2": "Не входить",
+
+  "sign.under_world.spawn_rules.1": "[ПРАВИЛА]",
+  "sign.under_world.spawn_rules.2": "1. Не гриферить",
+  "sign.under_world.spawn_rules.3": "2. Без читов",
+  "sign.under_world.spawn_rules.4": "3. Жди у спавна",
+
+  "sign.under_world.spawn_staff.1": "[АДМИНЫ]",
+  "sign.under_world.spawn_staff.2": "Admin: ПРОПАЛ",
+  "sign.under_world.spawn_staff.3": "Mod: КИКНУТ",
+  "sign.under_world.spawn_staff.4": "friend: ЗАШЁЛ",
+
+  "sign.under_world.trading.1": "РЫНОК ЗАКРЫТ",
+  "sign.under_world.trading.2": "НЕ СМОТРИТЕ",
+  "sign.under_world.trading.3": "В ЛАВКИ",
+  "sign.under_world.trading.4": "ПО НОЧАМ",
+
+  "book.under_world.hillside_house.title": "Журнал склада - Kira_99",
+  "book.under_world.hillside_house.page_1": "День 12.\nЗакончила укладывать светокамень в пол, под стеклянным навесом стало уютно!\n\nНо каждую полночь за задней каменной стеной кто-то копает, хотя на сервере никого нет.",
+  "book.under_world.hillside_house.page_2": "День 14.\nНашла мерцающий блок помех в углу за сундуками. Стоило ударить по нему — экран затрясся.\n\nУ лестницы стоял Стив. Не настоящий игрок — его голова резко дёргалась набок на 90 градусов.",
+  "book.under_world.hillside_house.page_3": "Заперла дубовую дверь и побежала к террасе клана.\n\nЕсли найдёте мой дом — заберите припасы из сундуков и НЕ ПОДХОДИТЕ близко к Стиву у холма.",
+
+  "book.under_world.clan_base_secret.title": "ПРИЗНАНИЕ АДМИНА [BACKUP_14]",
+  "book.under_world.clan_base_secret.page_1": "Если кто-то из клана найдёт этот потайной подвал под полом — простите, что не отключил сервер раньше.\n\nВсе думали, что зашедший в первый вечер friend — просто безобидный взломщик. Это было не так.",
+  "book.under_world.clan_base_secret.page_2": "Три ночи назад Alex вышел из землянки, а через час его персонаж сам зашёл во двор.\n\nКогда Misha подошёл спросить, почему он молчит в Discord, скин разорвало на чёрные пиксели с четырьмя длинными щупальцами.",
+  "book.under_world.clan_base_secret.page_3": "Оно догнало Misha прямо у бассейна. Теперь оно ходит по тропам в ЕГО скине и с ЕГО ником над головой.\n\nЯ удалил логи консоли и старые бэкапы мира, чтобы никто не искал сид.",
+  "book.under_world.clan_base_secret.page_4": "Сижу в подвале при одном красном факеле. В воде тоже не спастись — в реке нечто утянуло лодку Dima языком под воду.\n\nПокиньте сервер. И не касайтесь чёрного летающего шара в поле.",
+
+  "book.under_world.mario_art.title": "Заметки пиксель-арта - Dima_2015",
+  "book.under_world.mario_art.page_1": "Почти достроил огромного Марио из шерсти у спавна! Осталось пару рядов красной шапки и леса убрать.\n\nСтоп. Кто поставил этот глючный куб в пиксель-арт? Ни у кого нет прав на мой участок.",
+  "book.under_world.mario_art.page_2": "Днём небо внезапно почернело на три секунды. Глянул на реку — из-под воды вынырнуло чёрное чудовище с рядами розовых клыков и множеством белых глаз.",
+  "book.under_world.mario_art.page_3": "Оставляю шерсть и ножницы в сундуке. Поплыву на лодке через озеро к дому Kira — так быстрее.\n\nПогодите почему лодку тянет на дно",
+
+  "book.under_world.monument.title": "Архив сервера #1",
+  "book.under_world.monument.page_1": "Памятник в честь нашей первой карты 2013 года до повреждения чанков.\n\nОснователи: Max, Alex_2014, Kira_99, Dima_2015, Leo.",
+  "book.under_world.monument.page_2": "После каждого вайпа эта статуя снова возникает на случайных полянах с одним выбитым глазом.\n\nВ сумерках красные факелы здесь загораются сами, а обычные гаснут.",
+  "book.under_world.monument.page_3": "Журнал сервера обрывается в 03:17 одной строкой, повторенной сорок раз:\n\n'this server is ^&^#&* please leave server the truth is here'",
+
+  "book.under_world.treehouse.title": "Записки с ветки - Misha_Play",
+  "book.under_world.treehouse.page_1": "Построил домик высоко в кроне гигантского дуба, чтобы лесная нечисть не достала до лестницы.\n\nГотов поклясться, двадцать минут назад внизу стоял Alex и смотрел строго вверх.",
+  "book.under_world.treehouse.page_2": "Его шея дважды неестественно хрустнула вбок. Я захлопнул люк и чуть не выронил лук — внизу кто-то ходит и молчит.",
+  "book.under_world.treehouse.page_3": "Что бы это ни было, оно теряет человеческий облик, как только подойдёшь близко. Буду прыгать по северным листьям к огням базы клана.",
+
+  "book.under_world.dugout.title": "Дневник укрытия - Alex_2014",
+  "book.under_world.dugout.page_1": "Выкопал землянку под холмом и замаскировал люк дёрном.\n\nВчера над лугом проплыл абсолютно чёрный шар. Он сжимался и растягивался в воздухе, будто дышал.",
+  "book.under_world.dugout.page_2": "Leo случайно задел этот шар на бегу. Он кричал в голосовом чате, что экран перекосился, а перед глазами кружатся геометрические фигуры.",
+  "book.under_world.dugout.page_3": "Держу железную решётку закрытой. Не гаси красный факел. Если сверху постучат и начнут странно писать в чат — НЕ ОТКРЫВАЙ люк.",
+
+  "book.under_world.spawn_hub.title": "Правила сервера [СТАРЫЕ]",
+  "book.under_world.spawn_hub.page_1": "Добро пожаловать на UnderCraft (2013-2015)!\n1. Уважайте постройки и базы кланов.\n2. Запрещён гриф спавна и пиксель-артов.\n3. Следите за доской объявлений.",
+  "book.under_world.spawn_hub.page_2": "[ОБЪЯВЛЕНИЕ МОДЕРАТОРА LEO]\nИгнорируйте вход игрока 'friend' после 18:00. Этот ник не в белом списке, а Mojang возвращает пустой UUID.",
+  "book.under_world.spawn_hub.page_3": "[ЭКСТРЕННАЯ БЛОКИРОВКА]\nЗащита спавна отказала. Статуи часов появляются в старых чанках. Возврат на спавн отключён.\n\nВСЕМ СРОЧНО ВЫЙТИ С СЕРВЕРА.",
+
+  "book.under_world.trading_hall.title": "Карантин рынка - Trader_Vova",
+  "book.under_world.trading_hall.page_1": "Поставил три прилавка с изумрудами, книгами и железной бронёй перед войной кланов.\n\nТорговля шла отлично до вторника, пока не замигали лампы.",
+  "book.under_world.trading_hall.page_2": "Все три жителя одновременно перестали спать. Они просто стоят за оградой и смотрят в одну тёмную точку за холмом.",
+  "book.under_world.trading_hall.page_3": "Запер двери и оставил изумруды в сундуке.\n\nЕсли читаешь это: не торгуй после заката и не подходи к реке позади рынка."
 }
