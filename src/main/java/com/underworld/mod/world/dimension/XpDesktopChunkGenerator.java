@@ -45,7 +45,6 @@ public class XpDesktopChunkGenerator extends ChunkGenerator {
 
     public static int getSurfaceY(int wx, int wz) {
         if (wz >= 12) {
-            // Lush green Windows XP Bliss hills behind player!
             double rise = Math.min(20.0D, (wz - 12) * 0.42D);
             double wave = Math.sin(wx * 0.035D) * 4.5D + Math.cos(wz * 0.045D) * 2.5D;
             return Mth.clamp((int) Math.round(DESKTOP_Y + rise + Math.max(0.0D, wave)), DESKTOP_Y, 92);
@@ -131,54 +130,61 @@ public class XpDesktopChunkGenerator extends ChunkGenerator {
         int minX = chunk.getPos().getMinBlockX();
         int minZ = chunk.getPos().getMinBlockZ();
 
-        // Chrome colorful portal orb at center-ahead (0, 65, -14)
+        // Chrome Monument centered strictly inside chunk (0, -1) at (3, 64, -12)
         if (cx == 0 && cz == -1) {
-            placeChromeMonument(level, new BlockPos(0, DESKTOP_Y, -14));
+            placeChromeMonumentInChunk(chunk, minX, minZ, new BlockPos(3, DESKTOP_Y, -12));
         }
 
-        // Return CRT Computer near spawn (8, 65, 10)
+        // Return CRT Computer near spawn (10, 65, 9) inside chunk (0, 0)
         if (cx == 0 && cz == 0) {
-            level.setBlock(new BlockPos(10, DESKTOP_Y + 1, 9), ModBlocks.COMPUTER.get().defaultBlockState(), 2);
+            setInChunk(chunk, minX, minZ, 10, DESKTOP_Y + 1, 9, ModBlocks.COMPUTER.get().defaultBlockState());
         }
 
-        // Floating 3D Desktop Shortcut Icons scattered across the desktop plane (wz < 10)
+        // Floating 3D Desktop Shortcut Icons strictly inside their chunk center
         if (cz >= -2 && cz <= 0 && Math.abs(cx) <= 2 && !(cx == 0 && cz == -1)) {
             int ix = minX + 7;
             int iz = minZ + 7;
-            if (iz < 8 && !(Math.abs(ix) <= 5 && Math.abs(iz + 14) <= 5)) {
-                placeDesktopIcon(level, new BlockPos(ix, DESKTOP_Y, iz));
+            if (iz < 8 && !(Math.abs(ix - 3) <= 5 && Math.abs(iz + 12) <= 5)) {
+                placeDesktopIconInChunk(chunk, minX, minZ, new BlockPos(ix, DESKTOP_Y, iz));
             }
         }
     }
 
-    private static void placeDesktopIcon(WorldGenLevel level, BlockPos base) {
+    private static void placeDesktopIconInChunk(ChunkAccess chunk, int minX, int minZ, BlockPos base) {
         BlockState icon = ModBlocks.XP_ICON_BLOCK.get().defaultBlockState();
-        // Elevated icon cube (y + 3 .. y + 5) so approaching drops it!
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = 3; dy <= 5; dy++) {
-                level.setBlock(base.offset(dx, dy, 0), icon, 2);
+                setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + dy, base.getZ(), icon);
             }
         }
-        level.setBlock(base.offset(-1, 1, 0), Blocks.WHITE_CONCRETE.defaultBlockState(), 2);
-        level.setBlock(base.offset(0, 1, 0), Blocks.WHITE_CONCRETE.defaultBlockState(), 2);
-        level.setBlock(base.offset(1, 1, 0), Blocks.WHITE_CONCRETE.defaultBlockState(), 2);
+        setInChunk(chunk, minX, minZ, base.getX() - 1, base.getY() + 1, base.getZ(), Blocks.WHITE_CONCRETE.defaultBlockState());
+        setInChunk(chunk, minX, minZ, base.getX(), base.getY() + 1, base.getZ(), Blocks.WHITE_CONCRETE.defaultBlockState());
+        setInChunk(chunk, minX, minZ, base.getX() + 1, base.getY() + 1, base.getZ(), Blocks.WHITE_CONCRETE.defaultBlockState());
     }
 
-    private static void placeChromeMonument(WorldGenLevel level, BlockPos base) {
-        // Giant colorful Chrome logo frame & walk-in portal core!
+    private static void placeChromeMonumentInChunk(ChunkAccess chunk, int minX, int minZ, BlockPos base) {
         for (int dx = -2; dx <= 2; dx++) {
             for (int dy = 1; dy <= 5; dy++) {
                 boolean inner = Math.abs(dx) <= 1 && dy >= 2 && dy <= 4;
                 if (inner) {
-                    level.setBlock(base.offset(dx, dy, 0), ModBlocks.CHROME_PORTAL.get().defaultBlockState(), 2);
+                    setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + dy, base.getZ(),
+                            ModBlocks.CHROME_PORTAL.get().defaultBlockState());
                 } else {
                     BlockState col;
                     if (dy >= 4) col = Blocks.RED_CONCRETE.defaultBlockState();
                     else if (dx >= 1) col = Blocks.YELLOW_CONCRETE.defaultBlockState();
                     else col = Blocks.LIME_CONCRETE.defaultBlockState();
-                    level.setBlock(base.offset(dx, dy, 0), col, 2);
+                    setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + dy, base.getZ(), col);
                 }
             }
+        }
+    }
+
+    private static void setInChunk(ChunkAccess chunk, int minX, int minZ, int wx, int wy, int wz, BlockState state) {
+        int lx = wx - minX;
+        int lz = wz - minZ;
+        if (lx >= 0 && lx < 16 && lz >= 0 && lz < 16 && wy >= -64 && wy < 320) {
+            chunk.setBlockState(new BlockPos(lx, wy, lz), state, false);
         }
     }
 

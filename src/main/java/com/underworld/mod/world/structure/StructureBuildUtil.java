@@ -185,20 +185,26 @@ public final class StructureBuildUtil {
     }
 
     private static void applySignText(ServerLevelAccessor level, BlockPos pos, DyeColor color, boolean glowing, String... lines) {
-        if (level.getBlockEntity(pos) instanceof SignBlockEntity sign) {
-            Component[] msgs = new Component[]{
-                    Component.empty(), Component.empty(), Component.empty(), Component.empty()
-            };
-            for (int i = 0; i < Math.min(4, lines.length); i++) {
-                String s = lines[i];
-                if (s != null && !s.isEmpty()) {
-                    msgs[i] = s.startsWith("sign.") ? Component.translatable(s) : Component.literal(s);
+        if (level instanceof net.minecraft.server.level.WorldGenRegion) {
+            return;
+        }
+        try {
+            if (level.getBlockEntity(pos) instanceof SignBlockEntity sign) {
+                Component[] msgs = new Component[]{
+                        Component.empty(), Component.empty(), Component.empty(), Component.empty()
+                };
+                for (int i = 0; i < Math.min(4, lines.length); i++) {
+                    String s = lines[i];
+                    if (s != null && !s.isEmpty()) {
+                        msgs[i] = s.startsWith("sign.") ? Component.translatable(s) : Component.literal(s);
+                    }
                 }
+                SignText text = new SignText(msgs, msgs, color, glowing);
+                sign.setText(text, true);
+                sign.setWaxed(true);
+                sign.setChanged();
             }
-            SignText text = new SignText(msgs, msgs, color, glowing);
-            sign.setText(text, true);
-            sign.setWaxed(true);
-            sign.setChanged();
+        } catch (Exception ignored) {
         }
     }
 }

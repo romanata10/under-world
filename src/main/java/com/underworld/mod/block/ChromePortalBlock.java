@@ -1,9 +1,11 @@
 package com.underworld.mod.block;
 
+import com.underworld.mod.event.UnderWorldEventDirector;
 import com.underworld.mod.registry.ModDimensions;
 import com.underworld.mod.registry.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -29,10 +31,17 @@ public class ChromePortalBlock extends Block {
     }
 
     private static void tryTeleport(Level level, BlockPos pos, Entity entity) {
-        if (!level.isClientSide && entity instanceof ServerPlayer player && !player.isOnPortalCooldown()) {
+        if (!level.isClientSide && level instanceof ServerLevel serverLevel
+                && entity instanceof ServerPlayer player && !player.isOnPortalCooldown()) {
             player.setPortalCooldown(100);
             level.playSound(null, pos, ModSounds.XP_STARTUP.get(), SoundSource.AMBIENT, 1.2F, 1.15F);
-            ModDimensions.sendToBrowser(player);
+            java.util.UUID pid = player.getUUID();
+            UnderWorldEventDirector.schedule(1, () -> {
+                ServerPlayer p = serverLevel.getServer().getPlayerList().getPlayer(pid);
+                if (p != null && p.isAlive() && p.level() == serverLevel) {
+                    ModDimensions.sendToBrowser(p);
+                }
+            });
         }
     }
 

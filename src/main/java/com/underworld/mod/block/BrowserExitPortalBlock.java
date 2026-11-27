@@ -1,11 +1,13 @@
 package com.underworld.mod.block;
 
+import com.underworld.mod.event.UnderWorldEventDirector;
 import com.underworld.mod.registry.ModDimensions;
 import com.underworld.mod.registry.ModItems;
 import com.underworld.mod.registry.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -32,16 +34,23 @@ public class BrowserExitPortalBlock extends Block {
     }
 
     private static void tryEscape(Level level, BlockPos pos, Entity entity) {
-        if (!level.isClientSide && entity instanceof ServerPlayer player && !player.isOnPortalCooldown()) {
+        if (!level.isClientSide && level instanceof ServerLevel serverLevel
+                && entity instanceof ServerPlayer player && !player.isOnPortalCooldown()) {
             player.setPortalCooldown(100);
             level.playSound(null, pos, ModSounds.XP_STARTUP.get(), SoundSource.AMBIENT, 1.3F, 1.2F);
-            if (ModDimensions.returnToOverworldFromNewDim(player, "message.under_world.browser_escaped")) {
-                ItemStack computer = new ItemStack(ModItems.COMPUTER.get());
-                if (!player.getInventory().add(computer)) {
-                    player.drop(computer, false);
+            java.util.UUID pid = player.getUUID();
+            UnderWorldEventDirector.schedule(1, () -> {
+                ServerPlayer p = serverLevel.getServer().getPlayerList().getPlayer(pid);
+                if (p != null && p.isAlive() && p.level() == serverLevel) {
+                    if (ModDimensions.returnToOverworldFromNewDim(p, "message.under_world.browser_escaped")) {
+                        ItemStack computer = new ItemStack(ModItems.COMPUTER.get());
+                        if (!p.getInventory().add(computer)) {
+                            p.drop(computer, false);
+                        }
+                        p.displayClientMessage(Component.translatable("message.under_world.browser_reward_computer"), false);
+                    }
                 }
-                player.displayClientMessage(Component.translatable("message.under_world.browser_reward_computer"), false);
-            }
+            });
         }
     }
 

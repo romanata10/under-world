@@ -8,7 +8,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.StructureManager;
@@ -23,7 +25,6 @@ import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
-import net.minecraft.server.level.WorldGenRegion;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -85,15 +86,13 @@ public class BrowserChunkGenerator extends ChunkGenerator {
     }
 
     /**
-     * Carves the illuminated Escape Passage to the LEFT (-X) when DOWNLOAD is triggered!
+     * Carves the illuminated Escape Passage to the LEFT (-X) when DOWNLOAD is triggered at runtime!
      */
     public static void activateDownloadTrap(ServerLevel level, BlockPos downloadPos, ServerPlayer triggerPlayer) {
         BlockPos escapeCenter = downloadPos.offset(-12, 0, 0);
-        // Check if already carved
         if (level.getBlockState(escapeCenter.above()).is(ModBlocks.BROWSER_EXIT_PORTAL.get())) {
             return;
         }
-        // Open wide left-side corridor leading directly from Download arena into exit portal!
         for (int dx = -15; dx <= -4; dx++) {
             for (int dz = -2; dz <= 2; dz++) {
                 level.setBlock(downloadPos.offset(dx, -1, dz), Blocks.WHITE_CONCRETE.defaultBlockState(), 3);
@@ -103,13 +102,11 @@ public class BrowserChunkGenerator extends ChunkGenerator {
                 }
             }
         }
-        // Glowing Cyan Exit Portal gate on the LEFT wall (-X)
         for (int dz = -1; dz <= 1; dz++) {
             for (int dy = 1; dy <= 3; dy++) {
                 level.setBlock(escapeCenter.offset(0, dy, dz), ModBlocks.BROWSER_EXIT_PORTAL.get().defaultBlockState(), 3);
             }
         }
-        // Frame arch & directional arrows pointing LEFT
         for (int dy = 1; dy <= 4; dy++) {
             level.setBlock(escapeCenter.offset(0, dy, -2), Blocks.SEA_LANTERN.defaultBlockState(), 3);
             level.setBlock(escapeCenter.offset(0, dy, 2), Blocks.SEA_LANTERN.defaultBlockState(), 3);
@@ -117,6 +114,10 @@ public class BrowserChunkGenerator extends ChunkGenerator {
         for (int dz = -2; dz <= 2; dz++) {
             level.setBlock(escapeCenter.offset(0, 4, dz), Blocks.SEA_LANTERN.defaultBlockState(), 3);
         }
+        StructureBuildUtil.placeWallOrStandingSign(level,
+                new net.minecraft.world.level.levelgen.structure.BoundingBox(escapeCenter.offset(2, 1, 0)),
+                escapeCenter.offset(2, 1, 0), Direction.EAST, DyeColor.CYAN, true,
+                "<<< RUN LEFT", "ESCAPE PORTAL", "", "");
     }
 
     @Override
@@ -188,7 +189,6 @@ public class BrowserChunkGenerator extends ChunkGenerator {
                 pos.set(lx, FLOOR_Y, lz);
                 chunk.setBlockState(pos, floorState, false);
 
-                // Overhead floating 2009 Chrome Browser Address-Bar ribbon frames at y = 84
                 if (Math.floorMod(wx, 24) == 0 || Math.floorMod(wz, 24) == 0) {
                     pos.set(lx, 84, lz);
                     chunk.setBlockState(pos, site.equals("minecraft_free_download") ? Blocks.BLACK_CONCRETE.defaultBlockState() : bar, false);
@@ -206,7 +206,7 @@ public class BrowserChunkGenerator extends ChunkGenerator {
         int minZ = chunk.getPos().getMinBlockZ();
         RandomSource rng = RandomSource.create(level.getSeed() ^ (cx * 73856093L + cz * 19349663L));
 
-        // Google Search Spawn Hub (chunk 0, 0)
+        // Google Search Spawn Hub strictly inside chunk (0, 0)
         if (cx == 0 && cz == 0) {
             BlockPos hub = new BlockPos(6, FLOOR_Y, 6);
             BlockState[] cols = {
@@ -218,78 +218,80 @@ public class BrowserChunkGenerator extends ChunkGenerator {
                     Blocks.RED_CONCRETE.defaultBlockState()
             };
             for (int i = 0; i < cols.length; i++) {
-                level.setBlock(hub.offset(i - 2, 1, -4), cols[i], 2);
-                level.setBlock(hub.offset(i - 2, 2, -4), cols[i], 2);
+                setInChunk(chunk, minX, minZ, hub.getX() + i - 2, hub.getY() + 1, hub.getZ() - 4, cols[i]);
+                setInChunk(chunk, minX, minZ, hub.getX() + i - 2, hub.getY() + 2, hub.getZ() - 4, cols[i]);
             }
-            StructureBuildUtil.placeWallOrStandingSign(level, hub.offset(0, 1, -2), Direction.SOUTH, false,
-                    "sign.under_world.browser_hub.1", "sign.under_world.browser_hub.2",
-                    "sign.under_world.browser_hub.3", "sign.under_world.browser_hub.4");
-            // Safe backlink portal to The Xp right behind spawn
-            level.setBlock(hub.offset(0, 1, 5), ModBlocks.COMPUTER.get().defaultBlockState(), 2);
+            setInChunk(chunk, minX, minZ, hub.getX(), hub.getY() + 1, hub.getZ() + 5, ModBlocks.COMPUTER.get().defaultBlockState());
             return;
         }
 
-        // Corrupted Download Arena at chunk center (136, -120) -> 100% inside single chunk (8, -8)!
+        // Corrupted Download Arena strictly inside chunk (8, -8) at center (136, FLOOR_Y, -120)
         if (Math.floorMod((minX + 8) - CORRUPT_CENTER_X, 384) == 0 && Math.floorMod((minZ + 8) - CORRUPT_CENTER_Z, 384) == 0) {
-            placeFreeDownloadArena(level, new BlockPos(minX + 8, FLOOR_Y, minZ + 8));
+            placeFreeDownloadArenaInChunk(chunk, minX, minZ, new BlockPos(minX + 8, FLOOR_Y, minZ + 8));
             return;
         }
 
-        // Website Biome Monoliths matching image-18.png
         int mx = minX + 8;
         int mz = minZ + 8;
         String site = getSiteId(mx, mz);
         if (site.equals("youtube") && rng.nextInt(3) == 0) {
-            placeSiteBanner(level, new BlockPos(mx, FLOOR_Y, mz), ModBlocks.SITE_YOUTUBE_BLOCK.get().defaultBlockState(), Blocks.RED_CONCRETE.defaultBlockState());
+            placeSiteBannerInChunk(chunk, minX, minZ, new BlockPos(mx, FLOOR_Y, mz),
+                    ModBlocks.SITE_YOUTUBE_BLOCK.get().defaultBlockState(), Blocks.RED_CONCRETE.defaultBlockState());
         } else if (site.equals("roblox") && rng.nextInt(3) == 0) {
-            placeSiteBanner(level, new BlockPos(mx, FLOOR_Y, mz), ModBlocks.SITE_ROBLOX_BLOCK.get().defaultBlockState(), Blocks.RED_CONCRETE.defaultBlockState());
+            placeSiteBannerInChunk(chunk, minX, minZ, new BlockPos(mx, FLOOR_Y, mz),
+                    ModBlocks.SITE_ROBLOX_BLOCK.get().defaultBlockState(), Blocks.RED_CONCRETE.defaultBlockState());
         } else if (site.equals("steam") && rng.nextInt(3) == 0) {
-            placeSiteBanner(level, new BlockPos(mx, FLOOR_Y, mz), ModBlocks.SITE_STEAM_BLOCK.get().defaultBlockState(), Blocks.LIGHT_BLUE_CONCRETE.defaultBlockState());
+            placeSiteBannerInChunk(chunk, minX, minZ, new BlockPos(mx, FLOOR_Y, mz),
+                    ModBlocks.SITE_STEAM_BLOCK.get().defaultBlockState(), Blocks.LIGHT_BLUE_CONCRETE.defaultBlockState());
         } else if (site.equals("reddit") && rng.nextInt(3) == 0) {
-            placeSiteBanner(level, new BlockPos(mx, FLOOR_Y, mz), ModBlocks.SITE_REDDIT_BLOCK.get().defaultBlockState(), Blocks.ORANGE_CONCRETE.defaultBlockState());
+            placeSiteBannerInChunk(chunk, minX, minZ, new BlockPos(mx, FLOOR_Y, mz),
+                    ModBlocks.SITE_REDDIT_BLOCK.get().defaultBlockState(), Blocks.ORANGE_CONCRETE.defaultBlockState());
         } else if (site.equals("minecraft_free_download") && rng.nextInt(2) == 0) {
             int h = 3 + rng.nextInt(6);
             for (int dy = 1; dy <= h; dy++) {
-                level.setBlock(new BlockPos(mx, FLOOR_Y + dy, mz), ModBlocks.SITE_GLITCH_BLOCK.get().defaultBlockState(), 2);
+                setInChunk(chunk, minX, minZ, mx, FLOOR_Y + dy, mz, ModBlocks.SITE_GLITCH_BLOCK.get().defaultBlockState());
             }
         }
     }
 
-    private static void placeSiteBanner(WorldGenLevel level, BlockPos base, BlockState main, BlockState accent) {
+    private static void placeSiteBannerInChunk(ChunkAccess chunk, int minX, int minZ, BlockPos base, BlockState main, BlockState accent) {
         for (int dx = -2; dx <= 2; dx++) {
             for (int dy = 1; dy <= 5; dy++) {
                 boolean rim = Math.abs(dx) == 2 || dy == 1 || dy == 5;
-                level.setBlock(base.offset(dx, dy, 0), rim ? main : accent, 2);
+                setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + dy, base.getZ(), rim ? main : accent);
             }
         }
     }
 
-    private static void placeFreeDownloadArena(WorldGenLevel level, BlockPos base) {
+    private static void placeFreeDownloadArenaInChunk(ChunkAccess chunk, int minX, int minZ, BlockPos base) {
         BlockState black = Blocks.BLACK_CONCRETE.defaultBlockState();
         BlockState green = Blocks.LIME_CONCRETE.defaultBlockState();
-        // Jagged black obsidian/glitch frame around central DOWNLOAD button!
         for (int dx = -6; dx <= 6; dx++) {
             for (int dz = -6; dz <= 6; dz++) {
-                level.setBlock(base.offset(dx, 0, dz), ModBlocks.SITE_GLITCH_BLOCK.get().defaultBlockState(), 2);
+                setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY(), base.getZ() + dz,
+                        ModBlocks.SITE_GLITCH_BLOCK.get().defaultBlockState());
             }
         }
-        // Hovering broken banner wall behind button
         for (int dx = -5; dx <= 5; dx++) {
             for (int dy = 3; dy <= 7; dy++) {
                 boolean border = Math.abs(dx) == 5 || dy == 3 || dy == 7;
-                level.setBlock(base.offset(dx, dy, -4), border ? black : green, 2);
+                setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + dy, base.getZ() - 4, border ? black : green);
             }
         }
-        // Central Pedestal + bright glowing [ DOWNLOAD ] block!
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
-                level.setBlock(base.offset(dx, 1, dz), black, 2);
+                setInChunk(chunk, minX, minZ, base.getX() + dx, base.getY() + 1, base.getZ() + dz, black);
             }
         }
-        level.setBlock(base.offset(0, 1, 0), ModBlocks.DOWNLOAD_BUTTON_BLOCK.get().defaultBlockState(), 2);
-        StructureBuildUtil.placeWallOrStandingSign(level, base.offset(0, 1, 2), Direction.SOUTH, false,
-                "sign.under_world.free_download.1", "sign.under_world.free_download.2",
-                "sign.under_world.free_download.3", "");
+        setInChunk(chunk, minX, minZ, base.getX(), base.getY() + 1, base.getZ(), ModBlocks.DOWNLOAD_BUTTON_BLOCK.get().defaultBlockState());
+    }
+
+    private static void setInChunk(ChunkAccess chunk, int minX, int minZ, int wx, int wy, int wz, BlockState state) {
+        int lx = wx - minX;
+        int lz = wz - minZ;
+        if (lx >= 0 && lx < 16 && lz >= 0 && lz < 16 && wy >= -64 && wy < 320) {
+            chunk.setBlockState(new BlockPos(lx, wy, lz), state, false);
+        }
     }
 
     @Override

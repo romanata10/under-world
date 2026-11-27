@@ -1,8 +1,10 @@
 package com.underworld.mod.block;
 
+import com.underworld.mod.event.UnderWorldEventDirector;
 import com.underworld.mod.registry.ModDimensions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -17,13 +19,21 @@ public class MazePortalBlock extends Block {
 
     @Override
     public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
-        if (!level.isClientSide && entity instanceof ServerPlayer player && !player.isOnPortalCooldown()) {
+        if (!level.isClientSide && level instanceof ServerLevel serverLevel
+                && entity instanceof ServerPlayer player && !player.isOnPortalCooldown()) {
             player.setPortalCooldown(80);
-            if (ModDimensions.isMaze(level)) {
-                ModDimensions.returnToOverworld(player);
-            } else {
-                ModDimensions.sendToMaze(player);
-            }
+            java.util.UUID pid = player.getUUID();
+            boolean inMaze = ModDimensions.isMaze(level);
+            UnderWorldEventDirector.schedule(1, () -> {
+                ServerPlayer p = serverLevel.getServer().getPlayerList().getPlayer(pid);
+                if (p != null && p.isAlive() && p.level() == serverLevel) {
+                    if (inMaze) {
+                        ModDimensions.returnToOverworld(p);
+                    } else {
+                        ModDimensions.sendToMaze(p);
+                    }
+                }
+            });
         }
     }
 
