@@ -1,0 +1,7 @@
+{
+  "type": "under_world:leaf_maze",
+  "biomes": "#under_world:has_structure/leaf_maze",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "under_world:block/time_portal"
+  },
+  "render_type": "minecraft:translucent"
+}

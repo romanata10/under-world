@@ -1,0 +1,28 @@
+{
+  "has_precipitation": false,
+  "temperature": 0.5,
+  "downfall": 0.0,
+  "effects": {
+    "sky_color": 8234239,
+    "fog_color": 11257087,
+    "water_color": 4159204,
+    "water_fog_color": 329011,
+    "music": {
+      "sound": "under_world:music_the_time",
+      "min_delay": 40,
+      "max_delay": 240,
+      "replace_current_music": true
+    }
+  },
+  "spawners": {
+    "monster": [],
+    "creature": [],
+    "ambient": [],
+    "water_creature": [],
+    "water_ambient": [],
+    "misc": []
+  },
+  "spawn_costs": {},
+  "carvers": {},
+  "features": []
+}

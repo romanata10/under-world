@@ -130,5 +130,48 @@ public final class ModBlocks {
                     .lightLevel(s -> 12)
                     .sound(SoundType.AMETHYST)));
 
+    // v2.2.0 blocks: The Error, The Time, and Glitch Block
+    public static final RegistryObject<Block> ERROR_GROUND = BLOCKS.register("error_ground",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_MAGENTA)
+                    .strength(0.8F)
+                    .sound(SoundType.STONE)));
+
+    public static final RegistryObject<Block> ERROR_SOIL = BLOCKS.register("error_soil",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_PURPLE)
+                    .strength(0.7F)
+                    .sound(SoundType.GRAVEL)));
+
+    public static final RegistryObject<Block> GLITCH_BLOCK = BLOCKS.register("glitch_block",
+            () -> new com.underworld.mod.block.GlitchBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_MAGENTA)
+                    .strength(1.5F, 6.0F)
+                    .noOcclusion()
+                    .lightLevel(s -> 6)
+                    .sound(SoundType.AMETHYST)));
+
+    public static final RegistryObject<Block> CLOCK_FACE_BLOCK = BLOCKS.register("clock_face_block",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.SAND)
+                    .strength(1.6F, 6.0F)
+                    .sound(SoundType.WOOD)));
+
+    public static final RegistryObject<Block> CLOCK_RIM_BLOCK = BLOCKS.register("clock_rim_block",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_BLACK)
+                    .strength(2.4F, 8.0F)
+                    .sound(SoundType.METAL)));
+
+    public static final RegistryObject<Block> TIME_PORTAL = BLOCKS.register("time_portal",
+            () -> new com.underworld.mod.block.TimePortalBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .noCollission()
+                    .noOcclusion()
+                    .strength(-1.0F, 3600000.0F)
+                    .noLootTable()
+                    .lightLevel(s -> 13)
+                    .sound(SoundType.GLASS)));
+
     private ModBlocks() {}
 }

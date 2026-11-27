@@ -8,7 +8,13 @@
     "water_color": 4159204,
     "water_fog_color": 329011,
     "grass_color": 8974336,
-    "foliage_color": 8449536
+    "foliage_color": 8449536,
+    "music": {
+      "sound": "under_world:music_fun_world",
+      "min_delay": 40,
+      "max_delay": 240,
+      "replace_current_music": true
+    }
   },
   "spawners": {
     "monster": [],

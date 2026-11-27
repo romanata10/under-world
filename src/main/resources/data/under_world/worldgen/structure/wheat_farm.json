@@ -1,0 +1,7 @@
+{
+  "type": "under_world:wheat_farm",
+  "biomes": "#under_world:has_structure/wheat_farm",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

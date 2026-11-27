@@ -1,0 +1,7 @@
+{
+  "type": "under_world:elongated_tree",
+  "biomes": "#under_world:has_structure/elongated_tree",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

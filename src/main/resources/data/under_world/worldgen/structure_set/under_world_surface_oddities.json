@@ -1,0 +1,26 @@
+{
+  "structures": [
+    {
+      "structure": "under_world:fountain",
+      "weight": 3
+    },
+    {
+      "structure": "under_world:glitch_cluster",
+      "weight": 3
+    },
+    {
+      "structure": "under_world:elongated_tree",
+      "weight": 4
+    },
+    {
+      "structure": "under_world:clock_statue",
+      "weight": 3
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 26,
+    "separation": 10,
+    "salt": 88214123
+  }
+}

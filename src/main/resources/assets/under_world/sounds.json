@@ -70,5 +70,36 @@
   "the_truth_ambient": {
     "subtitle": "subtitles.under_world.the_truth_ambient",
     "sounds": [{ "name": "under_world:the_truth_ambient", "stream": false }]
+  },
+  "clock_tick": {
+    "subtitle": "subtitles.under_world.clock_tick",
+    "sounds": [{ "name": "under_world:clock_tick", "stream": false }]
+  },
+  "clock_chime": {
+    "subtitle": "subtitles.under_world.clock_chime",
+    "sounds": [{ "name": "under_world:clock_chime", "stream": false }]
+  },
+  "error_warp": {
+    "subtitle": "subtitles.under_world.error_warp",
+    "sounds": [{ "name": "under_world:error_warp", "stream": false }]
+  },
+  "time_warp": {
+    "subtitle": "subtitles.under_world.time_warp",
+    "sounds": [{ "name": "under_world:time_warp", "stream": false }]
+  },
+  "music_fun_world": {
+    "sounds": [{ "name": "under_world:music_fun_world", "stream": true }]
+  },
+  "music_maze": {
+    "sounds": [{ "name": "under_world:music_maze", "stream": true }]
+  },
+  "music_the_error": {
+    "sounds": [{ "name": "under_world:music_the_error", "stream": true }]
+  },
+  "music_the_time": {
+    "sounds": [{ "name": "under_world:music_the_time", "stream": true }]
+  },
+  "music_overworld": {
+    "sounds": [{ "name": "under_world:music_overworld", "stream": true }]
   }
 }

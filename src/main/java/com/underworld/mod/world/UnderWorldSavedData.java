@@ -31,6 +31,7 @@ public class UnderWorldSavedData extends SavedData {
     private int truthCooldownTicks = 12000;
     private long funWorldDayTime = 1000L;
     private final Map<UUID, BlockPos> returnPositions = new HashMap<>();
+    private final Map<UUID, Integer> errorReturnTimers = new HashMap<>();
     private final Set<UUID> pendingTruthPillars = new HashSet<>();
 
     public UnderWorldSavedData() {}
@@ -76,6 +77,19 @@ public class UnderWorldSavedData extends SavedData {
                 }
             }
         }
+        if (tag.contains("ErrorReturnTimers", 10)) {
+            CompoundTag timers = tag.getCompound("ErrorReturnTimers");
+            for (String key : timers.getAllKeys()) {
+                try {
+                    UUID uuid = UUID.fromString(key);
+                    int ticks = timers.getInt(key);
+                    if (ticks > 0) {
+                        data.errorReturnTimers.put(uuid, ticks);
+                    }
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+        }
         if (tag.contains("PendingTruthPillars", Tag.TAG_LIST)) {
             ListTag list = tag.getList("PendingTruthPillars", Tag.TAG_STRING);
             for (int i = 0; i < list.size(); i++) {
@@ -111,6 +125,14 @@ public class UnderWorldSavedData extends SavedData {
             returns.put(entry.getKey().toString(), posTag);
         }
         tag.put("ReturnPositions", returns);
+
+        CompoundTag timers = new CompoundTag();
+        for (Map.Entry<UUID, Integer> entry : this.errorReturnTimers.entrySet()) {
+            if (entry.getValue() > 0) {
+                timers.putInt(entry.getKey().toString(), entry.getValue());
+            }
+        }
+        tag.put("ErrorReturnTimers", timers);
 
         ListTag pendingPillars = new ListTag();
         for (UUID uuid : this.pendingTruthPillars) {
@@ -227,5 +249,24 @@ public class UnderWorldSavedData extends SavedData {
     @Nullable
     public BlockPos getReturnPos(UUID playerId) {
         return this.returnPositions.get(playerId);
+    }
+
+    public void setErrorReturnTimer(UUID playerId, int ticks) {
+        if (ticks <= 0) {
+            this.errorReturnTimers.remove(playerId);
+        } else {
+            this.errorReturnTimers.put(playerId, ticks);
+        }
+        setDirty();
+    }
+
+    public int getErrorReturnTimer(UUID playerId) {
+        return this.errorReturnTimers.getOrDefault(playerId, 0);
+    }
+
+    public void clearErrorReturnTimer(UUID playerId) {
+        if (this.errorReturnTimers.remove(playerId) != null) {
+            setDirty();
+        }
     }
 }

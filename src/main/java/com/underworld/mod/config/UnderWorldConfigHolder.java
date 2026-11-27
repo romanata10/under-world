@@ -92,12 +92,23 @@ public final class UnderWorldConfigHolder {
             c.theTruthKickOnKill.set(fzzyConfig.theTruth.theTruthKickOnKill.get());
             c.theTruthSpawnPillarOnRejoin.set(fzzyConfig.theTruth.theTruthSpawnPillarOnRejoin.get());
 
+            c.clockEnabled.set(fzzyConfig.clock.clockEnabled.get());
+            c.clockSpawnChance.set(fzzyConfig.clock.clockSpawnChance.get());
+            c.clockTimeSpeed.set(fzzyConfig.clock.clockTimeSpeed.get());
+
             c.funWorldEnabled.set(fzzyConfig.dimensions.funWorldEnabled.get());
             c.funWorldTimeSpeedMultiplier.set(fzzyConfig.dimensions.funWorldTimeSpeedMultiplier.get());
             c.eyesOfFunEnabled.set(fzzyConfig.dimensions.eyesOfFunEnabled.get());
             c.eyesOfFunInstantKill.set(fzzyConfig.dimensions.eyesOfFunInstantKill.get());
             c.mazeEnabled.set(fzzyConfig.dimensions.mazeEnabled.get());
             c.smileSprintSpeed.set(fzzyConfig.dimensions.smileSprintSpeed.get());
+            c.errorDimensionEnabled.set(fzzyConfig.dimensions.errorDimensionEnabled.get());
+            c.errorBedWarpChance.set(fzzyConfig.dimensions.errorBedWarpChance.get());
+            c.errorStayDurationTicks.set(fzzyConfig.dimensions.errorStayDurationTicks.get());
+            c.timeDimensionEnabled.set(fzzyConfig.dimensions.timeDimensionEnabled.get());
+            c.clockTimeHuntEnabled.set(fzzyConfig.dimensions.clockTimeHuntEnabled.get());
+            c.customMusicEnabled.set(fzzyConfig.dimensions.customMusicEnabled.get());
+            c.customOverworldMusic.set(fzzyConfig.dimensions.customOverworldMusic.get());
 
             UnderWorldForgeConfig.COMMON_SPEC.save();
         } finally {
@@ -156,12 +167,23 @@ public final class UnderWorldConfigHolder {
             fzzyConfig.theTruth.theTruthKickOnKill.trySet(c.theTruthKickOnKill.get());
             fzzyConfig.theTruth.theTruthSpawnPillarOnRejoin.trySet(c.theTruthSpawnPillarOnRejoin.get());
 
+            fzzyConfig.clock.clockEnabled.trySet(c.clockEnabled.get());
+            fzzyConfig.clock.clockSpawnChance.trySet(c.clockSpawnChance.get());
+            fzzyConfig.clock.clockTimeSpeed.trySet(c.clockTimeSpeed.get());
+
             fzzyConfig.dimensions.funWorldEnabled.trySet(c.funWorldEnabled.get());
             fzzyConfig.dimensions.funWorldTimeSpeedMultiplier.trySet(c.funWorldTimeSpeedMultiplier.get());
             fzzyConfig.dimensions.eyesOfFunEnabled.trySet(c.eyesOfFunEnabled.get());
             fzzyConfig.dimensions.eyesOfFunInstantKill.trySet(c.eyesOfFunInstantKill.get());
             fzzyConfig.dimensions.mazeEnabled.trySet(c.mazeEnabled.get());
             fzzyConfig.dimensions.smileSprintSpeed.trySet(c.smileSprintSpeed.get());
+            fzzyConfig.dimensions.errorDimensionEnabled.trySet(c.errorDimensionEnabled.get());
+            fzzyConfig.dimensions.errorBedWarpChance.trySet(c.errorBedWarpChance.get());
+            fzzyConfig.dimensions.errorStayDurationTicks.trySet(c.errorStayDurationTicks.get());
+            fzzyConfig.dimensions.timeDimensionEnabled.trySet(c.timeDimensionEnabled.get());
+            fzzyConfig.dimensions.clockTimeHuntEnabled.trySet(c.clockTimeHuntEnabled.get());
+            fzzyConfig.dimensions.customMusicEnabled.trySet(c.customMusicEnabled.get());
+            fzzyConfig.dimensions.customOverworldMusic.trySet(c.customOverworldMusic.get());
 
             fzzyConfig.save();
         } finally {
@@ -195,5 +217,25 @@ public final class UnderWorldConfigHolder {
 
     public static boolean isScreenAtmosphereEnabled() {
         return !UnderWorldForgeConfig.CLIENT_SPEC.isLoaded() || UnderWorldForgeConfig.CLIENT.screenAtmosphereEffects.get();
+    }
+
+    public static double getErrorBedWarpChance() {
+        return fzzyConfig == null ? 0.20D : fzzyConfig.dimensions.errorBedWarpChance.get();
+    }
+
+    public static int getErrorStayDurationTicks() {
+        return fzzyConfig == null ? 1800 : fzzyConfig.dimensions.errorStayDurationTicks.get();
+    }
+
+    public static double getClockTimeSpeed() {
+        return fzzyConfig == null ? 0.42D : fzzyConfig.clock.clockTimeSpeed.get();
+    }
+
+    public static boolean isCustomMusicEnabled() {
+        return fzzyConfig == null || fzzyConfig.dimensions.customMusicEnabled.get();
+    }
+
+    public static boolean isOverworldCustomMusicEnabled() {
+        return fzzyConfig == null || fzzyConfig.dimensions.customOverworldMusic.get();
     }
 }

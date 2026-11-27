@@ -1,4 +1,4 @@
-# Under World (`under_world`) — v2.1.1
+# Under World (`under_world`) — v2.2.0
 
 A Minecraft **1.20.1 Forge** psychological & Dreamcore horror mod inspired by *The Broken Script*, built with **GeckoLib 4**, **Fzzy Config**, **Configured**, and full multiplayer server/client synchronization.
 
@@ -33,9 +33,14 @@ A Minecraft **1.20.1 Forge** psychological & Dreamcore horror mod inspired by *T
   - Super-mega-rare **50-block tall × 30-block wide** pitch-black stick/root colossus with a cracked triangular staring-eye mask and hanging claw tendrils.
   - Erupts out of the ground ahead of the player with an earth-shaking roar and chases relentlessly for 30 seconds while shattering any blocks in its path.
   - Triggers a full horror HUD takeover (4-corner watching face, scrolling crimson warning banner, and 30s survival countdown). If it catches you before the timer ends, it kills and disconnects you — and upon rejoining, a 100-block cobblestone pillar spawns beneath you.
+- **`clock`** (`under_world:clock`) *(v2.2)*:
+  - Tall lanky monochrome silhouette with a circular gray-rimmed white analog clock head, black-veined narrow white torso, branching crooked legs, and extra-long clawed arms.
+  - In the Overworld: either stalks and vanishes on eye contact, or chases the player and warps them into **The Time**.
+  - Inside **The Time**: aggressive hunter variant that **freezes completely in silence and sprints only while the clock ticking sound plays**.
 
-## Mechanics & Dimensions (v2 + v2.1)
+## Mechanics, Dimensions & Soundtracks (v2.0 – v2.2)
 
+- **Custom Dimension Music** *(v2.2)*: Custom streaming `.ogg` soundtracks for **The Fun World**, **The Maze**, **The Error**, **The Time**, and ambient **Overworld** tracks (`under_world:music_*`).
 - **Anti-Spawn-Kill** *(v2.1)*: When a player dies to any `under_world` entity, that entity (and nearby aggro `under_world` entities) vanish cleanly so they cannot spawn-kill the player upon respawning.
 - **The Fun World** (`under_world:the_fun_world`):
   - Accessible by stepping into a **Void Shrine** ritual core in the Overworld or being warped by `friend` at close range.
@@ -46,13 +51,32 @@ A Minecraft **1.20.1 Forge** psychological & Dreamcore horror mod inspired by *T
 - **The Maze** (`under_world:maze`):
   - Classic Windows 95/98 3D Maze screensaver labyrinth of red clay bricks, warm tan parquet floors, speckled grey ceiling tiles, dense dark corridor fog, and **`Smile`** hunting inside.
   - Navigate the connected brick corridors to locate a glowing **`Maze Escape Terminal`** (`under_world:maze_teleporter`) and return safely to the Overworld.
+- **The Error** (`under_world:the_error`) *(v2.2)*:
+  - **20% chance** upon sleeping in an Overworld bed to wake inside a broken magenta-and-black missing-texture world beneath a normal bright blue cloudy sky.
+  - Features missing void chunks, chunks lifted high into the sky, floating water pockets in midair, stretched glitch trees, and flashing glitch blocks.
+  - Completely **safe** (damage protected); automatically returns you to the Overworld after **1 minute 30 seconds** (`1800` ticks).
+- **The Time** (`under_world:the_time`) *(v2.2)*:
+  - Endless bright cloudy sky filled above and below with grids of horizontal floating analog clock discs.
+  - Entered when caught by `clock` in the Overworld; haunted by the ticking aggressive `clock` hunter.
+  - Escape only by finding a rare **Portal Clock Disc** containing `under_world:time_portal`.
+
+## Worldgen Structures (v2.0 – v2.2)
+
+- `under_world:void_shrine` & `under_world:broken_shaft` *(v2.0)*
+- `under_world:fountain` *(v2.2)* — Weathered cobblestone & mossy stone fountain basin
+- `under_world:glitch_cluster` *(v2.2)* — Broken monolith of `under_world:glitch_block` flashing live textures from across every block in the game
+- `under_world:elongated_tree` *(v2.2)* — Unnaturally stretched giant oak tree
+- `under_world:wheat_farm` *(v2.2)* — Fenced irrigated wheat farm plot with hay bales and supply chest
+- `under_world:old_village_house` *(v2.2)* — Nostalgic 1.12.2-style cobblestone & oak village cottage
+- `under_world:clock_statue` *(v2.2)* — Monumental standing grandfather clock tower
+- `under_world:leaf_maze` *(v2.2)* — Compact 15×15 oak-leaf hedge maze with treasure center
 
 ## Commands (`/underworld`, op level 2)
 
-- `/underworld spawn <friend|hands|tree|tree_mimic|the_sky|eyes_of_fun|smile|the_truth> [<player>]`
-- `/underworld trigger <friend_join|friend_chat|hands_encounter|tree_encounter|the_sky_event|eyes_of_fun|smile|the_truth> [<player>]`
-- `/underworld tp <overworld|fun_world|maze> [<player>]`
-- `/underworld structure <void_shrine|broken_shaft> [<player>]`
+- `/underworld spawn <friend|hands|tree|tree_mimic|the_sky|eyes_of_fun|smile|the_truth|clock> [<player>]`
+- `/underworld trigger <friend_join|friend_chat|hands_encounter|tree_encounter|the_sky_event|eyes_of_fun|smile|the_truth|clock> [<player>]`
+- `/underworld tp <overworld|fun_world|maze|the_error|the_time> [<player>]`
+- `/underworld structure <void_shrine|broken_shaft|fountain|glitch_cluster|elongated_tree|wheat_farm|old_village_house|clock_statue|leaf_maze> [<player>]`
 - `/underworld events <enable|disable|status>`
 - `/underworld reset friend`
 
