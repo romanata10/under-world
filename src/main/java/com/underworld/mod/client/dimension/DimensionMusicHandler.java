@@ -59,6 +59,18 @@ public final class DimensionMusicHandler {
         if (ModDimensions.isTime(level)) {
             return createMusic(ModSounds.MUSIC_THE_TIME.get(), 40, 220);
         }
+        if (ModDimensions.isPlains(level)) {
+            return createMusic(ModSounds.MUSIC_PLAINS.get(), 40, 220);
+        }
+        if (ModDimensions.isWindOcean(level)) {
+            return createMusic(ModSounds.MUSIC_WIND_OCEAN.get(), 40, 220);
+        }
+        if (ModDimensions.isXp(level)) {
+            return createMusic(ModSounds.MUSIC_XP.get(), 40, 220);
+        }
+        if (ModDimensions.isBrowser(level)) {
+            return createMusic(ModSounds.MUSIC_BROWSER.get(), 40, 220);
+        }
         if (level.dimension().equals(Level.OVERWORLD) && UnderWorldConfigHolder.isOverworldCustomMusicEnabled()) {
             return createMusic(ModSounds.MUSIC_OVERWORLD.get(), 120, 600);
         }

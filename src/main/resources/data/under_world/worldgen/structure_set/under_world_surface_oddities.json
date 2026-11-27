@@ -15,6 +15,10 @@
     {
       "structure": "under_world:clock_statue",
       "weight": 3
+    },
+    {
+      "structure": "under_world:power_pylon",
+      "weight": 3
     }
   ],
   "placement": {

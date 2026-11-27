@@ -8,6 +8,7 @@ import com.underworld.mod.world.structure.FountainPiece;
 import com.underworld.mod.world.structure.GlitchClusterPiece;
 import com.underworld.mod.world.structure.LeafMazePiece;
 import com.underworld.mod.world.structure.OldVillageHousePiece;
+import com.underworld.mod.world.structure.PowerPylonPiece;
 import com.underworld.mod.world.structure.VoidShrinePiece;
 import com.underworld.mod.world.structure.WheatFarmPiece;
 import net.minecraft.core.BlockPos;
@@ -33,7 +34,8 @@ public final class LoreStructureSpawner {
             "abandoned_treehouse",
             "secret_dugout",
             "old_spawn_hub",
-            "villager_trading_hall"
+            "villager_trading_hall",
+            "computer_desk"
     };
 
     public static final String[] CLASSIC_STRUCTURE_IDS = {
@@ -45,7 +47,8 @@ public final class LoreStructureSpawner {
             "clock_statue",
             "elongated_tree",
             "glitch_cluster",
-            "void_shrine"
+            "void_shrine",
+            "power_pylon"
     };
 
     private LoreStructureSpawner() {}
@@ -67,6 +70,8 @@ public final class LoreStructureSpawner {
             case "secret_dugout" -> { LoreDugoutPiece.placeAt(level, pos); yield true; }
             case "old_spawn_hub" -> { LoreSpawnHubPiece.placeAt(level, pos); yield true; }
             case "villager_trading_hall" -> { LoreTradingHallPiece.placeAt(level, pos); yield true; }
+            case "computer_desk" -> { LoreComputerDeskPiece.placeAt(level, pos); yield true; }
+            case "power_pylon" -> { PowerPylonPiece.placeAt(level, pos); yield true; }
             case "void_shrine" -> { VoidShrinePiece.placeAt(level, pos); yield true; }
             case "broken_shaft" -> {
                 BlockPos deep = pos.getY() > 24 ? new BlockPos(pos.getX(), Math.max(level.getMinBuildHeight() + 8, pos.getY() - 18), pos.getZ()) : pos;

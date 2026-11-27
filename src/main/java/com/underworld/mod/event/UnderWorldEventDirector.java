@@ -7,24 +7,32 @@ import com.underworld.mod.entity.DemonFishEntity;
 import com.underworld.mod.entity.EyesOfFunEntity;
 import com.underworld.mod.entity.FriendEntity;
 import com.underworld.mod.entity.HandsEntity;
+import com.underworld.mod.entity.LivingPylonEntity;
 import com.underworld.mod.entity.SmileEntity;
 import com.underworld.mod.entity.TheBallEntity;
+import com.underworld.mod.entity.TheDotComEntity;
 import com.underworld.mod.entity.TheMimicEntity;
 import com.underworld.mod.entity.TheSkyEntity;
 import com.underworld.mod.entity.TheTruthEntity;
 import com.underworld.mod.entity.TreeMimicEntity;
+import com.underworld.mod.entity.WindTurbineStalkerEntity;
 import com.underworld.mod.network.NetworkHandler;
+import com.underworld.mod.registry.ModBlocks;
 import com.underworld.mod.registry.ModDimensions;
 import com.underworld.mod.registry.ModEntities;
 import com.underworld.mod.registry.ModSounds;
 import com.underworld.mod.world.FunWorldTimeManager;
 import com.underworld.mod.world.UnderWorldSavedData;
+import com.underworld.mod.world.dimension.BrowserChunkGenerator;
 import com.underworld.mod.world.dimension.ErrorChunkGenerator;
 import com.underworld.mod.world.dimension.MazeChunkGenerator;
 import com.underworld.mod.world.dimension.TimeChunkGenerator;
+import com.underworld.mod.world.dimension.WindOceanChunkGenerator;
 import com.underworld.mod.world.structure.VoidShrinePiece;
 import com.underworld.mod.world.structure.lore.LoreStructureSpawner;
 import net.minecraft.ChatFormatting;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
@@ -43,9 +51,12 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -307,10 +318,16 @@ public final class UnderWorldEventDirector {
         tickErrorDimension(server);
         tickTimeDimension(server);
 
-        // Dimension horror directors (Fun World night Eyes of Fun & Maze Smile)
+        // v2.4.0 Dimension directors (The Plains night pylons, Wind Ocean stalking turbines, The Xp falling icons, Browser URL & trap)
+        tickXpDimension(server);
+        if (server.getTickCount() % 20 == 0) {
+            tickBrowserDimension(server);
+        }
         if (server.getTickCount() % 80 == 0) {
             tickFunWorld(server);
             tickMaze(server);
+            tickPlainsDimension(server);
+            tickWindOceanDimension(server);
         }
 
         if (!UnderWorldConfigHolder.isModEnabled() || data.areEventsPaused()) {
@@ -494,7 +511,17 @@ public final class UnderWorldEventDirector {
                 if (random.nextDouble() < clockChance) {
                     if (triggerClockEncounter(overworld, target, false) != null) {
                         data.setEventCooldownTicks(4200 + random.nextInt(3600));
+                        return;
                     }
+                }
+            }
+
+            // Super-rare night horror event: "welcome to the hell"
+            if (overworld.isNight() && random.nextDouble() < 0.008D) {
+                Advancement hellAdv = server.getAdvancements().getAdvancement(UnderWorldMod.id("welcome_to_the_hell"));
+                if (hellAdv != null && !target.getAdvancements().getOrStartProgress(hellAdv).isDone()) {
+                    triggerWelcomeToTheHellEvent(server, target);
+                    data.setEventCooldownTicks(6000 + random.nextInt(4800));
                 }
             }
         }
@@ -639,6 +666,97 @@ public final class UnderWorldEventDirector {
             int existing = mazeLevel.getEntitiesOfClass(SmileEntity.class, nearby).size();
             if (existing == 0 && mazeLevel.getRandom().nextFloat() < 0.55F) {
                 triggerSmileEncounter(mazeLevel, player);
+            }
+        }
+    }
+
+    private static void tickPlainsDimension(MinecraftServer server) {
+        ServerLevel plains = server.getLevel(ModDimensions.THE_PLAINS);
+        if (plains == null || plains.players().isEmpty() || !plains.isNight()) {
+            return;
+        }
+        for (ServerPlayer player : plains.players()) {
+            if (player.isCreative() || player.isSpectator() || !player.isAlive() || isSpawnProtected(player)) {
+                continue;
+            }
+            AABB nearby = AABB.ofSize(player.position(), 88.0D, 48.0D, 88.0D);
+            int existing = plains.getEntitiesOfClass(LivingPylonEntity.class, nearby).size();
+            if (existing == 0 && plains.getRandom().nextFloat() < 0.45F) {
+                triggerLivingPylonEncounter(plains, player);
+            }
+        }
+    }
+
+    private static void tickWindOceanDimension(MinecraftServer server) {
+        ServerLevel ocean = server.getLevel(ModDimensions.THE_WIND_OCEAN);
+        if (ocean == null || ocean.players().isEmpty()) {
+            return;
+        }
+        for (ServerPlayer player : ocean.players()) {
+            if (player.isCreative() || player.isSpectator() || !player.isAlive() || isSpawnProtected(player)) {
+                continue;
+            }
+            AABB nearby = AABB.ofSize(player.position(), 96.0D, 48.0D, 96.0D);
+            int existing = ocean.getEntitiesOfClass(WindTurbineStalkerEntity.class, nearby).size();
+            if (existing < 2 && ocean.getRandom().nextFloat() < 0.50F) {
+                triggerWindTurbineEncounter(ocean, player, false);
+            }
+        }
+    }
+
+    private static void tickXpDimension(MinecraftServer server) {
+        if (server.getTickCount() % 5 != 0) {
+            return;
+        }
+        ServerLevel xpLevel = server.getLevel(ModDimensions.THE_XP);
+        if (xpLevel == null || xpLevel.players().isEmpty()) {
+            return;
+        }
+        for (ServerPlayer player : xpLevel.players()) {
+            BlockPos pPos = player.blockPosition();
+            boolean corruptedAny = false;
+            for (int dx = -4; dx <= 4; dx++) {
+                for (int dz = -4; dz <= 4; dz++) {
+                    for (int dy = 0; dy <= 7; dy++) {
+                        BlockPos check = pPos.offset(dx, dy, dz);
+                        if (xpLevel.getBlockState(check).is(ModBlocks.XP_ICON_BLOCK.get())) {
+                            corruptedAny = true;
+                            xpLevel.setBlock(check, Blocks.AIR.defaultBlockState(), 3);
+                            FallingBlockEntity falling = FallingBlockEntity.fall(
+                                    xpLevel, check, ModBlocks.XP_ICON_FALLEN.get().defaultBlockState());
+                            falling.dropItem = false;
+                        }
+                    }
+                }
+            }
+            if (corruptedAny) {
+                xpLevel.playSound(null, pPos, ModSounds.XP_ERROR.get(), SoundSource.BLOCKS, 1.4F, 0.85F);
+            }
+        }
+    }
+
+    private static void tickBrowserDimension(MinecraftServer server) {
+        ServerLevel browser = server.getLevel(ModDimensions.THE_BROWSER);
+        if (browser == null || browser.players().isEmpty()) {
+            return;
+        }
+        for (ServerPlayer player : browser.players()) {
+            String url = BrowserChunkGenerator.getSiteUrl(player.getBlockX(), player.getBlockZ());
+            player.displayClientMessage(Component.literal("[Chrome] " + url).withStyle(
+                    "http://the-MinECRaT-fREe-downladn.com/".equals(url) ? ChatFormatting.RED : ChatFormatting.AQUA), true);
+            // Auto-trigger download trap if standing very close to DOWNLOAD button
+            BlockPos pp = player.blockPosition();
+            for (int dx = -2; dx <= 2; dx++) {
+                for (int dz = -2; dz <= 2; dz++) {
+                    for (int dy = -1; dy <= 1; dy++) {
+                        BlockPos scan = pp.offset(dx, dy, dz);
+                        if (browser.getBlockState(scan).is(ModBlocks.DOWNLOAD_BUTTON_BLOCK.get())) {
+                            BrowserChunkGenerator.activateDownloadTrap(browser, scan, player);
+                            triggerDotComTrap(browser, scan, player);
+                            return;
+                        }
+                    }
+                }
             }
         }
     }
@@ -947,6 +1065,124 @@ public final class UnderWorldEventDirector {
     }
 
     @Nullable
+    public static LivingPylonEntity triggerLivingPylonEncounter(ServerLevel level, ServerPlayer player) {
+        BlockPos pos = findSpawnPosAroundPlayer(level, player, 22, 38, false);
+        if (pos == null) {
+            return null;
+        }
+        LivingPylonEntity pylon = ModEntities.LIVING_PYLON.get().create(level);
+        if (pylon == null) {
+            return null;
+        }
+        pylon.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D,
+                level.getRandom().nextFloat() * 360.0F, 0.0F);
+        pylon.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
+        pylon.setAutoDespawnAtDay(ModDimensions.isPlains(level));
+        level.addFreshEntity(pylon);
+        level.playSound(null, pos, ModSounds.PYLON_HUM.get(), SoundSource.HOSTILE, 1.8F, 0.8F);
+        return pylon;
+    }
+
+    @Nullable
+    public static WindTurbineStalkerEntity triggerWindTurbineEncounter(ServerLevel level, ServerPlayer player, boolean awakenImmediately) {
+        double ang = level.getRandom().nextDouble() * Math.PI * 2.0D;
+        double dist = 24.0D + level.getRandom().nextDouble() * 18.0D;
+        int tx = Mth.floor(player.getX() + Math.cos(ang) * dist);
+        int tz = Mth.floor(player.getZ() + Math.sin(ang) * dist);
+        double spawnY = ModDimensions.isWindOcean(level) ? WindOceanChunkGenerator.SEA_LEVEL - 3.0D : player.getY();
+        BlockPos pos = new BlockPos(tx, Mth.floor(spawnY), tz);
+
+        WindTurbineStalkerEntity stalker = ModEntities.WIND_TURBINE_STALKER.get().create(level);
+        if (stalker == null) {
+            return null;
+        }
+        stalker.moveTo(pos.getX() + 0.5D, spawnY, pos.getZ() + 0.5D,
+                level.getRandom().nextFloat() * 360.0F, 0.0F);
+        stalker.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
+        if (awakenImmediately) {
+            stalker.setAwakened(true);
+        }
+        level.addFreshEntity(stalker);
+        return stalker;
+    }
+
+    @Nullable
+    public static TheDotComEntity triggerDotComEncounter(ServerLevel level, ServerPlayer player) {
+        BlockPos pos = findSpawnPosAroundPlayer(level, player, 16, 26, false);
+        if (pos == null) {
+            pos = player.blockPosition().offset(12, 0, 0);
+        }
+        TheDotComEntity dotCom = ModEntities.THE_DOT_COM.get().create(level);
+        if (dotCom == null) {
+            return null;
+        }
+        dotCom.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D,
+                level.getRandom().nextFloat() * 360.0F, 0.0F);
+        dotCom.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
+        dotCom.setTarget(player);
+        level.addFreshEntity(dotCom);
+        level.playSound(null, pos, ModSounds.DOT_COM_ROAR.get(), SoundSource.HOSTILE, 2.0F, 0.9F);
+        return dotCom;
+    }
+
+    public static void triggerDotComTrap(ServerLevel level, BlockPos downloadPos, ServerPlayer player) {
+        AABB box = AABB.ofSize(Vec3.atCenterOf(downloadPos), 64.0D, 32.0D, 64.0D);
+        if (!level.getEntitiesOfClass(TheDotComEntity.class, box).isEmpty()) {
+            return;
+        }
+        TheDotComEntity dotCom = ModEntities.THE_DOT_COM.get().create(level);
+        if (dotCom != null) {
+            BlockPos spawnPos = downloadPos.offset(8, 0, 0);
+            dotCom.moveTo(spawnPos.getX() + 0.5D, spawnPos.getY(), spawnPos.getZ() + 0.5D, 90.0F, 0.0F);
+            dotCom.finalizeSpawn(level, level.getCurrentDifficultyAt(spawnPos), MobSpawnType.EVENT, null, null);
+            dotCom.setTarget(player);
+            level.addFreshEntity(dotCom);
+        }
+        level.playSound(null, downloadPos, ModSounds.DOT_COM_ROAR.get(), SoundSource.HOSTILE, 2.4F, 0.85F);
+        level.sendParticles(ParticleTypes.CRIMSON_SPORE, downloadPos.getX() + 0.5D, downloadPos.getY() + 1.5D, downloadPos.getZ() + 0.5D,
+                40, 2.0D, 1.5D, 2.0D, 0.06D);
+        player.displayClientMessage(Component.translatable("message.under_world.dot_com_escaped_left").withStyle(ChatFormatting.RED, ChatFormatting.BOLD), false);
+    }
+
+    public static void triggerWelcomeToTheHellEvent(MinecraftServer server, ServerPlayer player) {
+        ServerLevel level = player.serverLevel();
+        BlockPos pos = player.blockPosition();
+
+        level.playSound(null, pos, ModSounds.HELL_EVENT.get(), SoundSource.AMBIENT, 2.2F, 0.8F);
+        server.getPlayerList().broadcastSystemMessage(
+                Component.translatable("message.under_world.welcome_to_the_hell_chat").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD),
+                false
+        );
+
+        player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 80, 0, false, false));
+        player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 25, 0, false, false));
+        player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 70, 0, false, false));
+
+        for (int i = 0; i < 16; i++) {
+            double ang = (Math.PI * 2.0D * i) / 16.0D;
+            double px = player.getX() + Math.cos(ang) * 3.5D;
+            double pz = player.getZ() + Math.sin(ang) * 3.5D;
+            level.sendParticles(ParticleTypes.FLAME, px, player.getY() + 0.4D, pz, 4, 0.2D, 0.5D, 0.2D, 0.04D);
+            level.sendParticles(ParticleTypes.CRIMSON_SPORE, px, player.getY() + 1.2D, pz, 5, 0.3D, 0.6D, 0.3D, 0.02D);
+        }
+
+        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
+        if (bolt != null) {
+            bolt.moveTo(player.getX() + 9.0D, player.getY(), player.getZ() + 9.0D);
+            bolt.setVisualOnly(true);
+            level.addFreshEntity(bolt);
+        }
+
+        Advancement adv = server.getAdvancements().getAdvancement(UnderWorldMod.id("welcome_to_the_hell"));
+        if (adv != null) {
+            AdvancementProgress progress = player.getAdvancements().getOrStartProgress(adv);
+            for (String criterion : progress.getRemainingCriteria()) {
+                player.getAdvancements().award(adv, criterion);
+            }
+        }
+    }
+
+    @Nullable
     public static BlockPos findWaterSpawnPosAroundPlayer(ServerLevel level, ServerPlayer player, int minDist, int maxDist) {
         RandomSource random = level.getRandom();
         for (int attempt = 0; attempt < 32; attempt++) {
@@ -1199,7 +1435,10 @@ public final class UnderWorldEventDirector {
                 || !level.getEntitiesOfClass(ClockEntity.class, box).isEmpty()
                 || !level.getEntitiesOfClass(TheMimicEntity.class, box).isEmpty()
                 || !level.getEntitiesOfClass(DemonFishEntity.class, box).isEmpty()
-                || !level.getEntitiesOfClass(TheBallEntity.class, box).isEmpty();
+                || !level.getEntitiesOfClass(TheBallEntity.class, box).isEmpty()
+                || !level.getEntitiesOfClass(LivingPylonEntity.class, box).isEmpty()
+                || !level.getEntitiesOfClass(WindTurbineStalkerEntity.class, box).isEmpty()
+                || !level.getEntitiesOfClass(TheDotComEntity.class, box).isEmpty();
     }
 
     @Nullable

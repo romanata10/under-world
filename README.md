@@ -1,6 +1,20 @@
-# Under World (`under_world`) — v2.3.0
+# Under World (`under_world`) — v2.4.0
 
-A Minecraft **1.20.1 Forge** psychological & Dreamcore horror mod inspired by *The Broken Script*, built with **GeckoLib 4**, **Fzzy Config**, **Configured**, and full multiplayer server/client synchronization.
+A Minecraft **1.20.1 Forge** psychological & analog Dreamcore horror mod inspired by *The Broken Script*, built with **GeckoLib 4**, **Fzzy Config**, **Configured**, and full multiplayer server/client synchronization.
+
+## What's New in v2.4.0
+
+- **Custom CRT Horror Main Menu** (`UnderWorldTitleScreen`): Replaces the vanilla title screen with a moody dusk horizon featuring animated powerline pylons, towering offshore wind turbines, glowing eye silhouettes, flickering CRT scanlines, crisp `UNDER WORLD` bitmap logo, and chilling splashes.
+- **Dimension Progression Loop 1 (`power_pylon` -> `The Plains` -> `The Wind Ocean`)**:
+  - Discover high-voltage lattice **`power_pylon`** towers in the Overworld with glowing **`plains_portal_grass`** at their base.
+  - Enter **`The Plains`** (`under_world:the_plains`): endless green fields bisected by a weathered powerline road following the normal day/night cycle. At night, **`Living Pylon`** (`under_world:living_pylon`) comes alive—dripping black eye-threads and zapping prey with torn high-voltage cables.
+  - Find a hilltop **`wind_turbine_portal`** to warp into **`The Wind Ocean`** (`under_world:the_wind_ocean`): misty grey endless waters studded with spinning offshore turbines (spawns a boat for traversal), stalked by **`Wind Turbine Stalker`** (`under_world:wind_turbine_stalker`), until you locate the towering **`Oil Rig`** and dive through its **`oil_rig_portal`** back home.
+- **Dimension Progression Loop 2 (`computer_desk` / `Computer` -> `The XP` -> `The Browser`)**:
+  - Discover **`computer_desk`** lore rooms in the Overworld (or retrieve a working **`Computer`** from the Browser) and right-click the **`Computer`** (`under_world:computer`) to boot into **`The XP`** (`under_world:the_xp`) — iconic Windows XP Bliss green hills, blue sky, and giant 3D desktop shortcut blocks that crash into fallen black squares on approach (`xp_error.ogg`), except **Chrome**.
+  - Enter the glowing **`Chrome Shortcut Portal`** (`under_world:chrome_portal`) to launch **`The Browser`** (`under_world:the_browser`): an endless white webpage grid featuring a Chrome address-bar HUD and towering site monoliths (`YouTube`, `Roblox`, `Steam`, `Reddit`) leading to the corrupted dark sector **`the MinECRaT fREe downladn`** at `(+136, -120)`.
+  - Clicking or stepping onto the green **`DOWNLOAD NOW`** button triggers **`The ___.com`** (`under_world:the_dot_com`) — run **LEFT** through the freshly opened exit passage and enter **`Browser Escape Portal`** to escape home with the haunted **`Computer`** item!
+- **Rare `"welcome to the hell"` Night Event & Advancement**: Unlocks hidden advancement `under_world:welcome_to_the_hell` accompanied by a phantom strike, crimson distortion, and `<...> welcome to the hell.` broadcast.
+- **Demon Fish Dry-Land Refinement**: Improved aquatic pathfinding keeps `Demon Fish` in deep water and shorelines without crawling onto dry land, vanishing automatically if stranded dry.
 
 ## Requirements
 
@@ -47,6 +61,12 @@ A Minecraft **1.20.1 Forge** psychological & Dreamcore horror mod inspired by *T
 - **`The Ball`** (`under_world:the_ball`) *(v2.3)*:
   - Floating pitch-black void sphere hovering in the Overworld that smoothly shrinks, expands, and stretches wide.
   - Touching it makes it vanish and inflicts **Geometric Nightmare** (`under_world:geometric_nightmare` — effect-only, no potion items), warping FOV, tilting the camera, and flooding the screen with geometric shapes.
+- **`Living Pylon`** (`under_world:living_pylon`) *(v2.4)*:
+  - Tall galvanized powerline tower stalking **The Plains** at night on hinged steel legs, oozing black tendrils and glowing red/white eyes while electrocuting targets.
+- **`Wind Turbine Stalker`** (`under_world:wind_turbine_stalker`) *(v2.4)*:
+  - Stands camouflaged among offshore wind turbines in **The Wind Ocean** until approached, then lifts out of the waves on giant legs with spinning blades to pursue and drown swimmers/boaters.
+- **`The ___.com`** (`under_world:the_dot_com`) *(v2.4)*:
+  - Corrupted malware horror with twisted jagged limbs and distorted red/magenta pixels released inside **The Browser** when pressing **`DOWNLOAD NOW`**.
 
 ## Mechanics, Dimensions & Soundtracks (v2.0 – v2.2)
 
@@ -90,11 +110,11 @@ All classic structures AND all 8 new **Server-Lore Structures** spawn dynamicall
 
 ## Commands (`/underworld`, op level 2)
 
-- `/underworld spawn <friend|hands|tree|tree_mimic|the_sky|eyes_of_fun|smile|the_truth|clock|the_mimic|demon_fish|the_ball> [<player>]`
-- `/underworld trigger <friend_join|friend_chat|hands_encounter|tree_encounter|the_sky_event|eyes_of_fun|smile|the_truth|clock|the_mimic|demon_fish|the_ball> [<player>]`
-- `/underworld lore <hillside_house|clan_base|mario_pixel_art|server_monument|abandoned_treehouse|secret_dugout|old_spawn_hub|villager_trading_hall|random> [<player>]`
-- `/underworld structure <all classic + lore structure IDs> [<player>]`
-- `/underworld tp <overworld|fun_world|maze|the_error|the_time> [<player>]`
+- `/underworld spawn <friend|hands|tree|tree_mimic|the_sky|eyes_of_fun|smile|the_truth|clock|the_mimic|demon_fish|the_ball|living_pylon|wind_turbine_stalker|the_dot_com> [<player>]`
+- `/underworld trigger <friend_join|friend_chat|hands_encounter|tree_encounter|the_sky_event|eyes_of_fun|smile|the_truth|clock|the_mimic|demon_fish|the_ball|living_pylon|wind_turbine|the_dot_com|welcome_to_the_hell> [<player>]`
+- `/underworld lore <hillside_house|clan_base|mario_pixel_art|server_monument|abandoned_treehouse|secret_dugout|old_spawn_hub|villager_trading_hall|computer_desk|random> [<player>]`
+- `/underworld structure <all classic + lore + power_pylon structure IDs> [<player>]`
+- `/underworld tp <overworld|fun_world|maze|the_error|the_time|the_plains|the_wind_ocean|the_xp|the_browser> [<player>]`
 - `/underworld events <enable|disable|status>`
 - `/underworld reset friend`
 

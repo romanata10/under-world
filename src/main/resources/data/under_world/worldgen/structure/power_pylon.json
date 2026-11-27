@@ -1,0 +1,7 @@
+{
+  "type": "under_world:power_pylon",
+  "biomes": "#under_world:has_structure/power_pylon",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_thin"
+}

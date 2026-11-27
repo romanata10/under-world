@@ -173,5 +173,167 @@ public final class ModBlocks {
                     .lightLevel(s -> 13)
                     .sound(SoundType.GLASS)));
 
+    // v2.4.0 blocks: The Plains, The Wind Ocean, The XP, The Browser & Computer
+    public static final RegistryObject<Block> PLAINS_GRASS_BLOCK = BLOCKS.register("plains_grass_block",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.GRASS)
+                    .strength(0.6F)
+                    .sound(SoundType.GRASS)));
+
+    public static final RegistryObject<Block> PLAINS_PATH_BLOCK = BLOCKS.register("plains_path_block",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.STONE)
+                    .strength(0.8F)
+                    .sound(SoundType.GRAVEL)));
+
+    public static final RegistryObject<Block> PLAINS_PORTAL_GRASS = BLOCKS.register("plains_portal_grass",
+            () -> new com.underworld.mod.block.PlainsPortalBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GREEN)
+                    .strength(1.0F)
+                    .lightLevel(s -> 7)
+                    .sound(SoundType.GRASS)));
+
+    public static final RegistryObject<Block> PYLON_STEEL = BLOCKS.register("pylon_steel",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BROWN)
+                    .strength(3.0F, 8.0F)
+                    .sound(SoundType.METAL)));
+
+    public static final RegistryObject<Block> WIND_TURBINE_PORTAL = BLOCKS.register("wind_turbine_portal",
+            () -> new com.underworld.mod.block.WindTurbinePortalBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .noCollission()
+                    .noOcclusion()
+                    .strength(-1.0F, 3600000.0F)
+                    .noLootTable()
+                    .lightLevel(s -> 12)
+                    .sound(SoundType.GLASS)));
+
+    public static final RegistryObject<Block> TURBINE_PILLAR = BLOCKS.register("turbine_pillar",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.SNOW)
+                    .strength(2.5F, 8.0F)
+                    .sound(SoundType.METAL)));
+
+    public static final RegistryObject<Block> TURBINE_BLADE = BLOCKS.register("turbine_blade",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.SNOW)
+                    .strength(1.8F, 6.0F)
+                    .sound(SoundType.METAL)));
+
+    public static final RegistryObject<Block> OIL_RIG_STEEL = BLOCKS.register("oil_rig_steel",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .strength(3.5F, 10.0F)
+                    .sound(SoundType.METAL)));
+
+    public static final RegistryObject<Block> OIL_RIG_PORTAL = BLOCKS.register("oil_rig_portal",
+            () -> new com.underworld.mod.block.OilRigPortalBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_CYAN)
+                    .noCollission()
+                    .noOcclusion()
+                    .strength(-1.0F, 3600000.0F)
+                    .noLootTable()
+                    .lightLevel(s -> 14)
+                    .sound(SoundType.GLASS)));
+
+    public static final RegistryObject<Block> XP_GRASS_BLOCK = BLOCKS.register("xp_grass_block",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GREEN)
+                    .strength(0.6F)
+                    .sound(SoundType.GRASS)));
+
+    public static final RegistryObject<Block> XP_ICON_BLOCK = BLOCKS.register("xp_icon_block",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .strength(0.8F)
+                    .lightLevel(s -> 5)
+                    .sound(SoundType.GLASS)));
+
+    public static final RegistryObject<Block> XP_ICON_FALLEN = BLOCKS.register("xp_icon_fallen",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .strength(1.0F)
+                    .sound(SoundType.STONE)));
+
+    public static final RegistryObject<Block> CHROME_PORTAL = BLOCKS.register("chrome_portal",
+            () -> new com.underworld.mod.block.ChromePortalBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_YELLOW)
+                    .noCollission()
+                    .noOcclusion()
+                    .strength(-1.0F, 3600000.0F)
+                    .noLootTable()
+                    .lightLevel(s -> 14)
+                    .sound(SoundType.GLASS)));
+
+    public static final RegistryObject<Block> BROWSER_TILE = BLOCKS.register("browser_tile",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.QUARTZ)
+                    .strength(1.2F)
+                    .sound(SoundType.STONE)));
+
+    public static final RegistryObject<Block> BROWSER_BAR_BLOCK = BLOCKS.register("browser_bar_block",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(1.6F)
+                    .sound(SoundType.METAL)));
+
+    public static final RegistryObject<Block> SITE_YOUTUBE_BLOCK = BLOCKS.register("site_youtube_block",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_RED)
+                    .strength(1.2F)
+                    .lightLevel(s -> 4)
+                    .sound(SoundType.GLASS)));
+
+    public static final RegistryObject<Block> SITE_ROBLOX_BLOCK = BLOCKS.register("site_roblox_block",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(1.2F)
+                    .sound(SoundType.STONE)));
+
+    public static final RegistryObject<Block> SITE_STEAM_BLOCK = BLOCKS.register("site_steam_block",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .strength(1.4F)
+                    .sound(SoundType.METAL)));
+
+    public static final RegistryObject<Block> SITE_REDDIT_BLOCK = BLOCKS.register("site_reddit_block",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_ORANGE)
+                    .strength(1.2F)
+                    .sound(SoundType.STONE)));
+
+    public static final RegistryObject<Block> SITE_GLITCH_BLOCK = BLOCKS.register("site_glitch_block",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .strength(1.8F)
+                    .lightLevel(s -> 4)
+                    .sound(SoundType.AMETHYST)));
+
+    public static final RegistryObject<Block> DOWNLOAD_BUTTON_BLOCK = BLOCKS.register("download_button_block",
+            () -> new com.underworld.mod.block.DownloadButtonBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GREEN)
+                    .strength(-1.0F, 3600000.0F)
+                    .noLootTable()
+                    .lightLevel(s -> 15)
+                    .sound(SoundType.AMETHYST)));
+
+    public static final RegistryObject<Block> BROWSER_EXIT_PORTAL = BLOCKS.register("browser_exit_portal",
+            () -> new com.underworld.mod.block.BrowserExitPortalBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_CYAN)
+                    .noCollission()
+                    .noOcclusion()
+                    .strength(-1.0F, 3600000.0F)
+                    .noLootTable()
+                    .lightLevel(s -> 15)
+                    .sound(SoundType.GLASS)));
+
+    public static final RegistryObject<Block> COMPUTER = BLOCKS.register("computer",
+            () -> new com.underworld.mod.block.ComputerBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.SAND)
+                    .strength(1.8F, 6.0F)
+                    .lightLevel(s -> 6)
+                    .sound(SoundType.METAL)));
+
     private ModBlocks() {}
 }

@@ -1,0 +1,10 @@
+{
+  "type": "under_world:the_plains",
+  "generator": {
+    "type": "under_world:the_plains",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "under_world:plains_meadow"
+    }
+  }
+}

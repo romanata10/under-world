@@ -3,10 +3,14 @@ package com.underworld.mod.registry;
 import com.underworld.mod.UnderWorldMod;
 import com.underworld.mod.config.UnderWorldConfigHolder;
 import com.underworld.mod.world.UnderWorldSavedData;
+import com.underworld.mod.world.dimension.BrowserChunkGenerator;
 import com.underworld.mod.world.dimension.ErrorChunkGenerator;
 import com.underworld.mod.world.dimension.FunWorldChunkGenerator;
 import com.underworld.mod.world.dimension.MazeChunkGenerator;
+import com.underworld.mod.world.dimension.PlainsChunkGenerator;
 import com.underworld.mod.world.dimension.TimeChunkGenerator;
+import com.underworld.mod.world.dimension.WindOceanChunkGenerator;
+import com.underworld.mod.world.dimension.XpDesktopChunkGenerator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -17,6 +21,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -36,6 +42,14 @@ public final class ModDimensions {
             ResourceKey.create(Registries.DIMENSION, UnderWorldMod.id("the_error"));
     public static final ResourceKey<Level> THE_TIME =
             ResourceKey.create(Registries.DIMENSION, UnderWorldMod.id("the_time"));
+    public static final ResourceKey<Level> THE_PLAINS =
+            ResourceKey.create(Registries.DIMENSION, UnderWorldMod.id("the_plains"));
+    public static final ResourceKey<Level> THE_WIND_OCEAN =
+            ResourceKey.create(Registries.DIMENSION, UnderWorldMod.id("the_wind_ocean"));
+    public static final ResourceKey<Level> THE_XP =
+            ResourceKey.create(Registries.DIMENSION, UnderWorldMod.id("the_xp"));
+    public static final ResourceKey<Level> THE_BROWSER =
+            ResourceKey.create(Registries.DIMENSION, UnderWorldMod.id("the_browser"));
 
     public static final ResourceKey<DimensionType> THE_FUN_WORLD_TYPE =
             ResourceKey.create(Registries.DIMENSION_TYPE, UnderWorldMod.id("the_fun_world"));
@@ -45,6 +59,14 @@ public final class ModDimensions {
             ResourceKey.create(Registries.DIMENSION_TYPE, UnderWorldMod.id("the_error"));
     public static final ResourceKey<DimensionType> THE_TIME_TYPE =
             ResourceKey.create(Registries.DIMENSION_TYPE, UnderWorldMod.id("the_time"));
+    public static final ResourceKey<DimensionType> THE_PLAINS_TYPE =
+            ResourceKey.create(Registries.DIMENSION_TYPE, UnderWorldMod.id("the_plains"));
+    public static final ResourceKey<DimensionType> THE_WIND_OCEAN_TYPE =
+            ResourceKey.create(Registries.DIMENSION_TYPE, UnderWorldMod.id("the_wind_ocean"));
+    public static final ResourceKey<DimensionType> THE_XP_TYPE =
+            ResourceKey.create(Registries.DIMENSION_TYPE, UnderWorldMod.id("the_xp"));
+    public static final ResourceKey<DimensionType> THE_BROWSER_TYPE =
+            ResourceKey.create(Registries.DIMENSION_TYPE, UnderWorldMod.id("the_browser"));
 
     private ModDimensions() {}
 
@@ -62,6 +84,22 @@ public final class ModDimensions {
 
     public static boolean isTime(@Nullable Level level) {
         return level != null && level.dimension().equals(THE_TIME);
+    }
+
+    public static boolean isPlains(@Nullable Level level) {
+        return level != null && level.dimension().equals(THE_PLAINS);
+    }
+
+    public static boolean isWindOcean(@Nullable Level level) {
+        return level != null && level.dimension().equals(THE_WIND_OCEAN);
+    }
+
+    public static boolean isXp(@Nullable Level level) {
+        return level != null && level.dimension().equals(THE_XP);
+    }
+
+    public static boolean isBrowser(@Nullable Level level) {
+        return level != null && level.dimension().equals(THE_BROWSER);
     }
 
     public static boolean sendToFunWorld(ServerPlayer player) {
@@ -185,6 +223,98 @@ public final class ModDimensions {
     public static boolean returnToOverworldFromTime(ServerPlayer player) {
         return returnToOverworldWithEffect(player, Component.translatable("message.under_world.time_escape"),
                 ModSounds.TIME_WARP.get(), 1.25F, 1.1F);
+    }
+
+    public static boolean sendToPlains(ServerPlayer player) {
+        MinecraftServer server = player.getServer();
+        if (server == null) return false;
+        ServerLevel dest = server.getLevel(THE_PLAINS);
+        if (dest == null) return false;
+        if (player.level().dimension().equals(Level.OVERWORLD)) {
+            UnderWorldSavedData.get(server).saveReturnPos(player.getUUID(), player.blockPosition());
+        }
+        int spawnX = 8;
+        int spawnZ = PlainsChunkGenerator.getPathZ(spawnX);
+        int surfaceY = PlainsChunkGenerator.getSurfaceY(spawnX, spawnZ);
+        BlockPos landPos = new BlockPos(spawnX, surfaceY + 1, spawnZ);
+        dest.getChunk(landPos);
+        ensureClearStandArea(dest, landPos, ModBlocks.PLAINS_PATH_BLOCK.get().defaultBlockState());
+
+        player.fallDistance = 0.0F;
+        player.changeDimension(dest, fixedTeleporter(new Vec3(landPos.getX() + 0.5D, landPos.getY(), landPos.getZ() + 0.5D), -90.0F, 0.0F));
+        dest.playSound(null, landPos, ModSounds.PYLON_HUM.get(), SoundSource.AMBIENT, 1.35F, 0.9F);
+        player.displayClientMessage(Component.translatable("message.under_world.plains_entered"), true);
+        return true;
+    }
+
+    public static boolean sendToWindOcean(ServerPlayer player) {
+        MinecraftServer server = player.getServer();
+        if (server == null) return false;
+        ServerLevel dest = server.getLevel(THE_WIND_OCEAN);
+        if (dest == null) return false;
+        if (player.level().dimension().equals(Level.OVERWORLD)) {
+            UnderWorldSavedData.get(server).saveReturnPos(player.getUUID(), player.blockPosition());
+        }
+        BlockPos boatPos = new BlockPos(8, WindOceanChunkGenerator.SEA_LEVEL, 8);
+        dest.getChunk(boatPos);
+
+        player.fallDistance = 0.0F;
+        Entity moved = player.changeDimension(dest, fixedTeleporter(new Vec3(boatPos.getX() + 0.5D, WindOceanChunkGenerator.SEA_LEVEL + 0.45D, boatPos.getZ() + 0.5D), -90.0F, 0.0F));
+        if (moved instanceof ServerPlayer destPlayer) {
+            Boat boat = EntityType.BOAT.create(dest);
+            if (boat != null) {
+                boat.setVariant(Boat.Type.OAK);
+                boat.moveTo(boatPos.getX() + 0.5D, WindOceanChunkGenerator.SEA_LEVEL + 0.25D, boatPos.getZ() + 0.5D, -90.0F, 0.0F);
+                dest.addFreshEntity(boat);
+                destPlayer.startRiding(boat, true);
+            }
+            dest.playSound(null, boatPos, ModSounds.TURBINE_WHOOSH.get(), SoundSource.AMBIENT, 1.4F, 0.85F);
+            destPlayer.displayClientMessage(Component.translatable("message.under_world.wind_ocean_entered"), true);
+        }
+        return true;
+    }
+
+    public static boolean sendToXp(ServerPlayer player) {
+        MinecraftServer server = player.getServer();
+        if (server == null) return false;
+        ServerLevel dest = server.getLevel(THE_XP);
+        if (dest == null) return false;
+        if (player.level().dimension().equals(Level.OVERWORLD)) {
+            UnderWorldSavedData.get(server).saveReturnPos(player.getUUID(), player.blockPosition());
+        }
+        BlockPos landPos = new BlockPos(0, XpDesktopChunkGenerator.DESKTOP_Y + 1, 6);
+        dest.getChunk(landPos);
+        ensureClearStandArea(dest, landPos, Blocks.LIGHT_BLUE_CONCRETE.defaultBlockState());
+
+        player.fallDistance = 0.0F;
+        player.changeDimension(dest, fixedTeleporter(new Vec3(landPos.getX() + 0.5D, landPos.getY(), landPos.getZ() + 0.5D), 180.0F, 0.0F));
+        dest.playSound(null, landPos, ModSounds.XP_STARTUP.get(), SoundSource.AMBIENT, 1.4F, 1.0F);
+        player.displayClientMessage(Component.translatable("message.under_world.xp_entered"), true);
+        return true;
+    }
+
+    public static boolean sendToBrowser(ServerPlayer player) {
+        MinecraftServer server = player.getServer();
+        if (server == null) return false;
+        ServerLevel dest = server.getLevel(THE_BROWSER);
+        if (dest == null) return false;
+        if (player.level().dimension().equals(Level.OVERWORLD)) {
+            UnderWorldSavedData.get(server).saveReturnPos(player.getUUID(), player.blockPosition());
+        }
+        BlockPos landPos = new BlockPos(6, BrowserChunkGenerator.FLOOR_Y + 1, 8);
+        dest.getChunk(landPos);
+        ensureClearStandArea(dest, landPos, ModBlocks.BROWSER_TILE.get().defaultBlockState());
+
+        player.fallDistance = 0.0F;
+        player.changeDimension(dest, fixedTeleporter(new Vec3(landPos.getX() + 0.5D, landPos.getY(), landPos.getZ() + 0.5D), 180.0F, 0.0F));
+        dest.playSound(null, landPos, ModSounds.XP_STARTUP.get(), SoundSource.AMBIENT, 1.25F, 1.15F);
+        player.displayClientMessage(Component.translatable("message.under_world.browser_entered"), true);
+        return true;
+    }
+
+    public static boolean returnToOverworldFromNewDim(ServerPlayer player, String messageKey) {
+        return returnToOverworldWithEffect(player, Component.translatable(messageKey),
+                ModSounds.XP_STARTUP.get(), 1.2F, 1.0F);
     }
 
     private static boolean returnToOverworldWithEffect(ServerPlayer player, Component message,
