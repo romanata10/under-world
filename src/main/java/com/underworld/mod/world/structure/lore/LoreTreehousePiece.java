@@ -14,7 +14,9 @@ import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.LadderBlock;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -95,14 +97,15 @@ public final class LoreTreehousePiece {
                 Blocks.OAK_DOOR.defaultBlockState().setValue(DoorBlock.FACING, Direction.NORTH).setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER));
 
         // Roof & leafy oak canopy above/around treehouse
+        BlockState canopyLeaves = Blocks.OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
         StructureBuildUtil.fillBox(level, box, ox - 3, oy + 10, oz - 3, ox + 4, oy + 10, oz + 3, Blocks.SPRUCE_SLAB.defaultBlockState());
         for (int x = ox - 4; x <= ox + 5; x++) {
             for (int z = oz - 4; z <= oz + 5; z++) {
                 if (Math.abs(x - ox) <= 4 && Math.abs(z - oz) <= 4 && random.nextInt(3) != 0) {
-                    StructureBuildUtil.setIfInside(level, box, new BlockPos(x, oy + 11, z), Blocks.OAK_LEAVES.defaultBlockState());
+                    StructureBuildUtil.setIfInside(level, box, new BlockPos(x, oy + 11, z), canopyLeaves);
                 }
                 if (Math.abs(x - ox) <= 2 && Math.abs(z - oz) <= 2) {
-                    StructureBuildUtil.setIfInside(level, box, new BlockPos(x, oy + 12, z), Blocks.OAK_LEAVES.defaultBlockState());
+                    StructureBuildUtil.setIfInside(level, box, new BlockPos(x, oy + 12, z), canopyLeaves);
                 }
             }
         }
@@ -113,7 +116,7 @@ public final class LoreTreehousePiece {
         StructureBuildUtil.setIfInside(level, box, new BlockPos(ox + 2, oy + 7, oz - 1),
                 Blocks.GREEN_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.NORTH).setValue(BedBlock.PART, BedPart.HEAD));
         StructureBuildUtil.setIfInside(level, box, new BlockPos(ox + 2, oy + 7, oz),
-                Blocks.GREEN_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.NORTH).setValue(BedPart.FOOT));
+                Blocks.GREEN_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.NORTH).setValue(BedBlock.PART, BedPart.FOOT));
         StructureBuildUtil.setIfInside(level, box, new BlockPos(ox - 1, oy + 7, oz - 1), Blocks.CRAFTING_TABLE.defaultBlockState());
         StructureBuildUtil.setIfInside(level, box, new BlockPos(ox - 1, oy + 8, oz + 1), Blocks.TORCH.defaultBlockState());
         StructureBuildUtil.setIfInside(level, box, new BlockPos(ox + 4, oy + 8, oz + 4), Blocks.TORCH.defaultBlockState());

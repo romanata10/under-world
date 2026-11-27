@@ -67,7 +67,7 @@ public final class LoreDugoutPiece {
         StructureBuildUtil.setIfInside(level, box, new BlockPos(ox + 2, oy - 4, oz - 2),
                 Blocks.GRAY_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.NORTH).setValue(BedBlock.PART, BedPart.HEAD));
         StructureBuildUtil.setIfInside(level, box, new BlockPos(ox + 2, oy - 4, oz - 1),
-                Blocks.GRAY_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.NORTH).setValue(BedPart.FOOT));
+                Blocks.GRAY_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.NORTH).setValue(BedBlock.PART, BedPart.FOOT));
         StructureBuildUtil.setIfInside(level, box, new BlockPos(ox - 2, oy - 4, oz - 3), Blocks.FURNACE.defaultBlockState());
         StructureBuildUtil.setIfInside(level, box, new BlockPos(ox - 1, oy - 4, oz - 3), Blocks.CRAFTING_TABLE.defaultBlockState());
         StructureBuildUtil.setIfInside(level, box, new BlockPos(ox + 3, oy - 3, oz), Blocks.REDSTONE_TORCH.defaultBlockState());

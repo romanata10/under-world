@@ -245,10 +245,11 @@ public final class UnderWorldCommands {
             }
         }
 
-        double actualDist = Math.sqrt(target.blockPosition().distSqr(pos));
+        final BlockPos spawnPos = pos;
+        double actualDist = Math.sqrt(target.blockPosition().distSqr(spawnPos));
         source.sendSuccess(() -> Component.translatable(
                 "command.under_world.spawn.success",
-                entity.getDisplayName(), pos.getX(), pos.getY(), pos.getZ(), actualDist, target.getName()
+                entity.getDisplayName(), spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), actualDist, target.getName()
         ), true);
         return 1;
     }
