@@ -70,19 +70,19 @@ public class TimeChunkGenerator extends ChunkGenerator {
             return BASE_DISC_Y;
         }
         long h = cellHash(cellX, cellZ);
-        int offset = Math.floorMod((int) (h >>> 5), 11) - 5;
+        int offset = Math.floorMod((int) (h >>> 5), 7) - 3;
         return BASE_DISC_Y + offset;
     }
 
     public static int getDiscRadius(int cellX, int cellZ) {
         if (cellX == 0 && cellZ == 0) {
-            return 6;
+            return 7;
         }
         if (isPortalCell(cellX, cellZ)) {
-            return 6;
+            return 7;
         }
         long h = cellHash(cellX, cellZ);
-        return 5 + Math.floorMod((int) (h >>> 12), 2);
+        return 6 + Math.floorMod((int) (h >>> 12), 2);
     }
 
     public static boolean isPortalCell(int cellX, int cellZ) {

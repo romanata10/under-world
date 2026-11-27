@@ -198,6 +198,7 @@ public final class ModDimensions {
             return false;
         }
         UnderWorldSavedData data = UnderWorldSavedData.get(server);
+        data.clearErrorReturnTimer(player.getUUID());
         BlockPos saved = data.getReturnPos(player.getUUID());
         BlockPos target = saved != null ? saved : overworld.getSharedSpawnPos();
         overworld.getChunk(target);
